@@ -45,8 +45,8 @@ schema. Go to `meanwise_backend` and run the following commands..
 Follow the instructions to create a super user.
 
 ### Running the server
-Squelo Backend already includes a uWSGI server and config for running it. 
-Before running the following commands make sure you edit `uwsgi.dev.ini` located in `squelo_backend/squelo_backend`.  
+Meanwise Backend already includes a uWSGI server and config for running it. 
+Before running the following commands make sure you edit `uwsgi.dev.ini` located in `meanwise_backend/meanwise_backend`.  
 Here's a sample config:
 ```
 [uwsgi]
