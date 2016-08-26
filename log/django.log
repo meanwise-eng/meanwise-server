@@ -1,0 +1,7 @@
+ERROR 2016-05-19 08:30:25,139 4293 139838877501248  ./common/http.py __init__ 27 {'message': u'User not loggedin'}
+ERROR 2016-05-19 08:35:18,967 4289 139838877501248  ./common/http.py __init__ 27 {'message': u'User not loggedin'}
+ERROR 2016-05-19 10:57:38,688 6375 140361168324352  /home/grover/squelo/squelo_backend/common/http.py __init__ 27 {'message': u'User not loggedin'}
+ERROR 2016-05-20 15:41:01,782 3154 140236361500416  /home/grover/squelo/squelo_backend/common/http.py __init__ 18 {'message': u'Email: This email id is already registered.'}
+ERROR 2016-05-20 15:41:13,993 3154 140236361500416  /home/grover/squelo/squelo_backend/common/http.py __init__ 27 {'message': u'Incorrect Email/Password Combination'}
+ERROR 2016-05-20 15:41:19,460 3154 140236361500416  /home/grover/squelo/squelo_backend/common/http.py __init__ 27 {'message': u'Incorrect Email/Password Combination'}
+ERROR 2016-05-30 12:54:04,339 12956 140320633870080  /home/grover/squelo/squelo_backend/common/http.py __init__ 27 {'message': u'User not loggedin'}

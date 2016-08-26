@@ -1,0 +1,1061 @@
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 12:10:12 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+writing pidfile to /home/grover/squelo/squelo_backend/squelo_backend.pid
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 bound to UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x19119c0
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+Raven is not configured (logging is disabled). Please see the documentation for more information.
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x19119c0 pid: 23379 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 23379)
+spawned uWSGI worker 1 (pid: 23391, cores: 1)
+spawned uWSGI worker 2 (pid: 23393, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 23395, cores: 1)
+spawned uWSGI worker 4 (pid: 23397, cores: 1)
+spawned uWSGI http 1 (pid: 23399)
+gateway "uWSGI http 1" has been buried (pid: 23399)
+...gracefully killing workers...
+Gracefully killing worker 1 (pid: 23391)...
+Gracefully killing worker 2 (pid: 23393)...
+Gracefully killing worker 3 (pid: 23395)...
+Gracefully killing worker 4 (pid: 23397)...
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 06:44:21 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x2583830
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+Raven is not configured (logging is disabled). Please see the documentation for more information.
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x2583830 pid: 23379 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 23379)
+spawned uWSGI worker 1 (pid: 23652, cores: 1)
+spawned uWSGI worker 2 (pid: 23654, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 23656, cores: 1)
+spawned uWSGI worker 4 (pid: 23658, cores: 1)
+spawned uWSGI http 1 (pid: 23660)
+SIGINT/SIGQUIT received...killing workers...
+gateway "uWSGI http 1" has been buried (pid: 23660)
+worker 1 buried after 2 seconds
+worker 2 buried after 2 seconds
+worker 3 buried after 2 seconds
+worker 4 buried after 2 seconds
+goodbye to uWSGI.
+VACUUM: pidfile removed.
+VACUUM WARNING: unix socket /home/grover/squelo/squelo_backend/squelo_backend.sock changed inode. Skip removal
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 12:15:39 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+writing pidfile to /home/grover/squelo/squelo_backend/squelo_backend.pid
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 bound to UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x22e99c0
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+Raven is not configured (logging is disabled). Please see the documentation for more information.
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x22e99c0 pid: 23696 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 23696)
+spawned uWSGI worker 1 (pid: 23708, cores: 1)
+spawned uWSGI worker 2 (pid: 23710, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 23712, cores: 1)
+spawned uWSGI worker 4 (pid: 23714, cores: 1)
+spawned uWSGI http 1 (pid: 23716)
+Not Found: /
+[pid: 23710|app: 0|req: 1/1] 127.0.0.1 () {38 vars in 657 bytes} [Thu May 19 06:56:49 2016] GET / => generated 2020 bytes in 729 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+Not Found: /favicon.ico
+[pid: 23714|app: 0|req: 1/2] 127.0.0.1 () {38 vars in 612 bytes} [Thu May 19 06:56:50 2016] GET /favicon.ico => generated 2053 bytes in 170 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+Not Found: /admin
+[pid: 23714|app: 0|req: 2/3] 127.0.0.1 () {38 vars in 667 bytes} [Thu May 19 06:57:01 2016] GET /admin => generated 0 bytes in 8 msecs (HTTP/1.1 301) 2 headers in 93 bytes (1 switches on core 0)
+[pid: 23714|app: 0|req: 3/4] 127.0.0.1 () {38 vars in 669 bytes} [Thu May 19 06:57:01 2016] GET /admin/ => generated 0 bytes in 112 msecs (HTTP/1.1 302) 7 headers in 292 bytes (1 switches on core 0)
+[pid: 23714|app: 0|req: 4/5] 127.0.0.1 () {38 vars in 706 bytes} [Thu May 19 06:57:01 2016] GET /admin/login/?next=/admin/ => generated 1712 bytes in 77 msecs (HTTP/1.1 200) 7 headers in 373 bytes (1 switches on core 0)
+Internal Server Error: /admin/login/
+Traceback (most recent call last):
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/decorators/cache.py", line 57, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/contrib/admin/sites.py", line 407, in login
+    return login(request, **defaults)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/contrib/auth/views.py", line 49, in inner
+    return func(*args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/decorators/debug.py", line 76, in sensitive_post_parameters_wrapper
+    return view(request, *args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/utils/decorators.py", line 149, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/decorators/cache.py", line 57, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/contrib/auth/views.py", line 69, in login
+    if form.is_valid():
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/forms/forms.py", line 161, in is_valid
+    return self.is_bound and not self.errors
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/forms/forms.py", line 153, in errors
+    self.full_clean()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/forms/forms.py", line 363, in full_clean
+    self._clean_form()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/forms/forms.py", line 390, in _clean_form
+    cleaned_data = self.clean()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/contrib/auth/forms.py", line 159, in clean
+    password=password)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/contrib/auth/__init__.py", line 74, in authenticate
+    user = backend.authenticate(**credentials)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/contrib/auth/backends.py", line 17, in authenticate
+    user = UserModel._default_manager.get_by_natural_key(username)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/contrib/auth/base_user.py", line 45, in get_by_natural_key
+    return self.get(**{self.model.USERNAME_FIELD: username})
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/manager.py", line 122, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 381, in get
+    num = len(clone)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 240, in __len__
+    self._fetch_all()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 1074, in _fetch_all
+    self._result_cache = list(self.iterator())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 52, in __iter__
+    results = compiler.execute_sql()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 850, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 231, in cursor
+    cursor = self.make_debug_cursor(self._cursor())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 204, in _cursor
+    self.ensure_connection()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/utils.py", line 95, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 171, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/postgresql/base.py", line 175, in get_new_connection
+    connection = Database.connect(**conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/psycopg2/__init__.py", line 164, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, async=async)
+OperationalError: FATAL:  password authentication failed for user "squelo"
+FATAL:  password authentication failed for user "squelo"
+
+[pid: 23714|app: 0|req: 5/6] 127.0.0.1 () {48 vars in 903 bytes} [Thu May 19 06:57:19 2016] POST /admin/login/?next=/admin/ => generated 192611 bytes in 281 msecs (HTTP/1.1 500) 3 headers in 106 bytes (1 switches on core 0)
+[pid: 23714|app: 0|req: 6/7] 127.0.0.1 () {38 vars in 706 bytes} [Thu May 19 06:57:32 2016] GET /admin/login/?next=/admin/ => generated 1712 bytes in 34 msecs (HTTP/1.1 200) 7 headers in 373 bytes (1 switches on core 0)
+Internal Server Error: /api/v3/interests/
+Traceback (most recent call last):
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/generic/base.py", line 68, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/views.py", line 466, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/views.py", line 463, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "./interests/api.py", line 24, in get
+    return Response({'interest': serializer.data})
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 674, in data
+    ret = super(ListSerializer, self).data
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 239, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 614, in to_representation
+    self.child.to_representation(item) for item in iterable
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 258, in __iter__
+    self._fetch_all()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 1074, in _fetch_all
+    self._result_cache = list(self.iterator())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 52, in __iter__
+    results = compiler.execute_sql()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 850, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 231, in cursor
+    cursor = self.make_debug_cursor(self._cursor())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 204, in _cursor
+    self.ensure_connection()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/utils.py", line 95, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 171, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/postgresql/base.py", line 175, in get_new_connection
+    connection = Database.connect(**conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/psycopg2/__init__.py", line 164, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, async=async)
+OperationalError: FATAL:  password authentication failed for user "squelo"
+FATAL:  password authentication failed for user "squelo"
+
+[pid: 23714|app: 0|req: 7/8] 127.0.0.1 () {38 vars in 691 bytes} [Thu May 19 06:58:51 2016] GET /api/v3/interests/ => generated 148548 bytes in 268 msecs (HTTP/1.1 500) 3 headers in 106 bytes (2 switches on core 0)
+Internal Server Error: /api/v3/interests/
+Traceback (most recent call last):
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/generic/base.py", line 68, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/views.py", line 466, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/views.py", line 463, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "./interests/api.py", line 24, in get
+    return Response({'interest': serializer.data})
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 674, in data
+    ret = super(ListSerializer, self).data
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 239, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 614, in to_representation
+    self.child.to_representation(item) for item in iterable
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 258, in __iter__
+    self._fetch_all()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 1074, in _fetch_all
+    self._result_cache = list(self.iterator())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 52, in __iter__
+    results = compiler.execute_sql()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 850, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 231, in cursor
+    cursor = self.make_debug_cursor(self._cursor())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 204, in _cursor
+    self.ensure_connection()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/utils.py", line 95, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 171, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/postgresql/base.py", line 175, in get_new_connection
+    connection = Database.connect(**conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/psycopg2/__init__.py", line 164, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, async=async)
+OperationalError: FATAL:  password authentication failed for user "squelo"
+FATAL:  password authentication failed for user "squelo"
+
+[pid: 23714|app: 0|req: 8/9] 127.0.0.1 () {40 vars in 722 bytes} [Thu May 19 06:58:57 2016] GET /api/v3/interests/ => generated 148683 bytes in 295 msecs (HTTP/1.1 500) 3 headers in 106 bytes (2 switches on core 0)
+[pid: 23714|app: 0|req: 9/10] 127.0.0.1 () {38 vars in 706 bytes} [Thu May 19 06:58:59 2016] GET /admin/login/?next=/admin/ => generated 1712 bytes in 38 msecs (HTTP/1.1 200) 7 headers in 373 bytes (2 switches on core 0)
+Internal Server Error: /api/v3/interests/
+Traceback (most recent call last):
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/views/generic/base.py", line 68, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/views.py", line 466, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/views.py", line 463, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "./interests/api.py", line 24, in get
+    return Response({'interest': serializer.data})
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 674, in data
+    ret = super(ListSerializer, self).data
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 239, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/rest_framework/serializers.py", line 614, in to_representation
+    self.child.to_representation(item) for item in iterable
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 258, in __iter__
+    self._fetch_all()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 1074, in _fetch_all
+    self._result_cache = list(self.iterator())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/query.py", line 52, in __iter__
+    results = compiler.execute_sql()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 850, in execute_sql
+    cursor = self.connection.cursor()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 231, in cursor
+    cursor = self.make_debug_cursor(self._cursor())
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 204, in _cursor
+    self.ensure_connection()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/utils.py", line 95, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 199, in ensure_connection
+    self.connect()
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/base/base.py", line 171, in connect
+    self.connection = self.get_new_connection(conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/django/db/backends/postgresql/base.py", line 175, in get_new_connection
+    connection = Database.connect(**conn_params)
+  File "/home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/psycopg2/__init__.py", line 164, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, async=async)
+OperationalError: FATAL:  password authentication failed for user "squelo"
+FATAL:  password authentication failed for user "squelo"
+
+[pid: 23710|app: 0|req: 2/11] 127.0.0.1 () {38 vars in 690 bytes} [Thu May 19 06:59:15 2016] GET /api/v3/interests/ => generated 148547 bytes in 285 msecs (HTTP/1.1 500) 3 headers in 106 bytes (1 switches on core 0)
+[uwsgi-python-reloader] module/file /home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/raven/utils/json.py has been modified
+gateway "uWSGI http 1" has been buried (pid: 23716)
+...gracefully killing workers...
+Gracefully killing worker 1 (pid: 23708)...
+Gracefully killing worker 2 (pid: 23710)...
+Gracefully killing worker 3 (pid: 23712)...
+[uwsgi-python-reloader] module/file /home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/raven/utils/json.py has been modified
+Gracefully killing worker 4 (pid: 23714)...
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 07:04:48 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0xaad830
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0xaad830 pid: 23696 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 23696)
+spawned uWSGI worker 1 (pid: 24482, cores: 1)
+spawned uWSGI worker 2 (pid: 24484, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 24486, cores: 1)
+spawned uWSGI worker 4 (pid: 24488, cores: 1)
+spawned uWSGI http 1 (pid: 24490)
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+gateway "uWSGI http 1" has been buried (pid: 24490)
+...gracefully killing workers...
+Gracefully killing worker 2 (pid: 24484)...
+Gracefully killing worker 1 (pid: 24482)...
+Gracefully killing worker 3 (pid: 24486)...
+Gracefully killing worker 4 (pid: 24488)...
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 07:08:56 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x167a830
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0x167a830 pid: 23696 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 23696)
+spawned uWSGI worker 1 (pid: 24666, cores: 1)
+spawned uWSGI worker 2 (pid: 24668, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 24670, cores: 1)
+spawned uWSGI worker 4 (pid: 24672, cores: 1)
+spawned uWSGI http 1 (pid: 24674)
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+gateway "uWSGI http 1" has been buried (pid: 24674)
+...gracefully killing workers...
+Gracefully killing worker 1 (pid: 24666)...
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+Gracefully killing worker 2 (pid: 24668)...
+Gracefully killing worker 3 (pid: 24670)...
+Gracefully killing worker 4 (pid: 24672)...
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 07:09:52 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x2082830
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0x2082830 pid: 23696 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 23696)
+spawned uWSGI worker 1 (pid: 24709, cores: 1)
+spawned uWSGI worker 2 (pid: 24711, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 24713, cores: 1)
+spawned uWSGI worker 4 (pid: 24715, cores: 1)
+spawned uWSGI http 1 (pid: 24717)
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+gateway "uWSGI http 1" has been buried (pid: 24717)
+...gracefully killing workers...
+Gracefully killing worker 3 (pid: 24713)...
+Gracefully killing worker 1 (pid: 24709)...
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+Gracefully killing worker 2 (pid: 24711)...
+Gracefully killing worker 4 (pid: 24715)...
+[uwsgi-python-reloader] module/file ./squelo_backend/settings.py has been modified
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 07:11:29 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x1f3d830
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x1f3d830 pid: 23696 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 23696)
+spawned uWSGI worker 1 (pid: 24770, cores: 1)
+spawned uWSGI worker 2 (pid: 24772, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 24774, cores: 1)
+spawned uWSGI worker 4 (pid: 24776, cores: 1)
+spawned uWSGI http 1 (pid: 24778)
+gateway "uWSGI http 1" has been buried (pid: 24778)
+...brutally killing workers...
+worker 1 buried after 0 seconds
+worker 2 buried after 0 seconds
+worker 3 buried after 0 seconds
+worker 4 buried after 0 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 07:12:58 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #65~14.04.1-Ubuntu SMP Tue Apr 19 18:57:09 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x1393830
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0x1393830 pid: 23696 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 23696)
+spawned uWSGI worker 1 (pid: 25116, cores: 1)
+spawned uWSGI worker 2 (pid: 25118, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 25120, cores: 1)
+spawned uWSGI worker 4 (pid: 25122, cores: 1)
+spawned uWSGI http 1 (pid: 25124)
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 13:30:25 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #66~14.04.1-Ubuntu SMP Fri May 13 17:27:10 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+writing pidfile to /home/grover/squelo/squelo_backend/squelo_backend.pid
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 bound to UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x1bf5a20
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x1bf5a20 pid: 4275 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 4275)
+spawned uWSGI worker 1 (pid: 4287, cores: 1)
+spawned uWSGI worker 2 (pid: 4289, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 4291, cores: 1)
+spawned uWSGI worker 4 (pid: 4293, cores: 1)
+spawned uWSGI http 1 (pid: 4295)
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 13:31:20 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #66~14.04.1-Ubuntu SMP Fri May 13 17:27:10 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+writing pidfile to /home/grover/squelo/squelo_backend/squelo_backend.pid
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+probably another instance of uWSGI is running on the same address (127.0.0.1:49100).
+bind(): Address already in use [core/socket.c line 769]
+[pid: 4293|app: 0|req: 1/1] 127.0.0.1 () {38 vars in 668 bytes} [Thu May 19 08:01:39 2016] GET /admin/ => generated 0 bytes in 850 msecs (HTTP/1.1 302) 7 headers in 292 bytes (1 switches on core 0)
+[pid: 4291|app: 0|req: 1/2] 127.0.0.1 () {38 vars in 705 bytes} [Thu May 19 08:01:40 2016] GET /admin/login/?next=/admin/ => generated 1712 bytes in 446 msecs (HTTP/1.1 200) 7 headers in 373 bytes (1 switches on core 0)
+Not Found: /favicon.ico
+[pid: 4291|app: 0|req: 2/3] 127.0.0.1 () {38 vars in 636 bytes} [Thu May 19 08:01:42 2016] GET /favicon.ico => generated 2053 bytes in 7 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+[pid: 4293|app: 0|req: 2/4] 127.0.0.1 () {48 vars in 903 bytes} [Thu May 19 08:29:16 2016] POST /admin/login/?next=/admin/ => generated 0 bytes in 235 msecs (HTTP/1.1 302) 9 headers in 526 bytes (2 switches on core 0)
+[pid: 4293|app: 0|req: 3/5] 127.0.0.1 () {42 vars in 808 bytes} [Thu May 19 08:29:16 2016] GET /admin/ => generated 1818 bytes in 80 msecs (HTTP/1.1 200) 6 headers in 251 bytes (1 switches on core 0)
+Not Found: /
+[pid: 4293|app: 0|req: 4/6] 127.0.0.1 () {40 vars in 746 bytes} [Thu May 19 08:29:29 2016] GET / => generated 2020 bytes in 13 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+[pid: 4287|app: 0|req: 1/7] 127.0.0.1 () {38 vars in 735 bytes} [Thu May 19 08:29:36 2016] GET /api/v3/interests/ => generated 15 bytes in 229 msecs (HTTP/1.1 200) 3 headers in 113 bytes (1 switches on core 0)
+Not Found: /api/v3/
+[pid: 4291|app: 0|req: 3/8] 127.0.0.1 () {38 vars in 715 bytes} [Thu May 19 08:29:50 2016] GET /api/v3/ => generated 9273 bytes in 26 msecs (HTTP/1.1 404) 2 headers in 80 bytes (2 switches on core 0)
+Not Found: /api/v3/geo/
+[pid: 4293|app: 0|req: 5/9] 127.0.0.1 () {38 vars in 723 bytes} [Thu May 19 08:29:59 2016] GET /api/v3/geo/ => generated 9559 bytes in 22 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+Not Found: /api/v3/geo/london
+[pid: 4293|app: 0|req: 6/10] 127.0.0.1 () {38 vars in 735 bytes} [Thu May 19 08:30:09 2016] GET /api/v3/geo/london => generated 9577 bytes in 24 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+Not Found: /api/v3/skills
+[pid: 4293|app: 0|req: 7/11] 127.0.0.1 () {38 vars in 727 bytes} [Thu May 19 08:30:25 2016] GET /api/v3/skills => generated 0 bytes in 32 msecs (HTTP/1.1 301) 2 headers in 101 bytes (1 switches on core 0)
+[pid: 4293|app: 0|req: 8/12] 127.0.0.1 () {38 vars in 729 bytes} [Thu May 19 08:30:25 2016] GET /api/v3/skills/ => generated 31 bytes in 2 msecs (HTTP/1.1 401) 3 headers in 123 bytes (1 switches on core 0)
+Not Found: /admin
+[pid: 4293|app: 0|req: 9/13] 127.0.0.1 () {38 vars in 711 bytes} [Thu May 19 08:32:32 2016] GET /admin => generated 0 bytes in 17 msecs (HTTP/1.1 301) 2 headers in 93 bytes (2 switches on core 0)
+[pid: 4293|app: 0|req: 10/14] 127.0.0.1 () {38 vars in 713 bytes} [Thu May 19 08:32:32 2016] GET /admin/ => generated 1818 bytes in 52 msecs (HTTP/1.1 200) 6 headers in 251 bytes (2 switches on core 0)
+Not Found: /
+[pid: 4293|app: 0|req: 11/15] 127.0.0.1 () {38 vars in 701 bytes} [Thu May 19 08:32:57 2016] GET / => generated 2020 bytes in 7 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+Not Found: /
+[pid: 4293|app: 0|req: 12/16] 127.0.0.1 () {40 vars in 746 bytes} [Thu May 19 08:35:11 2016] GET / => generated 2020 bytes in 10 msecs (HTTP/1.1 404) 2 headers in 80 bytes (1 switches on core 0)
+Thu May 19 08:35:18 2016 - SIGPIPE: writing to a closed pipe/socket/fd (probably the client disconnected) on request /admin/ (ip 127.0.0.1) !!!
+Thu May 19 08:35:18 2016 - uwsgi_response_writev_headers_and_body_do(): Broken pipe [core/writer.c line 296] during GET /admin/ (127.0.0.1)
+IOError: write error
+[pid: 4291|app: 0|req: 4/17] 127.0.0.1 () {38 vars in 713 bytes} [Thu May 19 08:35:18 2016] GET /admin/ => generated 0 bytes in 113 msecs (HTTP/1.1 200) 6 headers in 0 bytes (0 switches on core 0)
+Thu May 19 08:35:18 2016 - SIGPIPE: writing to a closed pipe/socket/fd (probably the client disconnected) on request /api/v3/skills/ (ip 127.0.0.1) !!!
+Thu May 19 08:35:18 2016 - uwsgi_response_writev_headers_and_body_do(): Broken pipe [core/writer.c line 296] during GET /api/v3/skills/ (127.0.0.1)
+IOError: write error
+[pid: 4289|app: 0|req: 1/18] 127.0.0.1 () {38 vars in 729 bytes} [Thu May 19 08:35:18 2016] GET /api/v3/skills/ => generated 0 bytes in 362 msecs (HTTP/1.1 401) 3 headers in 0 bytes (0 switches on core 0)
+[uwsgi-python-reloader] module/file /home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/contextlib2.py has been modified
+gateway "uWSGI http 1" has been buried (pid: 4295)
+...gracefully killing workers...
+Gracefully killing worker 1 (pid: 4287)...
+Gracefully killing worker 2 (pid: 4289)...
+Gracefully killing worker 3 (pid: 4291)...
+Gracefully killing worker 4 (pid: 4293)...
+[uwsgi-python-reloader] module/file /home/grover/squelo/squelo_backend/env/local/lib/python2.7/site-packages/raven/middleware.py has been modified
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 08:44:22 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #66~14.04.1-Ubuntu SMP Fri May 13 17:27:10 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x19e0810
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+Raven is not configured (logging is disabled). Please see the documentation for more information.
+WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0x19e0810 pid: 4275 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 4275)
+spawned uWSGI worker 1 (pid: 6229, cores: 1)
+spawned uWSGI worker 2 (pid: 6231, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 6233, cores: 1)
+spawned uWSGI worker 4 (pid: 6235, cores: 1)
+spawned uWSGI http 1 (pid: 6237)
+[uwsgi-python-reloader] module/file ./squelo_backend/celery.py has been modified
+[uwsgi-python-reloader] module/file ./squelo_backend/celery.py has been modified
+gateway "uWSGI http 1" has been buried (pid: 6237)
+...gracefully killing workers...
+Gracefully killing worker 2 (pid: 6231)...
+Gracefully killing worker 3 (pid: 6233)...
+Gracefully killing worker 4 (pid: 6235)...
+Gracefully killing worker 1 (pid: 6229)...
+worker 1 buried after 3 seconds
+worker 2 buried after 3 seconds
+worker 3 buried after 3 seconds
+worker 4 buried after 3 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 12:51:22 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #66~14.04.1-Ubuntu SMP Fri May 13 17:27:10 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x2132810
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+Raven is not configured (logging is disabled). Please see the documentation for more information.
+WSGI app 0 (mountpoint='') ready in 6 seconds on interpreter 0x2132810 pid: 4275 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 4275)
+spawned uWSGI worker 1 (pid: 14414, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 2 (pid: 14416, cores: 1)
+spawned uWSGI worker 3 (pid: 14418, cores: 1)
+spawned uWSGI worker 4 (pid: 14420, cores: 1)
+spawned uWSGI http 1 (pid: 14422)
+gateway "uWSGI http 1" has been buried (pid: 14422)
+...brutally killing workers...
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo/squelo_backend
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 6 mapped to socket 0 (/home/grover/squelo/squelo_backend/squelo_backend.sock)
+running /home/grover/squelo/squelo_backend/env/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.11.2 (64bit) on [Thu May 19 14:06:09 2016] ***
+compiled with version: 4.8.4 on 18 May 2016 23:10:51
+os: Linux-3.19.0-59-generic #66~14.04.1-Ubuntu SMP Fri May 13 17:27:10 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo/squelo_backend
+detected binary path: /home/grover/squelo/squelo_backend/env/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo_backend
+your processes number limit is 15354
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 inherited UNIX address /home/grover/squelo/squelo_backend/squelo_backend.sock fd 6
+Python version: 2.7.6 (default, Jun 22 2015, 18:01:27)  [GCC 4.8.2]
+Set PythonHome to /home/grover/squelo/squelo_backend/env/
+Python main interpreter initialized at 0x14b4810
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+Raven is not configured (logging is disabled). Please see the documentation for more information.
+WSGI app 0 (mountpoint='') ready in 4 seconds on interpreter 0x14b4810 pid: 4275 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 4275)
+spawned uWSGI worker 1 (pid: 17731, cores: 1)
+spawned uWSGI worker 2 (pid: 17733, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 17735, cores: 1)
+spawned uWSGI worker 4 (pid: 17737, cores: 1)
+spawned uWSGI http 1 (pid: 17739)
+*** Starting uWSGI 2.0.11.2 (64bit) on [Wed Jul 27 13:17:22 2016] ***
+compiled with version: 5.3.1 20160413 on 04 July 2016 20:50:12
+os: Linux-4.4.0-31-generic #50-Ubuntu SMP Wed Jul 13 00:07:12 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo-test
+writing pidfile to /home/grover/squelo/squelo-server/squelo_backend.pid
+detected binary path: /home/grover/.virtualenvs/squelo/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo/squelo-server
+your processes number limit is 15286
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 3
+uwsgi socket 0 bound to UNIX address /home/grover/squelo/squelo-server/squelo_backend.sock fd 6
+Python version: 2.7.12 (default, Jul  1 2016, 15:12:24)  [GCC 5.4.0 20160609]
+Set PythonHome to /home/grover/squelo/squelo-server/env/
+ImportError: No module named site
+*** Starting uWSGI 2.0.13.1 (64bit) on [Thu Aug 11 22:04:34 2016] ***
+compiled with version: 5.4.0 20160609 on 11 August 2016 21:39:06
+os: Linux-4.4.0-34-generic #53-Ubuntu SMP Wed Jul 27 16:06:39 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo-test
+writing pidfile to /home/grover/squelo-test/squelo_backend.pid
+detected binary path: /usr/local/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo-test
+your processes number limit is 15286
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 4
+uwsgi socket 0 bound to TCP address 127.0.0.1:40824 (port auto-assigned) fd 3
+Python version: 2.7.12 (default, Jul  1 2016, 15:12:24)  [GCC 5.4.0 20160609]
+Set PythonHome to /home/grover/squelo-test/env/
+Python main interpreter initialized at 0x1f2cd20
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x1f2cd20 pid: 19114 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 19114)
+spawned uWSGI worker 1 (pid: 19129, cores: 1)
+spawned uWSGI worker 2 (pid: 19130, cores: 1)
+spawned uWSGI worker 3 (pid: 19132, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 4 (pid: 19134, cores: 1)
+spawned uWSGI http 1 (pid: 19135)
+gateway "uWSGI http 1" has been buried (pid: 19135)
+...gracefully killing workers...
+Gracefully killing worker 2 (pid: 19130)...
+Gracefully killing worker 3 (pid: 19132)...
+Gracefully killing worker 1 (pid: 19129)...
+Gracefully killing worker 4 (pid: 19134)...
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo-test
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 3 mapped to socket 0 (127.0.0.1:40824)
+running /usr/local/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.13.1 (64bit) on [Thu Aug 11 16:34:44 2016] ***
+compiled with version: 5.4.0 20160609 on 11 August 2016 21:39:06
+os: Linux-4.4.0-34-generic #53-Ubuntu SMP Wed Jul 27 16:06:39 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo-test
+detected binary path: /usr/local/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo-test
+your processes number limit is 15286
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 5
+uwsgi socket 0 bound to TCP address 127.0.0.1:32886 (port auto-assigned) fd 4
+Python version: 2.7.12 (default, Jul  1 2016, 15:12:24)  [GCC 5.4.0 20160609]
+Set PythonHome to /home/grover/squelo-test/env/
+Python main interpreter initialized at 0x1975c00
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x1975c00 pid: 19114 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+gracefully (RE)spawned uWSGI master process (pid: 19114)
+spawned uWSGI worker 1 (pid: 19164, cores: 1)
+spawned uWSGI worker 2 (pid: 19165, cores: 1)
+spawned uWSGI worker 3 (pid: 19167, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 4 (pid: 19169, cores: 1)
+spawned uWSGI http 1 (pid: 19171)
+SIGINT/SIGQUIT received...killing workers...
+gateway "uWSGI http 1" has been buried (pid: 19171)
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+goodbye to uWSGI.
+VACUUM: pidfile removed.
+*** Starting uWSGI 2.0.13.1 (64bit) on [Thu Aug 11 22:04:58 2016] ***
+compiled with version: 5.4.0 20160609 on 11 August 2016 21:39:06
+os: Linux-4.4.0-34-generic #53-Ubuntu SMP Wed Jul 27 16:06:39 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo-test
+writing pidfile to /home/grover/squelo-test/squelo_backend.pid
+detected binary path: /usr/local/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo-test
+your processes number limit is 15286
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 4
+uwsgi socket 0 bound to TCP address 127.0.0.1:44338 (port auto-assigned) fd 3
+Python version: 2.7.12 (default, Jul  1 2016, 15:12:24)  [GCC 5.4.0 20160609]
+Set PythonHome to /home/grover/squelo-test/env/
+Python main interpreter initialized at 0x25f0d20
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 363840 bytes (355 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x25f0d20 pid: 19198 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 19198)
+spawned uWSGI worker 1 (pid: 19213, cores: 1)
+spawned uWSGI worker 2 (pid: 19214, cores: 1)
+Python auto-reloader enabled
+spawned uWSGI worker 3 (pid: 19216, cores: 1)
+spawned uWSGI worker 4 (pid: 19218, cores: 1)
+spawned uWSGI http 1 (pid: 19220)
+Gracefully killing worker 4 (pid: 19218)...
+Gracefully killing worker 1 (pid: 19213)...
+Gracefully killing worker 3 (pid: 19216)...
+gateway "uWSGI http 1" has been buried (pid: 19220)
+...brutally killing workers...
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+binary reloading uWSGI...
+chdir() to /home/grover/squelo-test
+closing all non-uwsgi socket fds > 2 (max_fd = 1024)...
+found fd 3 mapped to socket 0 (127.0.0.1:44338)
+running /usr/local/bin/uwsgi
+[uWSGI] getting INI configuration from squelo_backend/uwsgi.dev.ini
+*** Starting uWSGI 2.0.13.1 (64bit) on [Thu Aug 11 17:57:11 2016] ***
+compiled with version: 5.4.0 20160609 on 11 August 2016 21:39:06
+os: Linux-4.4.0-34-generic #53-Ubuntu SMP Wed Jul 27 16:06:39 UTC 2016
+nodename: grover
+machine: x86_64
+clock source: unix
+detected number of CPU cores: 4
+current working directory: /home/grover/squelo-test
+detected binary path: /usr/local/bin/uwsgi
+!!! no internal routing support, rebuild with pcre support !!!
+chdir() to /home/grover/squelo-test
+your processes number limit is 15286
+your memory page size is 4096 bytes
+detected max file descriptor number: 1024
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:49100 fd 4
+uwsgi socket 0 bound to UNIX address /home/grover/squelo-test/squelo_backend.sock fd 3
+Python version: 2.7.12 (default, Jul  1 2016, 15:12:24)  [GCC 5.4.0 20160609]
+Set PythonHome to /home/grover/squelo-test/env/
+ImportError: No module named site
+VACUUM: pidfile removed.
+VACUUM: unix socket /home/grover/squelo-test/squelo_backend.sock removed.

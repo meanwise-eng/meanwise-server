@@ -1,0 +1,65 @@
+#Backend Readme
+
+This file explains all the API endpoints for jobs, pages, companies.
+CRUD stands for GET/POST/DEL/PUT.
+
+    .../company/                                GET,         List of all companies
+    .../company/<company_slug>/                 GET/PUT/DEL, Specific company (company_slug)
+    .../<company_slug>/                         CRUD,        CompanyProfile
+    .../<company_slug>/locations/               CRUD,        CompanyLocation
+
+    .../jobs/list/                              GET,         List of all jobs
+    .../jobs/<company_slug>/                    GET/POST,    Create job, List company jobs
+    .../jobs/<company_slug>/<job_slug>/         GET/PUT/DEL  Detail of job, endpoint to modify
+    .../jobs/<company_slug>/<job_slug>/apply/   POST         Apply job endpoint
+    .../jobs/<username>/recommendations/        GET          Returns recommended (not ai) jobs
+
+    .../pages/<company_slug>/                   GET/POST     Creation/get endpont for Page
+    .../pages/<company_slug>/<page_slug>/       PUT/DEL      Update/delete endpoint for Page
+    .../pages/<company_slug>/leaders/           CRUD,        Leader
+
+
+
+## List of all common Response outputs
+
+### Company Response
+{
+    profile      : CompanyProfile,
+    company_name : "",
+    slug         : "",
+    pages        : Page
+}
+
+### CompanyProfile Response
+{
+    offices             : [CompanyLocation, ...],
+    name                : "",
+    company_description : "",
+    company_size        : int,
+    company_email       : "",
+    industry            : "", 
+    date_founded        : datetime,
+    company_type        : "",
+    company_vision      : "",
+    growth_plans        : ("NA", "15-25%", "50%"),      #One of these choices
+}
+
+### Page Response Response
+
+{
+    name          : "",
+    public        : bool,
+    slug          : "",
+    biography     : "",
+    about_culture : "",
+    about_company : ""
+}
+
+### CompanyLocation Response
+
+{
+    name  : "",
+    isHQ  : bool,
+    lon   : "float",
+    lat   : "float"
+}

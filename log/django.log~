@@ -1,0 +1,16 @@
+[uwsgi]
+# Environment Variables
+env = ENVIRONMENT=development
+env = DATABASE=default
+
+chdir=<PATH_TO_SQUELO_BACKEND>
+module=squelo_backend.wsgi:application
+master=True
+pidfile=<PATH_TO_SQUELO_BACKEND>/squelo_backend.pid
+vacuum=True
+max-requests=5000
+daemonize=<PATH_TO_SQUELO_BACKEND>/log/uwsgi.log
+home=<PATH_TO_SQUELO_BACKEND>/env/
+http=127.0.0.1:49100    # Use this to run it on port 49100
+socket=<PATH_TO_SQUELO_BACKEND>/squelo_backend.sock  # Use this to run it on socket
+py-autoreload=5
