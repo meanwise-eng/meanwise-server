@@ -22,10 +22,4 @@ from api_v3 import urls as api_v3_urls
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/v3/', include(api_v3_urls)),
-    url(r'^', include('company.urls')),
-    url(r'^jobs/', include('jobs.urls')),
-    url(r'^pages/', include('pages.urls')),
-    url(r'^stripe/', include('djstripe.urls')),
-    url(r'^candidate_manager/', include('candidate_manager.urls')),
-    url(r'^search/', include('search.urls'))
 ]

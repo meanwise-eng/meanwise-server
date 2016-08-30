@@ -23,5 +23,11 @@ urlpatterns = [
     url(r'', include(jobs_urls)),
     url(r'', include(notifications_urls)),
     url(r'', include(work_urls)),
-    url(r'', include(account_profile_urls))
+    url(r'', include(account_profile_urls)),
+    url(r'^', include('company.urls')),
+    url(r'^jobs/', include('jobs.urls')),
+    url(r'^pages/', include('pages.urls')),
+    url(r'^stripe/', include('djstripe.urls')),
+    url(r'^candidate_manager/', include('candidate_manager.urls')),
+    url(r'^search/', include('search.urls')),
 ]
