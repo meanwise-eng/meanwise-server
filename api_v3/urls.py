@@ -29,5 +29,5 @@ urlpatterns = [
     url(r'^pages/', include('pages.urls')),
     url(r'^stripe/', include('djstripe.urls')),
     url(r'^candidate_manager/', include('candidate_manager.urls')),
-    url(r'^search/', include('search.urls')),
+    url(r'rest_auth/', include('rest_auth.urls'))
 ]

@@ -65,15 +65,15 @@ urlpatterns = [
         views.HistoryView.as_view(),
         name="history"
     ),
-    url(
-        r'^cancel/$',
-        views.CancelSubscriptionView.as_view(),
-        name='stripe-cancel'
-    ),
+    # url(
+    #     r'^cancel/$',
+    #     views.CancelSubscriptionView.as_view(),
+    #     name='stripe-cancel'
+    # ),
 
     # Web services
     url(
-        r"^a/sync/history/$",
+        r"^sync/history/$",
         views.SyncHistoryView.as_view(),
         name="sync_history"
     ),
