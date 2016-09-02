@@ -4,6 +4,7 @@ For authentication we are using [Django allauth](https://django-allauth.readthed
 
 #### URL
 * **/user/register (POST)**
+
 Parameters:
 	- username (string)
 	- email (string)
@@ -26,6 +27,7 @@ Parameters:
 ```
 
 * **/user/login/ (POST)**
+
 Parameters:
 	- username (string)
 	- password (string)
@@ -60,6 +62,7 @@ Parameters:
 ```
 
 * **/user/password/reset/ (POST)**
+
 Parameters:
 	- email
 
@@ -77,6 +80,7 @@ Parameters:
 ```
 
 * **/user/password/reset/confirm/ (POST)**
+
 Parameters:
 	- uid
 	- token
@@ -95,6 +99,7 @@ Parameters:
 ```
 
 * ** /user/password/change/ (POST)**
+
 Parameters:
 	- new_password1
 	- new_password2
@@ -126,6 +131,7 @@ Parameters:
 ```
 
 * **/user/ (PUT/PATCH)**
+
 Parameters:
 	- username
 	- email
