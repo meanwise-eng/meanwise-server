@@ -6,7 +6,6 @@ from interests import urls as interests_urls
 from geography import urls as geography_urls
 from search import urls as search_urls
 from recommendation import urls as recommendation_urls
-from timeline import urls as timeline_urls
 from jobs import urls as jobs_urls
 from notifications import urls as notifications_urls
 from works import urls as work_urls
@@ -16,7 +15,6 @@ from .views import private_view
 urlpatterns = [
     url(r'subscribe/', include(subscribe_urls)),
     url(r'interests/', include(interests_urls)),
-    url(r'', include(timeline_urls)),
     url(r'geo/', include(geography_urls)),
     url(r'search/', include(search_urls)),
     url(r'', include(recommendation_urls)),

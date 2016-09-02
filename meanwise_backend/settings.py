@@ -78,7 +78,6 @@ INSTALLED_APPS = [
     'geography',
     'search',
     'recommendation',
-    'timeline',
     'jobs',
     'pages',
     'djcelery',
