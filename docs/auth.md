@@ -27,7 +27,7 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 	"response": {
 		"access_token": "jabhjbsadfjbsadf231312",
 		"username": "grover",
-		"success": "Successfully signed up and an email has been sent to your email id "
+		"success": "Successfully signed up and an email has been sent to your email id."
 	}	
 }
 ```
