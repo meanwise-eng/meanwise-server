@@ -16,7 +16,7 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 
 * **Logic:**
 
-	Create user with username/email, store the access token, generate auth token and send a verification email
+	Create user with username/email, store the access token, generate auth token and send a verification email. Also checks if the user with same email id exists or not, if does then it would send a failure message and redirects back to signup page.
 	
 
 * **Response:**
@@ -42,9 +42,9 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 	- password (string)
 	- email
 
-* **Logic:**
+* **Logic:** `Authentication Required`
 	
-	Checks if the user exists or not if yes then update the auth token object to that user and redirects to the home view.
+	Checks if the user exists or not if yes then update the auth token object to that user and redirects to the home view. Authentication is required to get past this view.
 	
 * **Response:**
 
@@ -65,7 +65,7 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 
 * **Logic:**
 
-	Calls Django logout method and delete the Token object assigned to the current User object. Accepts/Returns nothing.  
+	Calls Django logout method and delete the Token object assigned to the current User object. Accepts/Returns nothing.
 	
 * **Response:**
 
@@ -87,7 +87,7 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 
 * **Logic:**
 
-	Calls Django Auth PasswordResetForm save method. Accepts the following POST parameters: email. Returns the success/fail message.
+	Calls Django Auth PasswordResetForm save method. Accepts the following POST parameters: email. Returns the success/fail message. No authentication is required, only checks if the entered email address exists or not.
 
 * **Response:**
 
@@ -111,9 +111,9 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 	- new_password1
 	- new_password2
     
-* **Logic:**
+* **Logic:** `Email Verification Required`
 
-	Password reset e-mail link is confirmed, therefore this resets the user's password. Accepts the following POST parameters, Django URL arguments and returns the success/fail message.
+	Password reset e-mail link is confirmed, therefore this resets the user's password. Accepts the following POST parameters, Django URL arguments and returns the success/fail message. 
 
 * **Response:**
 
@@ -136,9 +136,9 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 	- new_password2
 	- old_password
 
-* **Logic:**
+* **Logic:** `Authentication Required`
 	
-    Calls Django Auth SetPasswordForm save method. Accepts the POST parameters and returns the success/fail message.
+    Calls Django Auth SetPasswordForm save method. Accepts the POST parameters and returns the success/fail message. Authentication is required to update password.
 
 * **Response:**
 
@@ -157,7 +157,7 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 
 * **Logic:**
 
-	Returns user's details in JSON format.
+	Returns user's details in JSON format. No authetication is required to see user details. All the
 	
 * **Response:**
 
@@ -184,9 +184,9 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
   - last_name
 
 
-* **Logic:**
+* **Logic:** `Authentication Required`
 	
-    Update user's details and return updated user details in JSON format.
+    Update user's details and return updated user details in JSON format. Authentication is required to update user details.
 
 * **Response:** 
 
@@ -198,5 +198,32 @@ For authentication, we are using [Django allauth](https://django-allauth.readthe
 		...
 		"date_joined": "some date"
 	}
+}
+```
+
+<br/>
+
+#### 9. `user/register/facebook` `POST` 
+
+* **Parameters:**
+
+  - access_token
+  - username
+  - email
+  
+* **Logic:**
+
+	Create user with their facebook username/email, store the access token, generate auth token and send a verification email. Also checks if the user exists or not, if user exists then login the user.
+    
+* **Response:**
+
+```json
+{
+	"status": "HTTP 200 OK",
+    "response": {
+        "access_token": "jabhjbsadfjbsadf231312",
+        "username": "grover",
+        "success": "Successfully signed up and an email has been sent to your email id."
+    } 
 }
 ```
