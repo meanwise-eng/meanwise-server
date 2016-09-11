@@ -116,51 +116,6 @@ Documentation for Channels app API endpoints.
     "published_by": "Abc",
     "image": "abc.jpeg",
     "post-text": "Hey",
-    "comments": {
-            "data": [
-                {
-                   "id": "1015012",
-                   "from": {
-                      "name": "Grover",
-                      "id": "614130500"
-                   },
-                   "message": "some messge",
-                   "created_time": "time"
-                },
-                {
-                   "id": "101501",
-                   "from": {
-                      "name": "Some-name",
-                      "id": "688036079"
-                   },
-                   "message": "some message",
-                   "created_time": "time"
-                }
-            ],
-        },
-        "likes": {
-          "data": [
-                {
-                   "id": "1015012",
-                   "from": {
-                      "name": "Grover",
-                      "id": "614130500"
-                  }
-                },
-            ]
-        },
-        "share": {
-          "data": [
-              {
-                  "id": "1329332",
-                    "from": {
-                      "name": "Grover",
-                        "id": "1203292",
-                        "url": "post_url"
-                    }
-                },
-            ]
-        },
     "published_date": "time",
     "slug_field": "<post_publisher/post_id>",
     "response": {
