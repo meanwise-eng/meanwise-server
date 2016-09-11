@@ -84,3 +84,5 @@ Current there is a very basic deployment script added to the repo. The deploymen
 ```
 fab -f meanwise_backend/fabfile.py -R staging deploy
 ```
+
+### [Documentation for API endpoints](https://github.com/meanwise-eng/meanwise-server/tree/master/docs)
