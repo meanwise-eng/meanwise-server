@@ -7,3 +7,5 @@
 * **[Profile](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/profile.md)**
 
 * **[Channels](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/channels.md)**
+
+* **[Messaging](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/messaging.md)**
