@@ -69,29 +69,29 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'easy_thumbnails',
-    'subscribe',
-    'api_v3',
-    'common',
-    'account_profile',
-    'hitcount',
-    'interests',
-    'geography',
-    'search',
-    'recommendation',
-    'jobs',
-    'pages',
+    #'subscribe',
+    #'api_v3',
+    #'common',
+    #'account_profile',
+    #'hitcount',
+    #'interests',
+    #'geography',
+    #'search',
+    #'recommendation',
+    #'jobs',
+    #'pages',
     'djcelery',
     'stream',
-    'notifications',
-    'works',
-    'company',
+    #'notifications',
+    #'works',
+    #'company',
     # auth
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.facebook',
-    'rest_auth',
-    'rest_auth.registration',
+    #'allauth',
+    #'allauth.account',
+    #'allauth.socialaccount',
+    #'allauth.socialaccount.providers.facebook',
+    #'rest_auth',
+    #'rest_auth.registration',
     'rest_framework.authtoken',
 
     # payment
@@ -100,6 +100,11 @@ INSTALLED_APPS = [
     # elastic search
     'elasticutils.contrib.django',
     'taggit',
+
+    # api v4
+    'api_v4',
+    'custom_auth',
+    'userprofile',
 ]
 
 SITE_ID = 1
@@ -198,7 +203,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 
     # `allauth` specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
+    #'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 # Password validation
@@ -247,7 +252,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'log', 'django.log'),
             'formatter': 'verbose'
@@ -256,7 +261,7 @@ LOGGING = {
     'loggers': {
         'meanwise_backend': {
             'handlers': ['file'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
     },
@@ -266,15 +271,15 @@ LOGGING = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_URL = SITE_URL + '/static/'
+STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-MEDIA_URL = SITE_URL + '/media/'
+MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-AUTH_USER_MODEL = 'allauth.User'
+#AUTH_USER_MODEL = 'allauth.User'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
@@ -295,7 +300,7 @@ JWT_AUTH_HEADER_PREFIX = 'Bearer'
 # Django Rest Framework Settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
