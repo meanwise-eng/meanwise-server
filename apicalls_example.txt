@@ -1,0 +1,106 @@
+
+Profession call
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:49100/api/v4/profession/ -H 'Authorization: Token 7fac7ea0fff0510487b6d8910cadd3c7a373f5f3' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   339    0   339    0     0   9307      0 --:--:-- --:--:-- --:--:--  9416
+{"count":2,"next":null,"previous":null,"results":[{"id":1,"text":"IT","slug":"IT","created_on":"2016-09-15T12:13:26.916938Z","last_updated":"2016-09-15T12:13:26.916964Z","searchable":true},{"id":2,"
+text":"athlete","slug":"athlete","created_on":"2016-09-15T12:13:44.737235Z","last_updated":"2016-09-15T12:13:44.737299Z","searchable":true}]}
+--------------------------------------------------------------------------------------------------------------------
+skill call
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:49100/api/v4/skill/ -H 'Authorization: Token 7fac7ea0fff0510487b6d8910cadd3c7a373f5f3' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   379    0   379    0     0   1788      0 --:--:-- --:--:-- --:--:--  1796
+{"count":2,"next":null,"previous":null,"results":[{"id":1,"text":"python","lower":"python","slug":"python","created_on":"2016-09-15T12:13:54.964147Z","last_updated":"2016-09-15T12:13:54.964201Z","se
+archable":true},{"id":2,"text":"django","lower":"django","slug":"django","created_on":"2016-09-15T12:14:14.290444Z","last_updated":"2016-09-15T12:14:14.290471Z","searchable":true}]}
+-----------------------------------------------------------------------------------------------------------------
+interest call
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:49100/api/v4/interest/ -H 'Authorization: Token 7fac7ea0fff0510487b6d8910cadd3c7a373f5f3' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   593    0   593    0     0   2647      0 --:--:-- --:--:-- --:--:--  2659
+{"count":2,"next":null,"previous":null,"results":[{"id":1,"name":"sports","slug":"sports","description":"sports","created_on":"2016-09-15T12:11:06.377205Z","modified_on":"2016-09-15T12:11:06.377234Z
+","published":false,"cover_photo":"https://squelo.com/media/interest_photos/IMG_20140525_164408761.jpg","color_code":"asda"},{"id":2,"name":"music","slug":"music","description":"music","created_on":
+"2016-09-15T12:12:18.297699Z","modified_on":"2016-09-15T12:12:18.297726Z","published":false,"cover_photo":"https://squelo.com/media/interest_photos/IMG_20140218_215136954.jpg","color_code":"wrw"}]}
+---------------------------------------------------------------------------------------------------------------
+
+userprofile
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:49100/api/v4/user/userprofile/ -H 'Authorization: Token 7fac7ea0fff0510487b6d8910cadd3c7a373f5f3' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   573    0   573    0     0   2570      0 --:--:-- --:--:-- --:--:--  2581
+{"count":1,"next":null,"previous":null,"results":[{"id":1,"facebook_token":"","username":"testuser1","first_name":"tfname1","middle_name":"tmidname1","last_name":"tlname1","city":"bangalore","profil
+e_photo":"http://127.0.0.1:49100/http:/127.0.0.1:49100/media/profile_photos/IMG_20140321_104523179.jpg","cover_photo":"http://127.0.0.1:49100/http:/127.0.0.1:49100/media/cover_photos/IMG_20140329_13
+5903539.jpg","bio":"Test bio","created_on":"2016-09-15T12:17:13.786931Z","last_updated":"2016-09-15T12:17:13.786953Z","user":2,"profession":1,"skills":[1,2],"interests":[1,2]}]}
+
+---------------------------------------------------------------------------------------------------------------
+
+Register  - normal/django way
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/user/register/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"register":{"username":"testuser2@test.com", "email":"testuser2@test.com", "password":"testpasstwo","first_name":"testfname3", "profession":1,"skills":[1,2],"interests":[1,2]}}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   177    0     0  100   177      0   1551 --:--:-- --:--:-- --:--:--  1552HTTP/1.0 201 Created
+Date: Thu, 15 Sep 2016 15:12:14 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+Allow: POST, OPTIONS
+X-Frame-Options: SAMEORIGIN
+
+100   259    0    82  100   177    714   1541 --:--:-- --:--:-- --:--:--  1539
+{"auth_token":"c227efcfa25db32ada9bde04cff3e2bbd764c371","user":9,"userprofile":5}
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+Register - facebook login
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/user/register/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"register":{"username":"testuser8@test.com", "email":"testuser8@test.com", "facebook_token":"fbtokeneight","first_name":"testfname8", "profession":1,"skills":[1,2],"interests":[1,2]}}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 201 Created
+Date: Thu, 15 Sep 2016 15:32:26 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Allow: POST, OPTIONS
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+
+100   267    0    83  100   184    744   1649 --:--:-- --:--:-- --:--:--  1657
+{"auth_token":"63cd2dda1508e2bcfe15550b53930f7792598e84","user":13,"userprofile":9}
+
+------------------------------------------------------------------------------------------------------------------------------
+To retrieve user token given username and password
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/api-token-auth/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"username":"testuser5@test.com","password":"testpassfive"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 200 OK
+Date: Thu, 15 Sep 2016 16:03:28 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+X-Frame-Options: SAMEORIGIN
+Allow: POST, OPTIONS
+Content-Type: application/json
+
+100   111    0    52  100    59    507    575 --:--:-- --:--:-- --:--:--   578
+{"token":"93deff3e4c04e5f2ee1349035fd7637bb4df7aa0"}
+
+------------------------------------------------------------------------------------
+
+Check if use with email exists
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/user/verify/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"email":"testuser5@test.com"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 202 Accepted
+Date: Thu, 15 Sep 2016 16:18:07 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Allow: POST, OPTIONS
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json
+
+100    47    0    17  100    30    691   1220 --:--:-- --:--:-- --:--:--  1250
+{"exists":"true"}
+--------------------------------------------------------------------------------------------------------------------------
