@@ -33,7 +33,7 @@ class SkillViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     fields = ('id', 'text', 'lower', 'slug',
-              'created_on', 'last_updated', 'searchablge')
+              'created_on', 'last_updated', 'searchable')
 
 
 class InterestViewSet(viewsets.ModelViewSet):
