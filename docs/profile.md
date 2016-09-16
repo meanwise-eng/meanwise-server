@@ -176,23 +176,24 @@ Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanw
   "response": {
       "profession": {
         "data": [
-          {
+            {
             "id": "2313rg5465",
             "text": "Software Engineer",
             "slug": "software-engineer",
             "created_on": "some-date",
             "last_updated": "some-date",
             "searchable": "False",
-          },
-          {
+            },
+            {
             "id": "23121g5465",
             "text": "Front-end Developer",
             "slug": "Front-end-developer",
             "created_on": "some-date",
             "last_updated": "some-date",
             "searchable": "False",
-          }
-        ]
+            }
+          ]
+        }
   }
 }
 ```
@@ -252,7 +253,7 @@ Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanw
 
 <br/>
 
-#### 3.`/api/v4/skills` `GET`
+#### 4.`/api/v4/skills` `GET`
 
 
 * **Parameters:**
