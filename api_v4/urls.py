@@ -13,5 +13,4 @@ router.register(r'user/userprofile', UserProfileViewSet)
 urlpatterns = [
     url(r'custom_auth/', include('custom_auth.urls')),
     url(r'^', include(router.urls)),
-
 ]

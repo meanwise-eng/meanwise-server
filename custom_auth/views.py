@@ -15,15 +15,15 @@ from custom_auth.serializers import *
 
 logger = logging.getLogger('meanwise')
 
+
 class RegisterUserView(APIView):
     """
     Handle Registering of user for both normal django flow and facebook flow.
     Capture all user information at one go.
     For each user generate auth token and use the same to authorize further api calls.
-    
     """
     permission_classes = (AllowAny,)
-    
+
     def post(self, request):
         logger.info("RegisterUserView - POST ")
         register_data = request.data.get('register')
@@ -38,7 +38,9 @@ class RegisterUserView(APIView):
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         logger.error("RegisterUserView - POST - Invalid Serializer")
-        return Response(reg_user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
+        return Response(reg_user_serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -61,5 +63,5 @@ def verify_user(request):
         response_data['exists'] = 'true'
     else:
         response_data['exists'] = 'false'
-        
+
     return Response(response_data, status=status.HTTP_202_ACCEPTED)

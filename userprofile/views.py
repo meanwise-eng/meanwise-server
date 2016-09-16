@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from userprofile.models import Profession, Skill, Interest, UserProfile
 from userprofile.serializers import *
 
+
 class ProfessionViewSet(viewsets.ModelViewSet):
     """
     Profession apis
@@ -21,6 +22,7 @@ class ProfessionViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     fields = ('id', 'text', 'slug', 'created_on', 'last_updated', 'searchable')
 
+
 class SkillViewSet(viewsets.ModelViewSet):
     """
     Skill apis
@@ -30,7 +32,9 @@ class SkillViewSet(viewsets.ModelViewSet):
     serializer_class = SkillSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    fields = ('id', 'text', 'lower', 'slug', 'created_on', 'last_updated', 'searchablge')
+    fields = ('id', 'text', 'lower', 'slug',
+              'created_on', 'last_updated', 'searchablge')
+
 
 class InterestViewSet(viewsets.ModelViewSet):
     """
@@ -41,7 +45,10 @@ class InterestViewSet(viewsets.ModelViewSet):
     serializer_class = InterestSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    fields = ('id', 'name', 'slug', 'description', 'created_on', 'modified_on', 'published', 'cover_photo', 'color_code')
+    fields = ('id', 'name', 'slug', 'description',
+              'created_on', 'modified_on', 'published',
+              'cover_photo', 'color_code')
+
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     """
@@ -52,5 +59,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    fields = ('id', 'username', 'first_name', 'middle_name', 'last_name', 'profession', 'city', 'skills',
-                  'interests', 'profile_photo', 'cover_photo', 'bio', 'created_on', 'last_updated')
+    fields = ('id', 'username', 'first_name', 'middle_name',
+              'last_name', 'profession', 'city', 'skills',
+              'interests', 'profile_photo', 'cover_photo',
+              'bio', 'created_on', 'last_updated')

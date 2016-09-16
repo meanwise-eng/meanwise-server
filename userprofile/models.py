@@ -15,17 +15,19 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from common.utils import slugify
 
+
 @receiver(post_save, sender=User)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
-        
+
+
 class Profession(models.Model):
-    text        = models.CharField(max_length=128)
-    slug        = models.SlugField(max_length=70, unique=True)
-    created_on  = models.DateTimeField(auto_now_add=True)
-    last_updated= models.DateTimeField(auto_now=True)
-    searchable  = models.BooleanField(default=True)
+    text = models.CharField(max_length=128)
+    slug = models.SlugField(max_length=70, unique=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    searchable = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.text
@@ -35,13 +37,14 @@ class Profession(models.Model):
             self.slug = slugify(self.text)
         super(Profession, self).save(*args, **kwargs)
 
+
 class Skill(models.Model):
-    text        = models.CharField(max_length=128)
-    lower      = models.CharField(max_length=128, blank=True)
-    slug        = models.SlugField(max_length=70, unique=True, blank=True)
-    created_on  = models.DateTimeField(auto_now_add=True)
-    last_updated= models.DateTimeField(auto_now=True)
-    searchable  = models.BooleanField(default=True)
+    text = models.CharField(max_length=128)
+    lower = models.CharField(max_length=128, blank=True)
+    slug = models.SlugField(max_length=70, unique=True, blank=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    searchable = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.text
@@ -53,6 +56,7 @@ class Skill(models.Model):
         if not self.lower:
             self.lower = self.text.lower()
         super(Skill, self).save(*args, **kwargs)
+
 
 class Interest(models.Model):
     name = models.CharField(max_length=64)
@@ -74,22 +78,26 @@ class Interest(models.Model):
         else:
             return ''
 
+
 class UserProfile(models.Model):
-    user            = models.OneToOneField(User, db_index=True)
+    user = models.OneToOneField(User, db_index=True)
     facebook_token = models.CharField(max_length=128, null=True, blank=True)
-    username        = models.CharField(max_length=25, db_index=True)
-    first_name      = models.CharField(max_length=128)
-    middle_name     = models.CharField(max_length=128, blank=True)
-    last_name       = models.CharField(max_length=128, blank=True)
-    profession      = models.ForeignKey('Profession', models.DO_NOTHING, blank=True, null=True)
-    city            = models.CharField(max_length=128, blank=True, null=True)
-    skills          = models.ManyToManyField('Skill', related_name='skills', blank=True)
-    interests       = models.ManyToManyField('Interest', related_name='interests', blank=True)
-    profile_photo   = ThumbnailerImageField(upload_to='profile_photos', blank=True)
-    cover_photo     = ThumbnailerImageField(upload_to='cover_photos', blank=True)
+    username = models.CharField(max_length=25, db_index=True)
+    first_name = models.CharField(max_length=128)
+    middle_name = models.CharField(max_length=128, blank=True)
+    last_name = models.CharField(max_length=128, blank=True)
+    profession = models.ForeignKey('Profession',
+                                   models.DO_NOTHING, blank=True, null=True)
+    city = models.CharField(max_length=128, blank=True, null=True)
+    skills = models.ManyToManyField('Skill', related_name='skills', blank=True)
+    interests = models.ManyToManyField('Interest',
+                                       related_name='interests', blank=True)
+    profile_photo = ThumbnailerImageField(upload_to='profile_photos',
+                                          blank=True)
+    cover_photo = ThumbnailerImageField(upload_to='cover_photos', blank=True)
     bio = models.TextField(null=True, blank=True)
-    created_on      = models.DateTimeField(auto_now_add=True, db_index=True)
-    last_updated    = models.DateTimeField(auto_now=True, db_index=True)
+    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+    last_updated = models.DateTimeField(auto_now=True, db_index=True)
 
     def __unicode__(self):
         return '%s %s (%s)' % (self.first_name, self.last_name, self.username)

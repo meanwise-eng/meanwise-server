@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from userprofile.models import *
 from userprofile.serializers import UserProfileSerializer
 
+
 class RegisterUserSerializer(serializers.Serializer):
     """
     Handle user registration.
@@ -23,7 +24,7 @@ class RegisterUserSerializer(serializers.Serializer):
     middle_name = serializers.CharField(required=False)
     last_name = serializers.CharField(max_length=128, required=False)
     profession = serializers.IntegerField(source='Profession')
-    city  = serializers.CharField(max_length=128, required=False)
+    city = serializers.CharField(max_length=128, required=False)
     skills = serializers.ListField()
     interests = serializers.ListField()
     profile_photo = serializers.ImageField(required=False)
@@ -35,9 +36,11 @@ class RegisterUserSerializer(serializers.Serializer):
         email = self.validated_data['email']
         password = self.validated_data.get('password', None)
         if password:
-            user = User.objects.create(username=username, password=password, email=email)
+            user = User.objects.create(username=username,
+                                       password=password, email=email)
         elif self.validated_data.get('facebook_token', None):
-            user = User.objects.create(username=username, password='password', email=email)
+            user = User.objects.create(username=username,
+                                       password='password', email=email)
         token = Token.objects.get_or_create(user=user)
         user_profile = UserProfile()
         user_profile.user = user
@@ -63,7 +66,8 @@ class RegisterUserSerializer(serializers.Serializer):
                 user_profile.profession = profession
                 user_profile.save()
             except Profession.DoesNotExist:
-                logger.warning("Error adding profession to profile during registration", self.validated_data['profession'])
+                logger.warning("Error adding profession to profile during registration",
+                               self.validated_data['profession'])
         if self.validated_data.get('skills', None):
             for skill in self.validated_data['skills']:
                 try:
@@ -78,8 +82,8 @@ class RegisterUserSerializer(serializers.Serializer):
                     user_profile.interests.add(interest)
                 except Profession.DoesNotExist:
                     logger.warning("Error adding interest to profile during registration", interest)
-                    
         return user, user_profile, token[0].key
+
 
 class RegisterFacebookUserSerializer(RegisterUserSerializer):
     """
@@ -92,7 +96,8 @@ class RegisterFacebookUserSerializer(RegisterUserSerializer):
         username = self.validated_data['username']
         email = self.validated_data['email']
         password = self.validated_data['password']
-        user = User.objects.create(username=username, password=password, email=email)
+        user = User.objects.create(username=username,
+                                   password=password, email=email)
         token = Token.objects.get_or_create(user=user)
         user_profile = UserProfile()
         user_profile.first_name = self.validated_data['first_name']
@@ -130,5 +135,4 @@ class RegisterFacebookUserSerializer(RegisterUserSerializer):
                     user_profile.interests.add(interest)
                 except Profession.DoesNotExist:
                     logger.warning("Error adding interest to profile during registration", interest)
-                    
         return user, user_profile, token[0].key
