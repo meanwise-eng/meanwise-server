@@ -4,7 +4,7 @@ Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanw
 
 ## URL
 
-#### 1.`/api_v4/user/userprofile/<username>` `GET | POST`
+#### 1.`/api/v4/user/userprofile/<user_id>` `GET | POST`
 
 
 * **Parameters:**
@@ -132,7 +132,7 @@ Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanw
     "summary": "some-text",
     "skills": ["#skill-objects", "object2"],
     "DOB": "some-date",
-    "interest": ["#interestobjects", "object2"],
+    "interest": ["#interestobjects", "object2"],Rangpur Pahadi 
     "bio": "some-text",
     "video": "video-id",
     "profile_views": "300",
@@ -151,7 +151,7 @@ Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanw
 
 <br/>
 
-#### 2.`/api_v4/profession` `GET`
+#### 2.`/api/v4/profession` `GET`
 
 
 * **Parameters:**
@@ -199,7 +199,7 @@ Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanw
 
 <br/>
 
-#### 3.`/api_v4/skills` `GET`
+#### 3.`/api/v4/skills` `GET`
 
 
 * **Parameters:**
@@ -252,7 +252,7 @@ Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanw
 
 <br/>
 
-#### 3.`/api_v4/skills` `GET`
+#### 3.`/api/v4/skills` `GET`
 
 
 * **Parameters:**
