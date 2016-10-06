@@ -100,11 +100,13 @@ INSTALLED_APPS = [
     # elastic search
     'elasticutils.contrib.django',
     'taggit',
+    'taggit_serializer', 
 
     # api v4
     'api_v4',
     'custom_auth',
     'userprofile',
+    'post',
 ]
 
 SITE_ID = 1

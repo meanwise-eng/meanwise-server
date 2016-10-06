@@ -10,6 +10,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save, post_delete
 
 from easy_thumbnails.fields import ThumbnailerImageField
+from taggit.managers import TaggableManager
 
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
@@ -30,7 +31,7 @@ class Profession(models.Model):
     searchable = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.text
+        return "Profession id: " + str(seld.id) + " text : " + str(self.text)
 
     def save(self, *args, **kwargs):
         if not self.id and not self.slug:
@@ -47,7 +48,7 @@ class Skill(models.Model):
     searchable = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.text
+        return "Skill id:" + str(self.id) + " text:" + str(self.text)
 
     def save(self, *args, **kwargs):
         if not self.id and not self.slug:
@@ -62,14 +63,17 @@ class Interest(models.Model):
     name = models.CharField(max_length=64)
     slug = models.SlugField(max_length=70, unique=True)
     description = models.CharField(max_length=128)
+    published = models.BooleanField(default=False, db_index=True)
+    cover_photo = ThumbnailerImageField(upload_to='interest_photos', null=True, blank=True)
+    color_code = models.CharField(max_length=7, null=True, blank=True)
+    topics = TaggableManager()
+    is_deleted = models.BooleanField(default=False)
+    vote_count = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
-    published = models.BooleanField(default=False, db_index=True)
-    cover_photo = ThumbnailerImageField(upload_to='interest_photos')
-    color_code = models.CharField(max_length=7)
 
     def __unicode__(self):
-        return self.name
+        return "Interest id: " + str(self.id) + " name " + str(self.name)
 
     @property
     def cover_photo_url(self):
@@ -100,4 +104,4 @@ class UserProfile(models.Model):
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
 
     def __unicode__(self):
-        return '%s %s (%s)' % (self.first_name, self.last_name, self.username)
+        return 'user profile id %s - %s %s (%s)' % (str(seld.id), self.first_name, self.last_name, self.username)

@@ -1,9 +1,6 @@
-from django.http import HttpRequest
-from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
-
 from rest_framework import serializers
-from requests.exceptions import HTTPError
+
+from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 
 from userprofile.models import Profession, Skill, Interest, UserProfile
 
@@ -18,7 +15,8 @@ class SkillSerializer(serializers.ModelSerializer):
         model = Skill
 
 
-class InterestSerializer(serializers.ModelSerializer):
+class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
+    topics = TagListSerializerField()
     class Meta:
         model = Interest
 
