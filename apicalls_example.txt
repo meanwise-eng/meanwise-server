@@ -41,18 +41,19 @@ e_photo":"http://127.0.0.1:49100/http:/127.0.0.1:49100/media/profile_photos/IMG_
 
 Register  - normal/django way
 
-raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/user/register/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"register":{"username":"testuser2@test.com", "email":"testuser2@test.com", "password":"testpasstwo","first_name":"testfname3", "profession":1,"skills":[1,2],"interests":[1,2]}}' | more
+ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/user/register/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"register":{"username":"testuser3@test.com", "email":"testuser3@test.com", "password":"testpassthree","first_name":"testfname4", "profession":1,"skills":[1,2],"interests":[1,2], "invite_code":"REALPEOPLE"}}' | more
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100   177    0     0  100   177      0   1551 --:--:-- --:--:-- --:--:--  1552HTTP/1.0 201 Created
-Date: Thu, 15 Sep 2016 15:12:14 GMT
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 201 Created
+Date: Thu, 20 Oct 2016 16:18:06 GMT
 Server: WSGIServer/0.2 CPython/3.5.2
 Content-Type: application/json
-Allow: POST, OPTIONS
 X-Frame-Options: SAMEORIGIN
+Allow: POST, OPTIONS
 
-100   259    0    82  100   177    714   1541 --:--:-- --:--:-- --:--:--  1539
-{"auth_token":"c227efcfa25db32ada9bde04cff3e2bbd764c371","user":9,"userprofile":5}
+100   291    0    84  100   207    863   2126 --:--:-- --:--:-- --:--:--  2134
+{"userprofile":10,"auth_token":"e73e7c1e402c36a920907c239c7ccd0b324fe18a","user":15}
+
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
