@@ -105,3 +105,12 @@ class UserProfile(models.Model):
 
     def __unicode__(self):
         return 'user profile id %s - %s %s (%s)' % (str(seld.id), self.first_name, self.last_name, self.username)
+
+class InviteGroup(models.Model):
+    name = models.CharField(max_length=128)
+    count = models.IntegerField(default=0)
+    invite_code = models.CharField(max_length=128)
+    users = models.ManyToManyField(User, blank=True)
+
+    def __unicode__(self):
+        return 'invite group id %s - %s  count (%s)' % (str(seld.id), self.name, self.count)

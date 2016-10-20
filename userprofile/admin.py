@@ -18,8 +18,13 @@ class SkillAdmin(admin.ModelAdmin):
 class UserProfileAdmin(admin.ModelAdmin):
     pass
 
+class InviteGroupAdmin(admin.ModelAdmin):
+    pass
+
 
 admin.site.register(Profession, ProfessionAdmin)
 admin.site.register(Interest, InterestAdmin)
 admin.site.register(Skill, SkillAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(InviteGroup, InviteGroupAdmin)
+

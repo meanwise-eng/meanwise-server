@@ -30,8 +30,20 @@ class RegisterUserSerializer(serializers.Serializer):
     profile_photo = serializers.ImageField(required=False)
     cover_photo = serializers.ImageField(required=False)
     bio = serializers.CharField(max_length=200, required=False)
+    invite_code = serializers.CharField(max_length=128, required=True)
 
+    def validate_invite_code(self, value):
+        """
+        Check that the invite code is valid.
+        """
+        try:
+            invite_group = InviteGroup.objects.get(invite_code=value)
+        except InviteGroup.DoesNotExist:
+            raise serializers.ValidationError("Not a valid invite code.")
+        return value
+    
     def save(self):
+        #check
         username = self.validated_data['username']
         email = self.validated_data['email']
         password = self.validated_data.get('password', None)
@@ -82,6 +94,12 @@ class RegisterUserSerializer(serializers.Serializer):
                     user_profile.interests.add(interest)
                 except Profession.DoesNotExist:
                     logger.warning("Error adding interest to profile during registration", interest)
+
+        #add to invite group count
+        invite_group = InviteGroup.objects.get(invite_code=self.validated_data['invite_code'])
+        invite_group.count += 1
+        invite_group.save()
+        invite_group.users.add(user)
         return user, user_profile, token[0].key
 
 
