@@ -14,6 +14,9 @@ router.register(r'post', PostViewSet)
 router.register(r'comment', CommentViewSet)
 router.register(r'share', ShareViewSet)
 
+router.register("post/search", PostSearchView, base_name="post-search")
+router.register("userprofile/search", UserProfileSearchView, base_name="userprofile-search")
+
 urlpatterns = [
     url(r'custom_auth/', include('custom_auth.urls')),
     url(r'^', include(router.urls)),

@@ -8,9 +8,13 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from drf_haystack.serializers import HaystackSerializer
+from drf_haystack.viewsets import HaystackViewSet
+
 from post.models import Post, Comment, Share
 from post.serializers import PostSerializer, CommentSerializer, ShareSerializer
 
+from post.search_indexes import PostIndex
 
 class PostViewSet(viewsets.ModelViewSet):
     """
@@ -57,3 +61,14 @@ class ShareViewSet(viewsets.ModelViewSet):
     fields = ('id', 'post', 'messag', 'shared_by', 'recepients', 'created_on', 'modified_on')
 
 
+
+class PostSerializer(HaystackSerializer):
+    class Meta:
+        index_classes = [PostIndex]
+        fields = [
+            "text", "post_text"
+        ]
+
+class PostSearchView(HaystackViewSet):
+    index_models = [Post]
+    serializer_class = PostSerializer

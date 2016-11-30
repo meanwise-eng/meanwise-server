@@ -10,9 +10,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
 
+from drf_haystack.serializers import HaystackSerializer
+from drf_haystack.viewsets import HaystackViewSet
+
 from userprofile.models import Profession, Skill, Interest, UserProfile
 from userprofile.serializers import *
 
+from userprofile.search_indexes import UserProfileIndex
 
 class ProfessionViewSet(viewsets.ModelViewSet):
     """
@@ -105,3 +109,15 @@ class RequestInterest(APIView):
         except requests.RequestException as e:
             logger.error("Request Interest - POST - Exception: " + e.message + " [API / views.py /")
             return Response({"error":str(e)}, status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileSerializer(HaystackSerializer):
+    class Meta:
+        index_classes = [UserProfileIndex]
+        fields = [
+            "text", "first_name", "last_name"
+        ]
+
+class UserProfileSearchView(HaystackViewSet):
+    index_models = [UserProfile]
+    serializer_class = UserProfileSerializer
