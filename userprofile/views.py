@@ -29,7 +29,6 @@ class ProfessionViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     fields = ('id', 'text', 'slug', 'created_on', 'last_updated', 'searchable')
 
-
 class SkillViewSet(viewsets.ModelViewSet):
     """
     Skill apis

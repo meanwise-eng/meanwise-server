@@ -30,15 +30,18 @@ class RegisterUserView(APIView):
         reg_user_serializer = RegisterUserSerializer(data=register_data)
         if reg_user_serializer.is_valid():
             user, user_profile, auth_token = reg_user_serializer.save()
-            response_data = {}
-            response_data['auth_token'] = auth_token
-            response_data['user'] = user.id
-            response_data['userprofile'] = user_profile.id
+            response_user_data = {}
+            response_user_data['auth_token'] = auth_token
+            response_user_data['user'] = user.id
+            response_user_data['userprofile'] = user_profile.id
+            response_data = {'status':'success', 'error':'', 'results':response_user_data}
             logger.info("RegisterUserView - POST - Finished ")
+            
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         logger.error("RegisterUserView - POST - Invalid Serializer")
-        return Response(reg_user_serializer.errors,
+        
+        return Response({'status':'failed','error':reg_user_serializer.errors, 'data':''},
                         status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -64,4 +67,4 @@ def verify_user(request):
     else:
         response_data['exists'] = 'false'
 
-    return Response(response_data, status=status.HTTP_202_ACCEPTED)
+    return Response({'status':'success', 'error':'', 'results':response_data}, status=status.HTTP_202_ACCEPTED)
