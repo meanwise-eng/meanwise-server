@@ -22,5 +22,58 @@ class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+    skills = serializers.SerializerMethodField()
+    profession = serializers.SerializerMethodField()
+    interests = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
+        fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'first_name', 'last_name', 'bio',
+                      'skills', 'profession', 'interests']
+
+    def get_user_id(self, obj):
+        user_id = obj.user.id
+       
+        return user_id
+
+    def get_email(self, obj):
+        email = obj.user.email
+       
+        return email
+
+    def get_skills(self, obj):
+        skills = obj.skills.all()
+        skills_list = []
+        for skill in skills:
+            data ={
+                'name': skill.text,
+                'id': skill.id,
+                }
+            skills_list.append(data)
+
+        return skills_list
+
+    def get_profession(self, obj):
+        profession = obj.profession
+        data = {}
+        if profession:
+            data = {
+                'name': profession.text,
+                'id': profession.id,
+                }
+
+        return data
+
+
+    def get_interests(self, obj):
+        interests = obj.interests.all()
+        interests_list = []
+        for interest in interests:
+            data ={
+                'name': interest.name,
+                'id': interest.id,
+                }
+            interests_list.append(data)
+
+        return interests_list

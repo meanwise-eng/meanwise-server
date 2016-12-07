@@ -30,8 +30,8 @@ class Profession(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     searchable = models.BooleanField(default=True)
 
-    def __unicode__(self):
-        return "Profession id: " + str(seld.id) + " text : " + str(self.text)
+    def __str__(self):
+        return "Profession id: " + str(self.id) + " text : " + str(self.text)
 
     def save(self, *args, **kwargs):
         if not self.id and not self.slug:
@@ -47,7 +47,7 @@ class Skill(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     searchable = models.BooleanField(default=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Skill id:" + str(self.id) + " text:" + str(self.text)
 
     def save(self, *args, **kwargs):
@@ -72,7 +72,7 @@ class Interest(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Interest id: " + str(self.id) + " name " + str(self.name)
 
     @property
@@ -90,11 +90,12 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=128)
     middle_name = models.CharField(max_length=128, blank=True)
     last_name = models.CharField(max_length=128, blank=True)
-    profession = models.ForeignKey('Profession',
-                                   models.DO_NOTHING, blank=True, null=True)
+    friends = models.ManyToManyField(User, related_name='friends', blank=True)
+    profession = models.ForeignKey(Profession,
+                                    blank=True, null=True)
     city = models.CharField(max_length=128, blank=True, null=True)
-    skills = models.ManyToManyField('Skill', related_name='skills', blank=True)
-    interests = models.ManyToManyField('Interest',
+    skills = models.ManyToManyField(Skill, related_name='skills', blank=True)
+    interests = models.ManyToManyField(Interest,
                                        related_name='interests', blank=True)
     profile_photo = ThumbnailerImageField(upload_to='profile_photos',
                                           blank=True)
@@ -103,8 +104,8 @@ class UserProfile(models.Model):
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
 
-    def __unicode__(self):
-        return 'user profile id %s - %s %s (%s)' % (str(seld.id), self.first_name, self.last_name, self.username)
+    def __str__(self):
+        return 'user profile id %s - %s %s %s' % (str(self.id), self.first_name, self.last_name, self.username)
 
 class InviteGroup(models.Model):
     name = models.CharField(max_length=128)
@@ -112,5 +113,7 @@ class InviteGroup(models.Model):
     invite_code = models.CharField(max_length=128)
     users = models.ManyToManyField(User, blank=True)
 
-    def __unicode__(self):
-        return 'invite group id %s - %s  count (%s)' % (str(seld.id), self.name, self.count)
+    def __str__(self):
+        return 'invite group id %s - %s  count (%s)' % (str(self.id), self.name, self.count)
+
+

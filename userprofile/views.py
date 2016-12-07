@@ -1,6 +1,9 @@
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.text import slugify
+from django.contrib.auth.models import User
+
+import logging
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -9,6 +12,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
+from rest_framework import authentication, permissions
 
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
@@ -17,6 +21,8 @@ from userprofile.models import Profession, Skill, Interest, UserProfile
 from userprofile.serializers import *
 
 from userprofile.search_indexes import UserProfileIndex
+
+logger = logging.getLogger('delighter')
 
 class ProfessionViewSet(viewsets.ModelViewSet):
     """
@@ -110,13 +116,118 @@ class RequestInterest(APIView):
             return Response({"error":str(e)}, status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfileSerializer(HaystackSerializer):
+class FriendsList(APIView):
+    """
+    List all friends for user (user_id) and add friends
+
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, user_id):
+        """
+        List all friends for user (user_id)
+
+        """
+        logger.info("Friends list - GET - FriendList [API / views.py /")
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            logger.error("Friendslist - GET - User not found [api / views.py /")
+            return Response({"status":"failed","error":"User with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            up = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            logger.error("friendslist - GET - up not found [api / views.py /")
+            return Response({"status":"failed","error":"Userprofile with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        user_friends = up.friends.all()
+        user_friends_profiles = []
+        for user in user_friends:
+            try:
+                user_friends_profiles.append(UserProfile.objects.get(user=user).id)
+            except UserProfile.DoesNotExist:
+                pass
+        serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(id__in=user_friends_profiles), many=True)
+
+        return Response(serialized_friends_list.data, status=status.HTTP_200_OK)
+
+    
+    def post(self, request, user_id):
+        """
+        Add friend
+        
+        """
+        logger.info("Friendslist - POST [API / views.py /")
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            logger.error("Friendslist - GET - User not found [api / views.py /")
+            return Response({"status":"failed","error":"User with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            up = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            logger.error("friendslist - GET - up not found [api / views.py /")
+            return Response({"status":"failed","error":"Userprofile with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        friend_id = request.data.get('friend_id', None)
+
+        try:
+            friend_user = User.objects.get(id=int(friend_id))
+        except User.DoesNotExist:
+            logger.error("Friendslist - POST - friend User not found [api / views.py /")
+            return Response({"status":"failed","error":"friend User with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        up.friends.add(friend_user)
+        
+        
+        logger.info("Friendslist - POST - Finished [API / views.py /")
+        return Response({"status":"success", "error":"", "results":"successfully added friend"}, status=status.HTTP_201_CREATED)
+
+class RemoveFriend(APIView):
+    """
+    Remove friend
+
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def post(self, request, user_id):
+        """
+        Remove friend
+        
+        """
+        logger.info("RemoveFriend - POST [API / views.py /")
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            logger.error("RemoveFriend - Post - User not found [api / views.py /")
+            return Response({"status":"failed","error":"User with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            up = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            logger.error("Removefriend - GET - up not found [api / views.py /")
+            return Response({"status":"failed","error":"Userprofile with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        friend_id = request.data.get('friend_id', None)
+
+        try:
+            friend_user = User.objects.get(id=int(friend_id))
+        except User.DoesNotExist:
+            logger.error("Removefriend - POST - friend User not found [api / views.py /")
+            return Response({"status":"failed","error":"friend User with id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+        up.friends.remove(friend_user)
+        
+        
+        logger.info("Friendslist - POST - Finished [API / views.py /")
+        return Response({"status":"success", "error":"", "results":"successfully removed friend"}, status=status.HTTP_201_CREATED)
+
+    
+class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
         index_classes = [UserProfileIndex]
         fields = [
-            "text", "first_name", "last_name"
+            "first_name", "last_name"
         ]
 
 class UserProfileSearchView(HaystackViewSet):
     index_models = [UserProfile]
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileHSSerializer
