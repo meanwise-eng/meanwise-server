@@ -41,6 +41,26 @@ class RegisterUserSerializer(serializers.Serializer):
         except InviteGroup.DoesNotExist:
             raise serializers.ValidationError("Not a valid invite code.")
         return value
+
+    def validate_username(self, value):
+        """
+        Check that the username does not exist already.
+        """
+        try:
+            user = User.objects.get(username=value)
+        except User.DoesNotExist:
+            return value
+        raise serializers.ValidationError("User with username already exists.")
+
+    def validate_email(self, value):
+        """
+        Check that the email does not exist already.
+        """
+        try:
+            user = User.objects.get(email=value)
+        except User.DoesNotExist:
+            return value
+        raise serializers.ValidationError("User with email already exists.")
     
     def save(self):
         #check
