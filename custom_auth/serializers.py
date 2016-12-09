@@ -1,10 +1,12 @@
 from django.http import HttpRequest
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.core import exceptions
 
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from requests.exceptions import HTTPError
+import django.contrib.auth.password_validation as validators
 
 from django.contrib.auth.models import User
 from userprofile.models import *
@@ -68,6 +70,13 @@ class RegisterUserSerializer(serializers.Serializer):
         email = self.validated_data['email']
         password = self.validated_data.get('password', None)
         if password:
+            errors = dict()
+            try:
+                validators.validate_password(password=password, user=User)
+            except exceptions.ValidationError as e:
+                errors['password'] = list(e.messages)
+            if errors:
+                raise serializers.ValidationError(errors)
             user = User.objects.create(username=username,
                                        password=password, email=email)
         elif self.validated_data.get('facebook_token', None):
