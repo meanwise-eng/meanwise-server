@@ -90,7 +90,6 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=128)
     middle_name = models.CharField(max_length=128, blank=True)
     last_name = models.CharField(max_length=128, blank=True)
-    friends = models.ManyToManyField(User, related_name='friends', blank=True)
     profession = models.ForeignKey(Profession,
                                     blank=True, null=True)
     city = models.CharField(max_length=128, blank=True, null=True)
@@ -101,11 +100,31 @@ class UserProfile(models.Model):
                                           blank=True)
     cover_photo = ThumbnailerImageField(upload_to='cover_photos', blank=True)
     bio = models.TextField(null=True, blank=True)
+    intro_video = models.FileField(upload_to='intro_videos', null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
 
     def __str__(self):
         return 'user profile id %s - %s %s %s' % (str(self.id), self.first_name, self.last_name, self.username)
+
+FRIEND_STATUS = (
+    ('PE', 'Pending'),
+    ('AC', 'Accepted'),
+    ('RE', 'Rejected'),
+    )
+    
+class UserFriend(models.Model):
+    user = models.ForeignKey(User, related_name='user')
+    friend = models.ForeignKey(User, related_name='friend')
+    status = models.CharField(max_length=2, default="PE")
+    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+    last_updated = models.DateTimeField(auto_now=True, db_index=True)
+    class Meta:
+        unique_together = ("user", "friend")
+
+    def __str__(self):
+        return 'user %s - friend %s - status %s ' % (str(self.user), str(self.friend), self.status)
+
 
 class InviteGroup(models.Model):
     name = models.CharField(max_length=128)
