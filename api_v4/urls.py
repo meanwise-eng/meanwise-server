@@ -20,6 +20,12 @@ router.register("userprofile/search", UserProfileSearchView, base_name="userprof
 urlpatterns = [
     url(r'custom_auth/', include('custom_auth.urls')),
     url(r'^', include(router.urls)),
-    url(r'^user/(?P<user_id>[0-9]+)/friends$', FriendsList.as_view()),
-    url(r'^user/(?P<user_id>[0-9]+)/friends/remove$', RemoveFriend.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/friends/$', FriendsList.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/friends/remove/$', RemoveFriend.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/posts/$', UserPostList.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/$', UserPostDetail.as_view()),
+    url(r'^posts/(?P<post_id>[0-9]+)/comments/$', PostCommentList.as_view()),
+    url(r'^posts/(?P<post_id>[0-9]+)/comments/(?P<comment_id>[0-9]+)/$', PostCommentDetail.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/like/$', UserPostLike.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/unlike/$', UserPostUnLike.as_view()),
 ]
