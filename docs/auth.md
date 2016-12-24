@@ -3,7 +3,9 @@
 Official documentation for Meanwise - **[Authentication](https://github.com/meanwise-eng/meanwise-server/tree/master/custom_auth)**.
 
 #### 1. For normal registration - Django way
-##### `/api/v4/custom_auth/user/register/` `POST`
+* **Request URL:**
+
+	`/api/v4/custom_auth/user/register/` `POST`
 
 
 * **Parameters:**
@@ -25,8 +27,6 @@ Username | String | ✓
  Cover Photo | Image | ✕
  Bio | String | ✕
  
- 
-
 
 * **Logic:**
 
@@ -64,7 +64,9 @@ Username | String | ✓
 <br/>
 
 #### 2. Facebook Signup
-##### `/api/v4/custom_auth/user/register/` `POST`
+* **Request URL:** 
+
+	`/api/v4/custom_auth/user/register/` `POST`
 
 * **Parameters:**
 
@@ -119,7 +121,12 @@ Username | String | ✓
 
 <br/>
 
-#### 3. `/api/v4/custom_auth/api-token-auth/` `POST`
+#### 3. Retrieve auth token
+
+* **Request URL:**
+
+	`/api/v4/custom_auth/api-token-auth/` `POST`
+
 * **Parameters:**
 
 Parameter | Type | Required Field 
@@ -150,7 +157,11 @@ Password | String | ✓
 
 <br/>
 
-#### 4. `/api/v4/custom_auth/user/verify/` `POST`
+#### 4. Verify Email.
+
+* **Request URL:** 
+
+	`/api/v4/custom_auth/user/verify/` `POST`
 
 * **Parameters:**
 
