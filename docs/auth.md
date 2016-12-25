@@ -5,7 +5,7 @@ Official documentation for Meanwise - **[Authentication](https://github.com/mean
 #### 1. For normal registration - Django way
 * **Request URL:**
 
-	`/api/v4/custom_auth/user/register/` `POST`
+	`POST` `/api/v4/custom_auth/user/register/` 
 
 
 * **Parameters:**
@@ -34,18 +34,18 @@ Username | String | ✓
 	
 * **Request:**
 
-```json
+```javascript
 {	
 	"register":
     {
-    	"username":"testuser3@test.com", 		 
-    	"email":"testuser3@test.com",
-    	"password":"testpassthree",
-        "first_name":"testfname4", 
-        "profession":1,
-        "skills":[1,2],
-        "interests":[1,2], 
-        "invite_code":"REALPEOPLE"
+    	"username": "testuser3@test.com", 		 
+    	"email": "testuser3@test.com",
+    	"password": "testpassthree",
+        "first_name": "testfname4", 
+        "profession": 1,
+        "skills": [1,2],
+        "interests": [1,2], 
+        "invite_code": "REALPEOPLE"
     }
 }
 ```
@@ -53,11 +53,11 @@ Username | String | ✓
 
 * **Response:**
 
-```json
+```javascript
 {
-	"userprofile":10,
-    "auth_token":"e73e7c1e402c36a920907c239c7ccd0b324fe18a",
-    "user":15
+	"userprofile": 10,
+    "auth_token": "e73e7c1e402c36a920907c239c7ccd0b324fe18a",
+    "user": 15
 }
 ```
 
@@ -66,7 +66,7 @@ Username | String | ✓
 #### 2. Facebook Signup
 * **Request URL:** 
 
-	`/api/v4/custom_auth/user/register/` `POST`
+	`POST` `/api/v4/custom_auth/user/register/` 
 
 * **Parameters:**
 
@@ -95,27 +95,28 @@ Username | String | ✓
     
 * **Request:** 
 
-```json
+```javascript
 
 {
 	"register": {
-    	"username":"testuser8@test.com", 
-        "email":"testuser8@test.com",
-        "facebook_token":"fbtokeneight",
-        "first_name":"testfname8", 
-        "profession":1,"skills":[1,2],
-        "interests":[1,2]
+    	"username": "testuser8@test.com", 
+        "email": "testuser8@test.com",
+        "facebook_token": "fbtokeneight",
+        "first_name": "testfname8", 
+        "profession": 1,
+        "skills": [1,2],
+        "interests": [1,2]
     }
 }
 ```
 	
 * **Response:**
 
-```json
+```javascript
 {	
-	"auth_token":"63cd2dda1508e2bcfe15550b53930f7792598e84",
-    "user":13,
-    "userprofile":9
+	"auth_token": "63cd2dda1508e2bcfe15550b53930f7792598e84",
+    "user": 13,
+    "userprofile": 9
 }
 ```
 
@@ -125,7 +126,7 @@ Username | String | ✓
 
 * **Request URL:**
 
-	`/api/v4/custom_auth/api-token-auth/` `POST`
+	`POST` `/api/v4/custom_auth/api-token-auth/` 
 
 * **Parameters:**
 
@@ -140,18 +141,18 @@ Password | String | ✓
     
 * **Request:**
 
-```json
+```javascript
 {
-	"username":"testuser5@test.com",
-    "password":"testpassfive"
+	"username": "testuser5@test.com",
+    "password": "testpassfive"
 }
 ```
 	
 * **Response:**
 
-```json
+```javascript
 {
-	"token":"93deff3e4c04e5f2ee1349035fd7637bb4df7aa0"
+	"token": "93deff3e4c04e5f2ee1349035fd7637bb4df7aa0"
 }
 ```
 
@@ -161,7 +162,7 @@ Password | String | ✓
 
 * **Request URL:** 
 
-	`/api/v4/custom_auth/user/verify/` `POST`
+	`POST` `/api/v4/custom_auth/user/verify/` 
 
 * **Parameters:**
 
@@ -171,13 +172,13 @@ Email | String | ✓
 
 * **Logic:**
 
-	Check if the email exists or not.
+	Checks if the email exists or not.
     
 * **Request:**
 
-```json
+```javascript
 {
-	"email":"testuser5@test.com"
+	"email": "testuser5@test.com"
 }
 ```
 
@@ -185,6 +186,6 @@ Email | String | ✓
 
 ```json
 {
-	"exists":"true"
+	"exists": "true"
 }
 ```
