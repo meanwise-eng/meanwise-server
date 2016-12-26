@@ -7,18 +7,26 @@ from userprofile.models import Profession, Skill, Interest, UserProfile
 class ProfessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profession
-
+        fields = ('id', 'text')
 
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
+        fields = ('id', 'text')
 
 
 class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
-    topics = TagListSerializerField()
+    #topics = TagListSerializerField()
+    photo = serializers.SerializerMethodField()
     class Meta:
         model = Interest
+        fields = ('id', 'photo')
 
+    def get_photo(self, obj):
+        if obj.cover_photo:
+            photo_url = obj.cover_photo.url
+            return photo_url
+        return ""
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()

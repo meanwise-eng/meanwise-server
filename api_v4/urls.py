@@ -6,9 +6,6 @@ router = routers.SimpleRouter()
 from userprofile.views import *
 from post.views import *
 
-router.register(r'profession', ProfessionViewSet)
-router.register(r'skill', SkillViewSet)
-router.register(r'interest', InterestViewSet)
 router.register(r'user/userprofile', UserProfileViewSet)
 router.register(r'post', PostViewSet)
 router.register(r'comment', CommentViewSet)
@@ -28,4 +25,8 @@ urlpatterns = [
     url(r'^posts/(?P<post_id>[0-9]+)/comments/(?P<comment_id>[0-9]+)/$', PostCommentDetail.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/like/$', UserPostLike.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/unlike/$', UserPostUnLike.as_view()),
+    url(r'^profession/$', ProfessionListView.as_view()),
+    url(r'^skill/$', SkillListView.as_view()),
+    url(r'^interest/$', InterestListView.as_view()),
+    
 ]

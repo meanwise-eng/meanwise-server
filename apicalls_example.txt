@@ -218,4 +218,33 @@ X-Frame-Options: SAMEORIGIN
 
 --------------------------------------------------------------------------------------------------------------
 
+interest get all call, with pagination
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:8000/api/v4/interest/?page=2 -H 'Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   195    0   195    0     0   1420      0 --:--:-- --:--:-- --:--:--  1423
+{"num_pages":1,"results":[{"id":2,"photo":"/media/interest_photos/IMG_20140218_215136954.jpg"},{"id":1,"photo":"/media/interest_photos/IMG_20140525_164408761.jpg"}],"error":"","status":"success"}
+
+---------------------------------------------------------------------------------------------------------------------
+
+skill get all call, with pagination
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:8000/api/v4/skill/?page=2 -H 'Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   107    0   107    0     0   2740      0 --:--:-- --:--:-- --:--:--  2815
+{"num_pages":1,"results":[{"id":1,"text":"python"},{"id":2,"text":"django"}],"error":"","status":"success"}
+
+---------------------------------------------------------------------------------------------------------------------------
+
+profession get all call, with pagination
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:8000/api/v4/profession/?page=2 -H 'Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   104    0   104    0     0   4186      0 --:--:-- --:--:-- --:--:--  4333
+{"num_pages":1,"results":[{"id":1,"text":"IT"},{"id":2,"text":"athlete"}],"error":"","status":"success"}
+
+------------------------------------------------------------------------------------------------------------
 

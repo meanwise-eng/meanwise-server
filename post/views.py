@@ -23,6 +23,9 @@ class UserPostList(APIView):
     """
     List all User posts, or create a new User post.
     """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get(self, request, user_id):
         posts = Post.objects.filter(is_deleted=False).filter(poster__id=user_id)
         serializer = PostSerializer(posts, many=True)
@@ -42,6 +45,9 @@ class UserPostDetail(APIView):
     """
     Delete a post instance.
     """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Post.objects.get(pk=pk)
@@ -79,6 +85,9 @@ class UserPostLike(APIView):
     """
     User likes a post instance.
     """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Post.objects.get(pk=pk)
@@ -95,6 +104,9 @@ class UserPostUnLike(APIView):
     """
     User unlikes a post instance.
     """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Post.objects.get(pk=pk)
@@ -115,6 +127,9 @@ class PostCommentList(APIView):
     """
     List all post related comments, or create a new User comment.
     """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get(self, request, post_id):
         comments = Comment.objects.filter(is_deleted=False).filter(post__id=post_id)
         serializer = CommentSerializer(comments, many=True)
@@ -134,6 +149,9 @@ class PostCommentDetail(APIView):
     """
     Delete a comment instance.
     """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Comment.objects.get(pk=pk)

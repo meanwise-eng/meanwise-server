@@ -2,6 +2,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.text import slugify
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 import logging
 
@@ -13,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
+from rest_framework.pagination import PageNumberPagination
 
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
@@ -24,52 +27,82 @@ from userprofile.search_indexes import UserProfileIndex
 
 logger = logging.getLogger('delighter')
 
-class ProfessionViewSet(viewsets.ModelViewSet):
+class ProfessionListView(APIView):
     """
     Profession apis
 
     """
-    queryset = Profession.objects.all()
-    serializer_class = ProfessionSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    fields = ('id', 'text', 'slug', 'created_on', 'last_updated', 'searchable')
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
 
-class SkillViewSet(viewsets.ModelViewSet):
+    def get(self, request):
+        professions = Profession.objects.all()
+        paginator = Paginator(professions, settings.REST_FRAMEWORK['PAGE_SIZE'])
+        page = request.GET.get('page', 1)
+
+        try:
+            professions = paginator.page(page)
+        except PageNotAnInteger:
+            professions = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            professions = paginator.page(paginator.num_pages)
+        serializer = ProfessionSerializer(professions, many=True)
+        return Response({"status":"success", "error":"", "results":serializer.data,
+                             #'has_previous_page':professions.previous_page_number(), 'has_next_page':professions.next_page_number(), 
+                             'num_pages':professions.paginator.num_pages}, status=status.HTTP_200_OK)
+
+
+class SkillListView(APIView):
     """
     Skill apis
 
     """
-    queryset = Skill.objects.all()
-    serializer_class = SkillSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    fields = ('id', 'text', 'lower', 'slug',
-              'created_on', 'last_updated', 'searchable')
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
 
+    def get(self, request):
+        skills = Skill.objects.all()
+        paginator = Paginator(skills, settings.REST_FRAMEWORK['PAGE_SIZE'])
+        page = request.GET.get('page', 1)
 
-class InterestViewSet(viewsets.ModelViewSet):
+        try:
+            skills = paginator.page(page)
+        except PageNotAnInteger:
+            skills = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            skills = paginator.page(paginator.num_pages)
+        serializer = SkillSerializer(skills, many=True)
+        return Response({"status":"success", "error":"", "results":serializer.data,
+                             #'has_previous_page':skills.previous_page_number(), 'has_next_page':skills.next_page_number(), 
+                             'num_pages':skills.paginator.num_pages}, status=status.HTTP_200_OK)
+
+class InterestListView(APIView):
     """
     Interest apis
 
     """
-    queryset = Interest.objects.all()
-    serializer_class = InterestSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    fields = ('id', 'name', 'slug', 'description',
-              'created_on', 'modified_on', 'published',
-              'cover_photo', 'color_code', 'topics',
-                  'is_deleted')
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
 
-    def destroy(self, request, *args, **kwargs):
+    def get(self, request):
+        interests = Interest.objects.all()
+        paginator = Paginator(interests, settings.REST_FRAMEWORK['PAGE_SIZE'])
+        page = request.GET.get('page', 1)
+
         try:
-            instance = self.get_object()
-            instance.is_deleted = True
-            instance.save()
-        except Http404:
-            pass
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            interests = paginator.page(page)
+        except PageNotAnInteger:
+            interests = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            interests = paginator.page(paginator.num_pages)
+        serializer = InterestSerializer(interests, many=True)
+        return Response({"status":"success", "error":"", "results":serializer.data,
+                             #'has_previous_page':interests.previous_page_number(), 'has_next_page':interests.next_page_number(), 
+                             'num_pages':interests.paginator.num_pages}, status=status.HTTP_200_OK)
+   
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     """
