@@ -1,229 +1,191 @@
 # Authentication
 
-For authentication, we are using [Django allauth](https://django-allauth.readthedocs.io/en/latest/)  and [Django rest-auth](https://github.com/Tivix/django-rest-auth). 
+Official documentation for Meanwise - **[Authentication](https://github.com/meanwise-eng/meanwise-server/tree/master/custom_auth)**.
 
-## URL
+#### 1. For normal registration - Django way
+* **Request URL:**
 
-#### 1. `/user/register` `POST`
+	`POST` `/api/v4/custom_auth/user/register/` 
 
 
 * **Parameters:**
-  - username (string)
-  - email (string)
-  - password1 (string)
-  - password2 (string)
-  - access token
+
+Parameter | Type | Required Field | 
+:------------: | :-------------: | :------------: | 
+Username | String | ✓ 
+ Email| String | ✓
+ Password | String | ✓
+ First Name | String | ✓
+ Middle Name | String | ✕ 
+ Last Name | String | ✕ 
+ Profession | Professsion Object| ✓
+ Skills | List Field | ✓
+ Interests | List Field | ✓
+ Invite code | String | ✓
+ City | String | ✕
+ Profile Phtoto | Image | ✕
+ Cover Photo | Image | ✕
+ Bio | String | ✕
+ 
 
 * **Logic:**
 
-	Create user with username/email, store the access token, generate auth token and send a verification email. Also checks if the user with same email id exists or not, if does then it would send a failure message and redirects back to signup page.
+	Handle Registering of user for normal django flow. Capture all user information at one go. For each user generate auth token and use the same to authorize further api calls.
 	
+* **Request:**
 
-* **Response:**
-
-```json
-{
-	"status": "HTTP 200 OK",
-	"response": {
-		"access_token": "jabhjbsadfjbsadf231312",
-		"username": "grover",
-		"success": "Successfully signed up and an email has been sent to your email id."
-	}	
-}
-```
-
-<br/>
-
-#### 2. `/user/login/` `POST`
-
-* **Parameters:**
-
-	- username (string)
-	- password (string)
-	- email
-
-* **Logic:** `Authentication Required`
-	
-	Checks if the user exists or not if yes then update the auth token object to that user and redirects to the home view. Authentication is required to get past this view.
-	
-* **Response:**
-
-```json
+```javascript
 {	
-	"status": "HTTP 200 OK",
-	"response": {
-		"success": "Successfully loggin out."
-	}
+	"register":
+    {
+    	"username": "testuser3@test.com", 		 
+    	"email": "testuser3@test.com",
+    	"password": "testpassthree",
+        "first_name": "testfname4", 
+        "profession": 1,
+        "skills": [1,2],
+        "interests": [1,2], 
+        "invite_code": "REALPEOPLE"
+    }
 }
 ```
 
-<br/>
-
-#### 3. `/user/logout/` `POST | GET`
-* **Parameters:**
-	- token
-
-* **Logic:**
-
-	Calls Django logout method and delete the Token object assigned to the current User object. Accepts/Returns nothing.
-	
-* **Response:**
-
-```json
-{	
-	"status": "HTTP 200 OK",
-	"response": {
-		"success": "Successfully logged out."
-	}
-}
-```
-
-<br/>
-
-#### 4. `/user/password/reset/` `POST`
-
-* **Parameters:**
-	- email
-
-* **Logic:**
-
-	Calls Django Auth PasswordResetForm save method. Accepts the following POST parameters: email. Returns the success/fail message. No authentication is required, only checks if the entered email address exists or not.
 
 * **Response:**
 
-```json
+```javascript
 {
-	"status": "HTTP 200 OK",
-	"response": {
-		"success": "Password reset e-mail has been sent."
-	}
+	"userprofile": 10,
+    "auth_token": "e73e7c1e402c36a920907c239c7ccd0b324fe18a",
+    "user": 15
 }
 ```
 
 <br/>
 
-#### 5. `/user/password/reset/confirm/` `POST`
+#### 2. Facebook Signup
+* **Request URL:** 
+
+	`POST` `/api/v4/custom_auth/user/register/` 
 
 * **Parameters:**
 
-	- uid
-	- token
-	- new_password1
-	- new_password2
+Parameter | Type | Required Field | 
+:------------: | :-------------: | :------------: | 
+Username | String | ✓ 
+ Email| String | ✓
+ Facebook Token | String | ✓
+ Password | String | ✓
+ First Name | String | ✓
+ Middle Name | String | ✕ 
+ Last Name | String | ✕ 
+ Profession | Professsion Object| ✓
+ Skills | List Field | ✓
+ Interests | List Field | ✓
+ Invite code | String | ✓
+ City | String | ✕
+ Profile Phtoto | Image | ✕
+ Cover Photo | Image | ✕
+ Bio | String | ✕
+ 
+
+* **Logic:**
+	
+	Handle Registering of user for facebook flow. Capture all user information at one go. For each user generate auth token and use the same to authorize further api calls.
     
-* **Logic:** `Email Verification Required`
+* **Request:** 
 
-	Password reset e-mail link is confirmed, therefore this resets the user's password. Accepts the following POST parameters, Django URL arguments and returns the success/fail message. 
+```javascript
 
+{
+	"register": {
+    	"username": "testuser8@test.com", 
+        "email": "testuser8@test.com",
+        "facebook_token": "fbtokeneight",
+        "first_name": "testfname8", 
+        "profession": 1,
+        "skills": [1,2],
+        "interests": [1,2]
+    }
+}
+```
+	
 * **Response:**
 
-```json
-{
-	"response": {
-		"success": "Password has been reset with the new password."
-	}
+```javascript
+{	
+	"auth_token": "63cd2dda1508e2bcfe15550b53930f7792598e84",
+    "user": 13,
+    "userprofile": 9
 }
 ```
 
 <br/>
 
+#### 3. Retrieve auth token
 
-#### 6. `/user/password/change/` `POST`
+* **Request URL:**
+
+	`POST` `/api/v4/custom_auth/api-token-auth/` 
 
 * **Parameters:**
 
-	- new_password1
-	- new_password2
-	- old_password
-
-* **Logic:** `Authentication Required`
-	
-    Calls Django Auth SetPasswordForm save method. Accepts the POST parameters and returns the success/fail message. Authentication is required to update password.
-
-* **Response:**
-
-```json
-{
-	"response": {
-		"success": "New password has been saved."
-	}
-}
-```
-
-<br/>
-
-
-#### 7. `/user/` `GET`
+Parameter | Type | Required Field 
+:------------: | :-------------: | :------------: 
+Username | String | ✓ 
+Password | String | ✓
 
 * **Logic:**
 
-	Returns user's details in JSON format. No authetication is required to see user details. All the
-	
-* **Response:**
-
-```json
-{	
-	"user": {
-		"email": "abc@gmail.com",
-		"username": "grover",
-		...
-		"date_joined": "some date"
-	}
-}
-```
-
-<br/>
-
-#### 8. `/user/` `PUT | PATCH`
-
-* **Parameters:**
-
-  - username
-  - email
-  - first_name
-  - last_name
-
-
-* **Logic:** `Authentication Required`
-	
-    Update user's details and return updated user details in JSON format. Authentication is required to update user details.
-
-* **Response:** 
-
-```json
-{	
-	"user": {
-		"email": "abc@gmail.com",
-		"username": "grover",
-		...
-		"date_joined": "some date"
-	}
-}
-```
-
-<br/>
-
-#### 9. `user/register/facebook` `POST` 
-
-* **Parameters:**
-
-  - access_token
-  - username
-  - email
-  
-* **Logic:**
-
-	Create user with their facebook username/email, store the access token, generate auth token and send a verification email. Also checks if the user exists or not, if user exists then login the user.
+	To retrieve user token given username and password.
     
+* **Request:**
+
+```javascript
+{
+	"username": "testuser5@test.com",
+    "password": "testpassfive"
+}
+```
+	
+* **Response:**
+
+```javascript
+{
+	"token": "93deff3e4c04e5f2ee1349035fd7637bb4df7aa0"
+}
+```
+
+<br/>
+
+#### 4. Verify Email.
+
+* **Request URL:** 
+
+	`POST` `/api/v4/custom_auth/user/verify/` 
+
+* **Parameters:**
+
+Parameter | Type | Required Field 
+:------------: | :-------------: | :------------: 
+Email | String | ✓ 
+
+* **Logic:**
+
+	Checks if the email exists or not.
+    
+* **Request:**
+
+```javascript
+{
+	"email": "testuser5@test.com"
+}
+```
+
 * **Response:**
 
 ```json
 {
-	"status": "HTTP 200 OK",
-    "response": {
-        "access_token": "jabhjbsadfjbsadf231312",
-        "username": "grover",
-        "success": "Successfully signed up and an email has been sent to your email id."
-    } 
+	"exists": "true"
 }
 ```
