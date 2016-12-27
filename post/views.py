@@ -192,7 +192,7 @@ class PostHSerializer(HaystackSerializer):
     class Meta:
         index_classes = [PostIndex]
         fields = [
-            "text",
+            "text", "post_text", "id"
         ]
 
 class PostSearchView(HaystackViewSet):

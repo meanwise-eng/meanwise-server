@@ -4,10 +4,12 @@ from post.models import Post
 
 class PostIndex(indexes.SearchIndex, indexes.Indexable):
 
-    text = indexes.CharField(document=True, use_template=True)
-    #post_text = indexes.CharField(model_attr="text")
+    text = indexes.CharField(document=True, use_template=False)
+    post_text = indexes.CharField(model_attr="text")
+    id = indexes.CharField(model_attr="id")
+    #interest = 
 
-    autocomplete = indexes.EdgeNgramField()
+    #autocomplete = indexes.EdgeNgramField()
 
     #@staticmethod
     #def prepare_autocomplete(obj):
@@ -20,6 +22,6 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
 
     def index_queryset(self, using=None):
         return self.get_model().objects.filter(
-            created__lte=timezone.now()
+            created_on__lte=timezone.now()
         )
 
