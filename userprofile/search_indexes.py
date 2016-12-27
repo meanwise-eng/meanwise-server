@@ -9,7 +9,7 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     first_name = indexes.CharField(model_attr="first_name")
     last_name = indexes.CharField(model_attr="last_name")
     username = indexes.CharField(model_attr='username')
-    #skill_name = indexes.CharField()
+    skills_text = indexes.MultiValueField()
     #autocomplete = indexes.EdgeNgramField()
 
     #@staticmethod
@@ -25,4 +25,7 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
         return self.get_model().objects.filter(
             created_on__lte=timezone.now()
         )
+
+    def prepare_skills_text(self, obj):
+        return  [skill.text for skill in obj.skills.all()] 
 

@@ -330,7 +330,7 @@ class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
         index_classes = [UserProfileIndex]
         fields = [
-            "txext", "id", "first_name", "last_name", "username"
+            "txext", "id", "first_name", "last_name", "username", "skills_text"
         ]
 
 class UserProfileSearchView(HaystackViewSet):

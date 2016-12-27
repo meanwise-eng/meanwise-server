@@ -7,6 +7,7 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=False)
     post_text = indexes.CharField(model_attr="text")
     id = indexes.CharField(model_attr="id")
+    interest_name = indexes.CharField()
     #interest = 
 
     #autocomplete = indexes.EdgeNgramField()
@@ -23,5 +24,8 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         return self.get_model().objects.filter(
             created_on__lte=timezone.now()
-        )
+        ).select_related('interest')
+
+    def prepare_interest_name(self, obj):
+        return obj.interest.name
 

@@ -248,3 +248,54 @@ raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://12
 
 ------------------------------------------------------------------------------------------------------------
 
+Search for posts
+Use insterest_name (channel  name) and post_text (text of the post) for searching
+
+http://127.0.0.1:8000/api/v4/search/post/?interest_name=%22music%22&post_text=%22test%20post%20one%22
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "post_text": "test post one",
+            "interest_name": "music",
+            "text": null,
+            "id": "1"
+        }
+    ]
+}
+
+---------------------------------------------------------------------------------------------
+search for userprofile
+skill  is mapped to skills_text, can use comma seperated values, e.g. python,django
+
+http://127.0.0.1:8000/api/v4/search/userprofile/?skills_text=python&username=testuser2
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": "13",
+            "first_name": "fname2",
+            "skills_text": [
+                "python",
+                "django"
+            ],
+            "username": "testuser2",
+            "last_name": "lname2"
+        }
+    ]
+}
+----------------------------------------------------------------------------------
