@@ -146,3 +146,167 @@ Parameter | Type | Required Field |
 ```
 
 </br>
+
+#### 4. Adding comment to a post:
+* **Request URL:**
+
+    `POST` `/api/v4/posts/post_id/comments/`
+
+* **Parameters:**
+
+Parameter | Type | Required Field | 
+:------------: | :-------------: | :------------: | 
+post | Post object | ✕ 
+ commented_by| User object | ✓
+ comment_text | String | ✓
+ is_deleted | Boolean | ✕
+ created_on | DateTime | Auto 
+ modified_on | DateTime | Auto 
+    
+* **Logic:** `Authentication Required`
+
+    Let the user add a comment to a post. Authorization token will be required in the request header while sending the request.
+    
+* **Request:**
+    
+```javascript
+{
+    "comment_text": "test comment one",
+    "commented_by": 10
+}
+```
+    
+* **Response:**
+
+```javascript
+{
+    "status": "success",
+    "results": {
+        "id": 2,
+        "comment_text": "test comment one",
+        "is_deleted": false,
+        "created_on": "2016-12-22T10:30:14.718880Z",
+        "modified_on": "2016-12-22T10:30:14.718920Z",
+        "post": 2,
+        "commented_by": 10
+    },
+    "error": ""
+}
+```
+
+<br/>
+
+#### 5. Get all comments from a post:
+
+* **Request URL:**
+
+    `GET` `/api/v4/posts/post_id/comments/`
+    
+* **Logic:** `Authentication Required`
+
+    List all the comments of the post. Authorization token will be required in the request header while sending the request.
+    
+* **Response:**
+
+```javascript
+{
+    "error": "",
+    "results": [
+        {
+            "id": 2,
+            "comment_text": "test comment one",
+            "user_id": 10,
+            "user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing.jpg",
+            "user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing.jpg..jpg",
+            "post_id": 2
+        },
+        {
+            "id": 3,
+            "comment_text": "test comment two",
+            "user_id": 13,
+            "user_profile_photo": "",
+            "user_profile_photo_small": "",
+            "post_id": 2
+        }
+    ],
+    "status":"success"
+}
+```
+
+</br>
+
+#### 6. Delete a comment:
+
+* **Request URL:**
+
+    `DELETE` `/api/v4/posts/post_id/comments/comment_id/`
+    
+* **Logic:** `Authentication Required`
+
+    Deletes a post by sending a `DELETE` request with the post_id and comment_id in the URL with the authorization token in the header.
+
+* **Response:**
+
+```javascript
+{
+    "error": "",
+    "results": "Succesfully deleted.",
+    "status": "success"
+}
+```
+
+</br>
+
+#### 7. Like a post:
+
+* **Request URL:**
+
+    `POST` `/api/v4/user/user_id/posts/<post_id>/like`
+    
+* **Logic:** `Authentication Required`
+    
+    Let a user to like a comment by sending a `POST` request to the required URL with user_id, the id of the user and post_id the id of the post. Also the authorization token will be required in the request header.
+    
+* **Request:**
+
+```javascript
+{}
+```
+
+* **Response:**
+
+```javascript
+{
+    "results": "Succesfully liked.",
+    "status": "success",
+    "error": ""
+}
+```
+
+<br/>
+
+#### 8. Unlike a post:
+
+* **Request URL:**
+
+    `POST` `/api/v4/user/user_id/posts/post_id/like/`
+    
+* **Logic:** `Authentication Required`
+    
+    Let a user to unlike a comment by sending a `POST` request to the required URL with user_id, the id of the user and post_id the id of the post. Also the authorization token will be required in the request header.
+    
+* **Request:**
+
+```javascript
+{}
+```
+
+* **Response:**
+
+```javascript
+{
+    "results": "Succesfully unliked.",
+    "status": "success",
+    "error": ""
+}
+```

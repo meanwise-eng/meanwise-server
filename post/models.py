@@ -49,8 +49,4 @@ class Share(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return "Share id: " + str(self.id)  + " post: " + str(self.post) 
-
-    
-                                
-
+        return "Share id: " + str(self.id)  + " post: " + str(self.post)
