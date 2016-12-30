@@ -1,310 +1,178 @@
 # Profile
 
-Here is the link to [Meanwise Profile app](https://github.com/meanwise-eng/meanwise-server/tree/master/userprofile). 
-
-## URL
-
-#### 1.`/api/v4/user/userprofile/<user_id>` `GET | POST`
+Official documentation of [Meanwise Profile app](https://github.com/meanwise-eng/meanwise-server/tree/master/userprofile). 
 
 
-* **Parameters:**
-  - id
-  - username
-  - first_name
-  - last_name
-  - profile_pic
-  - profession
-  - location(city, country)
-  - summary
-  - skills
-  - date of birth
-  - bio
-  - video (introduction)
-  - profile_views(count-field of profile views)
-  - connections(Array of objects)
+
+#### 1. Profession Call:
+
+* **Request URL:**
+
+  `GET` `/api/v4/profession/`
+
 
 * **Logic:** `Authentication Required`
   
-    - Return user's profile. Authentication is required for this view as all the details related to user's profile are public but can be viewed only to user who has Meanwise account.
+    List all the professions. Authorization token will be required in the request header while sending a request to the URL.
 
 
 * **Response:**
 
-`GET REQUEST`
-```json
+```javascript
 {
-  "status": "HTTP-GET 200 OK",
-  "response": {
-        "id": "12345dfgghjjn",
-    "username": "grover",
-        "first_name": "Punit",
-        "last_name": "Grover",
-        "profile_pic": "image-id",
-        "cover_pic": "photo-id",
-        "profession": {
-          "data": [
-              {
-                  "id": "2313rg5465",
-                    "text": "Software Engineer",
-                    "slug": "software-engineer",
-                    "created_on": "some-date",
-                    "last_updated": "some-date",
-                    "searchable": "False",
-                }
-            ]
+  "count": 2,
+    "next": null,
+    "previous": null,
+    "results":[
+      {
+          "id": 1,
+        "text": "IT",
+            "slug": "IT",
+            "created_on": "2016-09-15T12:13:26.916938Z",
+            "last_updated": "2016-09-15T12:13:26.916964Z",
+            "searchable": true
         },
-        "location": {
-          "city": "New Delhi",
-            "country": "India"
-        },
-        "summary": "some-text",
-        "skills": {
-          "data": [
-              {
-                  "id": "23434rytutu",
-                    "text": "#Django",
-                    "lower": "django",
-                    "slug": "slug",
-                    "created_on": "some-date",
-                    "last_updated": "some-date",
-                    "searchable": "True",
-                },
-                {
-                  "id": "123423434rytutu",
-                    "text": "Java",
-                    "lower": "java",
-                    "slug": "slug",
-                    "created_on": "some-date",
-                    "last_updated": "some-date",
-                    "searchable": "False",
-                }
-            ]
-        },
-        "DOB": "some-date",
-        "interest": {
-          "data": [
-              {
-                  "id": "123343rfvvgtgv",
-                    "name": "#Science",
-                    "slug": "Science",
-                    "description": "some-description",
-                    "created_on": "somedate",
-                    "modified_on": "some-date",
-                    "publiched": "some-date",
-                    "cover_photo": "coverphoto-id",
-                    "color_code": "#333"
-                },
-                {
-                  "id": "1256743rfvvgtgv",
-                    "name": "Technology",
-                    "slug": "Technology",
-                    "description": "some-description",
-                    "created_on": "somedate",
-                    "modified_on": "some-date",
-                    "publiched": "some-date",
-                    "cover_photo": "coverphoto-id",
-                    "color_code": "#333"
-                }
-            ]
-        },
-        "bio": "some-text",
-        "video": "video-id",
-        "profile_views": "300",
-        "connections": ["object1", "object2"],
-    "success": "Profile info"
-  } 
-}
-```
-* **Request Sent:**
-
-```json
-{
-  "username": "grover",
-    "first_name": "Punit",
-    "last_name": "Grover",
-    "profile_pic": "image-id",
-    "cover_pic": "photo-id",
-    "profession": ["Software Engineer"],
-    "location": {
-        "city": "New Delhi",
-        "country": "India"
-    },
-    "summary": "some-text",
-    "skills": ["#skill-objects", "object2"],
-    "DOB": "some-date",
-    "interest": ["#interestobjects", "object2"],Rangpur Pahadi 
-    "bio": "some-text",
-    "video": "video-id",
-    "profile_views": "300",
-    "connections": ["object1", "object2"],
-  "success": "Profile info"
-  } 
-}
-```
-
-* **Profile Overview:** 
-
-![alt text](https://d2gn4xht817m0g.cloudfront.net/p/product_screenshots/images/original/000/734/429/734429-a986fb24ca026a66913858db3062f79735f416db.png?1471020221 "Meanwise Profile")
-
-![alt text](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/prfle.png "Meanwise")
-
-
-<br/>
-
-#### 2.`/api/v4/profession` `GET`
-
-
-* **Parameters:**
-
-  - id
-    - text
-    - slug
-    - created_on
-    - last_updated
-    - searchable
-    
-
-* **Logic:**
-  
-    List all the professions.
-    
-* **Response**
-
-```json
-{
-  "status": "HTTP-GET 200 OK",
-  "response": {
-      "profession": {
-        "data": [
-            {
-            "id": "2313rg5465",
-            "text": "Software Engineer",
-            "slug": "software-engineer",
-            "created_on": "some-date",
-            "last_updated": "some-date",
-            "searchable": "False",
-            },
-            {
-            "id": "23121g5465",
-            "text": "Front-end Developer",
-            "slug": "Front-end-developer",
-            "created_on": "some-date",
-            "last_updated": "some-date",
-            "searchable": "False",
-            }
-          ]
+        {
+          "id": 2,
+            "text": "athlete",
+            "slug": "athlete",
+            "created_on": "2016-09-15T12:13:44.737235Z",
+            "last_updated": "2016-09-15T12:13:44.737299Z",
+            "searchable": true
         }
-  }
+    ]
 }
-```
-
-<br/>
-
-#### 3.`/api/v4/skills` `GET`
-
-
-* **Parameters:**
-
-  - id
-    - text
-    - lower
-    - slug
-    - created_on
-    - last_updated
-    - searchable
-    
-
-* **Logic:**
   
-    List all the skills.
-    
-* **Response**
-
-```json
-{
-  "status": "HTTP-GET 200 OK",
-  "response": {
-      "skills": {
-          "data": [
-              {
-                  "id": "23434rytutu",
-                    "text": "#Django",
-                    "lower": "django",
-                    "slug": "slug",
-                    "created_on": "some-date",
-                    "last_updated": "some-date",
-                    "searchable": "True",
-                },
-                {
-                  "id": "123423434rytutu",
-                    "text": "Java",
-                    "lower": "java",
-                    "slug": "slug",
-                    "created_on": "some-date",
-                    "last_updated": "some-date",
-                    "searchable": "False",
-                }
-            ]
-        }
-    }
-}
 ```
 
 
 <br/>
 
-#### 4.`/api/v4/skills` `GET`
+#### 2. Skill call:
 
+* **Request URL:**
 
-* **Parameters:**
-
-  - id
-    - name
-    - slug
-    - description
-    - created_on
-    - modified_on
-    - published
-    - cover_photo
-    - color_code
+  `GET` `/api/v4/skill/`
     
 
-* **Logic:**
+* **Logic:** `Authentication Required`
   
-    List all the interests.
+    List all the skills. Authorization token will be required in the request header while sending a request to the URL.
     
 * **Response**
 
-```json
+```javascript
 {
-  "status": "HTTP-GET 200 OK",
-  "response": {
-      "interest": {
-          "data": [
-              {
-                  "id": "123343rfvvgtgv",
-                    "name": "#Science",
-                    "slug": "Science",
-                    "description": "some-description",
-                    "created_on": "somedate",
-                    "modified_on": "some-date",
-                    "publiched": "some-date",
-                    "cover_photo": "coverphoto-id",
-                    "color_code": "#333"
-                },
-                {
-                  "id": "1256743rfvvgtgv",
-                    "name": "Technology",
-                    "slug": "Technology",
-                    "description": "some-description",
-                    "created_on": "somedate",
-                    "modified_on": "some-date",
-                    "publiched": "some-date",
-                    "cover_photo": "coverphoto-id",
-                    "color_code": "#333"
-                }
-            ]
+  "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+          "id": 1,
+        "text": "python",
+      "lower": "python",
+            "slug": "python",
+            "created_on": "2016-09-15T12:13:54.964201Z",
+            "last_updated": "2016-09-15T12:13:54.964201Z",
+            "searchable": true
+    },    
+        {   
+          "id": 2,
+      "text": "django",
+            "lower": "django",
+            "slug": "django",
+            "created_on": "2016-09-15T12:14:14.290444Z",
+            "last_updated": "2016-09-15T12:14:14.290471Z",
+            "searchable": true
         }
-    }
+   ]
+}
+```
+
+<br/>
+
+#### 3. Interest call:
+
+* **Request URL:**
+
+  `GET` `/api/v4/skills/` 
+
+* **Logic:** `Authentication Required`
+  
+    List all the interests. Authorization token will be required in the request header while sending a request to the URL.
+    
+* **Response**
+
+```javascript
+{
+  "count": 2,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+          "id": 1,
+        "name": "sports",
+            "slug": "sports",
+            "description": "sports",
+            "created_on": "2016-09-15T12:11:06.377205Z",
+            "modified_on":"2016-09-15T12:11:06.377234Z",
+      "published": false,
+            "cover_photo": "https://squelo.com/media/interest_photos/IMG_20140525_164408761.jpg",
+            "color_code": "asda"
+        },  
+        {
+          "id": 2,
+            "name": "music",
+            "slug": "music",
+            "description": "music",
+            "created_on": "2016-09-15T12:12:18.297699Z",
+      "modified_on": "2016-09-15T12:12:18.297726Z",
+            "published": false,
+            "cover_photo": "https://squelo.com/media/interest_photos/IMG_20140218_215136954.jpg",
+            "color_code": "wrw"
+        }
+    ]
+}
+```
+
+<br/>
+
+#### 4. Userprofile:
+
+* **Request URL:**
+  
+    `GET` `/api/v4/user/userprofile/`
+    
+* **Logic:** `Authentication Required`
+
+  List the profile info of the user. Authorization token will be required in the request header while sending a request to the URL.
+    
+* **Response:**
+
+``` javascript
+{
+  "count": 1,
+    "next": null,
+    "previous": null,
+    "results":[
+      {
+        "id": 1,
+          "facebook_token": "",
+            "username": "testuser1",
+            "first_name": "tfname1",
+            "middle_name": "tmidname1",
+            "last_name": "tlname1",
+            "city": "bangalore",
+            "profile_photo": "http://127.0.0.1:49100/http:/127.0.0.1:49100/media/profile_photos/IMG_20140321_104523179.jpg",
+            "cover_photo": "http://127.0.0.1:49100/http:/127.0.0.1:49100/media/cover_photos/IMG_20140329_135903539.jpg",
+      "bio": "Test bio",
+            "created_on": "2016-09-15T12:17:13.786931Z",
+            "last_updated": "2016-09-15T12:17:13.786953Z",
+            "user": 2,
+            "profession": 1,
+            "skills": [1,2],
+            "interests": [1,2]
+        }
+   ]
 }
 ```
