@@ -20,13 +20,13 @@ Official documentation of [Meanwise Profile app](https://github.com/meanwise-eng
 
 ```javascript
 {
-  "count": 2,
+    "count": 2,
     "next": null,
     "previous": null,
     "results":[
-      {
-          "id": 1,
-        "text": "IT",
+        {
+            "id": 1,
+            "text": "IT",
             "slug": "IT",
             "created_on": "2016-09-15T12:13:26.916938Z",
             "last_updated": "2016-09-15T12:13:26.916964Z",
@@ -63,22 +63,22 @@ Official documentation of [Meanwise Profile app](https://github.com/meanwise-eng
 
 ```javascript
 {
-  "count": 2,
+    "count": 2,
     "next": null,
     "previous": null,
     "results": [
-      {
-          "id": 1,
-        "text": "python",
-      "lower": "python",
+        {
+            "id": 1,
+            "text": "python",
+            "lower": "python",
             "slug": "python",
             "created_on": "2016-09-15T12:13:54.964201Z",
             "last_updated": "2016-09-15T12:13:54.964201Z",
             "searchable": true
-    },    
+        },    
         {   
-          "id": 2,
-      "text": "django",
+            "id": 2,
+            "text": "django",
             "lower": "django",
             "slug": "django",
             "created_on": "2016-09-15T12:14:14.290444Z",
@@ -105,28 +105,28 @@ Official documentation of [Meanwise Profile app](https://github.com/meanwise-eng
 
 ```javascript
 {
-  "count": 2,
+    "count": 2,
     "next": null,
     "previous": null,
     "results": [
-      {
-          "id": 1,
-        "name": "sports",
+        {
+            "id": 1,
+            "name": "sports",
             "slug": "sports",
             "description": "sports",
             "created_on": "2016-09-15T12:11:06.377205Z",
             "modified_on":"2016-09-15T12:11:06.377234Z",
-      "published": false,
+            "published": false,
             "cover_photo": "https://squelo.com/media/interest_photos/IMG_20140525_164408761.jpg",
             "color_code": "asda"
         },  
         {
-          "id": 2,
+            "id": 2,
             "name": "music",
             "slug": "music",
             "description": "music",
             "created_on": "2016-09-15T12:12:18.297699Z",
-      "modified_on": "2016-09-15T12:12:18.297726Z",
+            "modified_on": "2016-09-15T12:12:18.297726Z",
             "published": false,
             "cover_photo": "https://squelo.com/media/interest_photos/IMG_20140218_215136954.jpg",
             "color_code": "wrw"
@@ -151,13 +151,13 @@ Official documentation of [Meanwise Profile app](https://github.com/meanwise-eng
 
 ``` javascript
 {
-  "count": 1,
+    "count": 1,
     "next": null,
     "previous": null,
-    "results":[
-      {
-        "id": 1,
-          "facebook_token": "",
+    "results": [
+        {
+            "id": 1,
+            "facebook_token": "",
             "username": "testuser1",
             "first_name": "tfname1",
             "middle_name": "tmidname1",
@@ -165,7 +165,7 @@ Official documentation of [Meanwise Profile app](https://github.com/meanwise-eng
             "city": "bangalore",
             "profile_photo": "http://127.0.0.1:49100/http:/127.0.0.1:49100/media/profile_photos/IMG_20140321_104523179.jpg",
             "cover_photo": "http://127.0.0.1:49100/http:/127.0.0.1:49100/media/cover_photos/IMG_20140329_135903539.jpg",
-      "bio": "Test bio",
+            "bio": "Test bio",
             "created_on": "2016-09-15T12:17:13.786931Z",
             "last_updated": "2016-09-15T12:17:13.786953Z",
             "user": 2,
@@ -174,5 +174,100 @@ Official documentation of [Meanwise Profile app](https://github.com/meanwise-eng
             "interests": [1,2]
         }
    ]
+}
+```
+<br/>
+
+#### 5. Skill call with pagination:
+
+* **Request URL:**
+
+  `GET` `/api/v4/skill/?page=<page_number>`
+    
+* **Logic:** `Authentication Required`
+
+  List out all the skills with pagination. Authorization token will be required in the request header while sending a request to the URL.
+    
+* **Response:**
+
+```javascript
+{
+    "num_pages": 1,
+    "results": [
+        {
+            "id": 2,
+            "photo": "/media/interest_photos/IMG_20140218_215136954.jpg"
+        },
+        {
+            "id": 1,
+            "photo": "/media/interest_photos/IMG_20140525_164408761.jpg"
+        }
+    ],
+    "error": "",
+    "status": "success"
+}
+```
+
+<br/>
+
+#### 6. Interest call with pagination:
+
+* **Request URL:**
+
+  `GET` `/api/v4/interest/?page=<page_number>`
+    
+* **Logic:** `Authentication Required`
+
+  List out all the interests with pagination. Authorization token will be required in the request header while sending a request to the URL.
+    
+* **Response:**
+
+```javascript
+{
+    "num_pages": 1,
+    "results": [
+        {
+            "id": 2,
+            "photo": "/media/interest_photos/IMG_20140218_215136954.jpg"
+        },
+        {
+            "id": 1,
+            "photo": "/media/interest_photos/IMG_20140525_164408761.jpg"
+        }
+    ],
+    "error": "",
+    "status": "success"
+}
+```
+
+<br/>
+
+#### 7. Profession call with pagination:
+
+* **Request URL:**
+
+  `GET` `/api/v4/profession/?page=<page_number>`
+    
+* **Logic:** `Authentication Required`
+
+  List out all the professions with pagination. Authorization token will be required in the request header while sending a request to the URL.
+    
+* **Response:**
+
+```javascript
+{
+    "num_pages": 1,
+    "results": [
+        {
+            "id": 1,
+            "text": "IT"
+        },
+        {
+            "id": 2,
+            "text": "athlete"
+        }
+    ],
+    "error": "",
+    "status": "success"
 }
 ```
