@@ -32,8 +32,7 @@ class ProfessionListView(APIView):
     Profession apis
 
     """
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         professions = Profession.objects.all()
@@ -58,8 +57,7 @@ class SkillListView(APIView):
     Skill apis
 
     """
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         skills = Skill.objects.all()
@@ -83,8 +81,7 @@ class InterestListView(APIView):
     Interest apis
 
     """
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         interests = Interest.objects.all()
