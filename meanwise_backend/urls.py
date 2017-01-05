@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.conf.urls.static import static
+from django.conf import settings
 
 #from api_v3 import urls as api_v3_urls
 from api_v4 import urls as api_v4_urls
@@ -25,3 +27,6 @@ urlpatterns = [
     #url(r'^api/v3/', include(api_v3_urls)),
     url(r'^api/v4/', include(api_v4_urls)),
 ]
+
+urlpatterns +=  static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
