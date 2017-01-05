@@ -81,7 +81,9 @@ class RegisterUserSerializer(serializers.Serializer):
                                        password=password, email=email)
         elif self.validated_data.get('facebook_token', None):
             user = User.objects.create(username=username,
-                                       password='password', email=email)
+                                       email=email)
+            user.set_password('P@ssw0rd123!')
+            user.save()
         token = Token.objects.get_or_create(user=user)
         user_profile = UserProfile()
         user_profile.user = user
