@@ -5,7 +5,7 @@ from post.models import Post
 class PostIndex(indexes.SearchIndex, indexes.Indexable):
 
     text = indexes.CharField(document=True, use_template=False)
-    post_text = indexes.CharField(model_attr="text")
+    post_text = indexes.CharField(model_attr="text", null=True)
     id = indexes.CharField(model_attr="id")
     interest_name = indexes.CharField()
     #interest = 

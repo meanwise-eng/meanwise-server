@@ -299,3 +299,22 @@ Vary: Accept
     ]
 }
 ----------------------------------------------------------------------------------
+
+post image example
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/user/17/posts/ --dump-header - -H "Content-Type: multipart/form-data" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST -F interest=1 -F image="@/home/raj/Pictures/mobile/IMG_20140310_195139094.jpg" | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0 1149k    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0HTTP/1.0 201 Created
+Date: Fri, 06 Jan 2017 05:10:47 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Allow: GET, POST, HEAD, OPTIONS
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+Vary: Accept
+
+100 1149k    0   346  100 1149k    303  1009k  0:00:01  0:00:01 --:--:-- 1011k
+{"error":"","results":{"id":5,"image":"/media/post_images/IMG_20140310_195139094_7dJj2zz.jpg","video":null,"text":null,"is_deleted":false,"video_height":null,"video_width":null,"video_thumbnail":nul
+l,"created_on":"2017-01-06T05:10:47.490990Z","modified_on":"2017-01-06T05:10:47.491061Z","interest":1,"poster":17,"liked_by":[]},"status":"success"}
+
+----------------------------------------------------------------
