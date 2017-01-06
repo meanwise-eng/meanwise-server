@@ -9,3 +9,7 @@
 * **[Channels](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/channels.md)**
 
 * **[Messaging](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/messaging.md)**
+
+* **[Posts](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/post.md)**
+
+* **[Search](https://github.com/meanwise-eng/meanwise-server/blob/master/docs/search.md)**

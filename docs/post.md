@@ -27,7 +27,7 @@ Parameter | Type | Required Field |
 
 * **Logic:** `Authorization Token Required`
  
- Let's a user to post a story. Token would be required in request header.
+ Lets a user to post a story. Token would be required in request header.
  
 
 * **Request:**
@@ -338,7 +338,7 @@ Parameter | Type | Required Field |
     
 * **Logic:** `Authentication Required`
 
-    Let's a user to post an image by sending a `POST` request to the specified URL where user_id is the Poster object id. Also authorization token would be required in request header while sending the request.
+    Lets a user to post an image by sending a `POST` request to the specified URL where user_id is the Poster object id. Also authorization token would be required in request header while sending the request.
 
 
 * **Request:**
