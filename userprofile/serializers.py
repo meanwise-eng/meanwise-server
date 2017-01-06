@@ -20,7 +20,7 @@ class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
     class Meta:
         model = Interest
-        fields = ('id', 'photo')
+        fields = ('id', 'name', 'photo')
 
     def get_photo(self, obj):
         if obj.cover_photo:
