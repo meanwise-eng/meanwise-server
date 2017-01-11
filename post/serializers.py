@@ -131,18 +131,51 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
+    user_username = serializers.SerializerMethodField()
+    user_first_name = serializers.SerializerMethodField()
+    user_last_name = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
     user_profile_photo_small = serializers.SerializerMethodField()
+    
+    
     post_id = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
-        fields = ('id', 'comment_text', 'user_id', 'user_profile_photo', 'user_profile_photo_small',
+        fields = ('id', 'comment_text', 'user_id', 'user_username', 'user_first_name', 'user_last_name',
+                      'user_profile_photo', 'user_profile_photo_small',
                       'post_id')
 
     def get_user_id(self, obj):
         user_id = obj.commented_by.id
         return user_id
+
+    def get_user_username(self, obj):
+        try:
+            user_up = obj.commented_by.userprofile
+        except UserProfile.DoesNotExist:
+            return ""
+        if user_up:
+            return user_up.username
+        return ""
+
+    def get_user_first_name(self, obj):
+        try:
+            user_up = obj.commented_by.userprofile
+        except UserProfile.DoesNotExist:
+            return ""
+        if user_up:
+            return user_up.first_name
+        return ""
+
+    def get_user_last_name(self, obj):
+        try:
+            user_up = obj.commented_by.userprofile
+        except UserProfile.DoesNotExist:
+            return ""
+        if user_up:
+            return user_up.last_name
+        return ""
 
     def get_post_id(self, obj):
         post_id = obj.post.id
