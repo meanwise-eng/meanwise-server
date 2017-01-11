@@ -114,7 +114,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_video_thumb_url(self, obj):
         #needs to be added
         if obj.video:
-            return obj.video_thumb.url
+            
+            #return obj.video_thumb.url
+            return ""
         else:
             return ""
 
@@ -123,7 +125,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return {'height':obj.image.height, 'width':obj.image.width}
         elif obj.video:
             #needs to be done
-            return {'height':obj.video_height, 'width':obj.video_width}
+            
+            #return {'height':obj.video_height, 'width':obj.video_width}
+            return {'height':320, 'width':240}
 
 class PostSaveSerializer(serializers.ModelSerializer):
     class Meta:
