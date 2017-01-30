@@ -101,6 +101,8 @@ class UserProfile(models.Model):
     cover_photo = ThumbnailerImageField(upload_to='cover_photos', blank=True)
     bio = models.TextField(null=True, blank=True)
     intro_video = models.FileField(upload_to='intro_videos', null=True, blank=True)
+    phone = models.CharField(max_length=255, blank=True, null=True)
+    dob = models.DateField(null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
 

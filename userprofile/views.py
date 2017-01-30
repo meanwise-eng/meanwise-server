@@ -101,6 +101,49 @@ class InterestListView(APIView):
                              'num_pages':interests.paginator.num_pages}, status=status.HTTP_200_OK)
    
 
+class UserProfileList(APIView):
+    """
+    List all Users .
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        userprofiles = UserProfile.objects.all()
+        serializer = UserProfileSerializer(userprofiles, many=True)
+        return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+
+class UserProfileDetail(APIView):
+    """
+    Edit a userprofile instance.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_object(self, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            userprofile = UserProfile.objects.get(user=user)
+        except User.DoesNotExist:
+            return Response({"status":"failed", "error":"User not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        except UserProfile.DoesNotExist:
+            return Response({"status":"failed", "error":"UserProfile not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        return userprofile
+
+    def get(self, request, user_id):
+         userprofile = self.get_object(user_id)
+         serializer = UserProfileSerializer(userprofile)
+         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+     
+    def patch(self, request, user_id):
+        data = request.data
+        userprofile = self.get_object(user_id)
+        serialized_up = UserProfileSerializer(userprofile, data=data, partial=True)
+        if serialized_up.is_valid():
+            serialized_up.save()
+            return Response({"status":"success", "error":"", "results":serialized_up.data}, status=status.HTTP_201_CREATED)
+        return Response({"status":"failed", "error":serialized_up.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
 class UserProfileViewSet(viewsets.ModelViewSet):
     """
     UserProfile apis
@@ -327,7 +370,7 @@ class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
         index_classes = [UserProfileIndex]
         fields = [
-            "txext", "id", "first_name", "last_name", "username", "skills_text"
+            "text", "id", "first_name", "last_name", "username", "skills_text"
         ]
 
 class UserProfileSearchView(HaystackViewSet):

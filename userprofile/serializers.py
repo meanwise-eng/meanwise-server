@@ -38,7 +38,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
-                      'skills', 'profession', 'interests', 'intro_video']
+                      'skills', 'profession', 'interests', 'intro_video', 'phone', 'dob']
 
     def get_user_id(self, obj):
         user_id = obj.user.id
