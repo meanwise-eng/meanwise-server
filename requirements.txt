@@ -56,3 +56,4 @@ uWSGI==2.0.11.2
 Whoosh==2.7.0
 django-taggit-serializer==0.1.5
 drf-haystack
+moviepy
