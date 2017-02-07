@@ -3,6 +3,7 @@ from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 from easy_thumbnails.files import get_thumbnailer
 
+from userprofile.models import UserProfile
 from post.models import Post, Comment, Share
 
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -114,9 +115,8 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_video_thumb_url(self, obj):
         #needs to be added
         if obj.video:
-            
-            #return obj.video_thumb.url
-            return ""
+            if obj.video_thumbnail:
+                return obj.video_thumbnail.url
         else:
             return ""
 
