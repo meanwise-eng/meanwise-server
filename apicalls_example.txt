@@ -349,3 +349,21 @@ to_small":"","first_name":"testfname5","last_name":"","bio":null,"skills":[{"id"
 sic"}],"intro_video":null,"phone":"+11234567891","dob":"1980-10-30"},"error":""}
 
 --------------------------------------------
+
+fetch token and user_id using email and password
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/fetch/token/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"email":"testuser8@test.com","password":"P@ssword123!"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 200 OK
+Date: Wed, 08 Feb 2017 10:42:17 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+Allow: POST, OPTIONS
+Vary: Accept, Cookie
+
+100   162    0   106  100    56   1293    683 --:--:-- --:--:-- --:--:--  1308
+{"status":"success","result":{"user_id":13,"token":"63cd2dda1508e2bcfe15550b53930f7792598e84"},"error":""}
+
+--------------------------------------------------------------------------------------------

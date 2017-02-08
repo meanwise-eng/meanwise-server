@@ -7,4 +7,5 @@ urlpatterns = [
     url(r'^user/register/$', RegisterUserView.as_view(), name='register_user'),
     url(r'^api-token-auth/', views.obtain_auth_token),
     url(r'^user/verify', verify_user),
+    url(r'^fetch/token/', FetchToken.as_view()),
 ]
