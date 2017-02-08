@@ -27,7 +27,7 @@ class UserPostList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, user_id):
-        posts = Post.objects.filter(is_deleted=False).filter(poster__id=user_id)
+        posts = Post.objects.filter(is_deleted=False).filter(poster__id=user_id).order_by('-created_on')
         serializer = PostSerializer(posts, many=True)
         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
@@ -66,7 +66,7 @@ class PostViewSet(viewsets.ModelViewSet):
     Post apis
 
     """
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-created_on')
     serializer_class = PostSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -131,7 +131,7 @@ class PostCommentList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, post_id):
-        comments = Comment.objects.filter(is_deleted=False).filter(post__id=post_id)
+        comments = Comment.objects.filter(is_deleted=False).filter(post__id=post_id).order_by('-created_on')
         serializer = CommentSerializer(comments, many=True)
         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
@@ -169,7 +169,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     Comment apis
 
     """
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().order_by('-created_on')
     serializer_class = CommentSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)

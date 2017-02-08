@@ -22,12 +22,13 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     resolution = serializers.SerializerMethodField()
+    liked_by = serializers.SerializerMethodField()
     
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession',
-                      'image_url', 'video_url', 'video_thumb_url', 'resolution')
+                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -100,6 +101,13 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_num_comments(self, obj):
         return Comment.objects.filter(post=obj).count()
 
+    def get_liked_by(self, obj):
+        liked_by = []
+        for user in obj.liked_by.all():
+            liked_by.append(user.id)
+
+        return liked_by
+
     def get_image_url(self, obj):
         _image = obj.image
         if _image:
@@ -148,7 +156,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'comment_text', 'user_id', 'user_username', 'user_first_name', 'user_last_name',
                       'user_profile_photo', 'user_profile_photo_small',
-                      'post_id')
+                      'post_id', 'created_on')
 
     def get_user_id(self, obj):
         user_id = obj.commented_by.id
