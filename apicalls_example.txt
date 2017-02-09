@@ -367,3 +367,34 @@ Vary: Accept, Cookie
 {"status":"success","result":{"user_id":13,"token":"63cd2dda1508e2bcfe15550b53930f7792598e84"},"error":""}
 
 --------------------------------------------------------------------------------------------
+
+User's friends' posts
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:8000/api/v4/user/17/friends/posts/ -H 'Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   610    0   610    0     0  10778      0 --:--:-- --:--:-- --:--:-- 10892
+{"status":"success","results":[{"id":1,"text":"test post one","user_id":9,"num_likes":2,"num_comments":1,"interest_id":2,"user_firstname":"fname2","user_lastname":"lname2","user_profile_photo":"/med
+ia/profile_photos/6859429-beach-wallpaper_HwW9VbE.jpg","user_cover_photo":"/media/cover_photos/luna-more-noch-lyudi-serfing_XmPS2Ta.jpg","user_profile_photo_small":"/media/profile_photos/6859429-bea
+ch-wallpaper_HwW9VbE.jpg..jpg","user_profession":{"name":"IT","id":1},"image_url":"","video_url":"","video_thumb_url":"","resolution":null,"liked_by":[10,11],"created_on":"2016-10-06T12:39:14.532570
+Z"}],"error":""}
+
+--------------------------------------------------------------------------------------------------------
+User's interests based posts
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:8000/api/v4/user/17/interests/posts/ -H 'Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710' | more  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  1818    0  1818    0     0  14993      0 --:--:-- --:--:-- --:--:-- 15024
+{"results":[{"id":5,"text":null,"user_id":17,"num_likes":0,"num_comments":0,"interest_id":1,"user_firstname":"testfname10","user_lastname":"","user_profile_photo":"/media/profile_photos/luna-more-no
+ch-lyudi-serfing_H81m58R.jpg","user_cover_photo":"/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg","user_profile_photo_small":"/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg.
+.jpg","user_profession":{},"image_url":"/media/post_images/IMG_20140310_195139094_7dJj2zz.jpg","video_url":"","video_thumb_url":"","resolution":{"width":2592,"height":1456},"liked_by":[],"created_on
+":"2017-01-06T05:10:47.490990Z"},{"id":4,"text":null,"user_id":17,"num_likes":0,"num_comments":0,"interest_id":1,"user_firstname":"testfname10","user_lastname":"","user_profile_photo":"/media/profil
+e_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg","user_cover_photo":"/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg","user_profile_photo_small":"/media/profile_photos/luna-more-noch-lyudi
+-serfing_H81m58R.jpg..jpg","user_profession":{},"image_url":"/media/post_images/IMG_20140310_195139094.jpg","video_url":"","video_thumb_url":"","resolution":{"width":2592,"height":1456},"liked_by":[
+],"created_on":"2017-01-06T05:06:58.651977Z"},{"id":2,"text":"text post dec22","user_id":17,"num_likes":1,"num_comments":2,"interest_id":1,"user_firstname":"testfname10","user_lastname":"","user_pro
+file_photo":"/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg","user_cover_photo":"/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg","user_profile_photo_small":"/media/profile_p
+hotos/luna-more-noch-lyudi-serfing_H81m58R.jpg..jpg","user_profession":{},"image_url":"","video_url":"","video_thumb_url":"","resolution":null,"liked_by":[17],"created_on":"2016-12-22T09:11:01.77773
+7Z"}],"status":"success","error":""}
+
+
+-----------------------------------------------------------------------------------------------------

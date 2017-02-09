@@ -16,6 +16,7 @@ from drf_haystack.viewsets import HaystackViewSet
 
 from post.models import Post, Comment, Share
 from post.serializers import *
+from userprofile.models import UserFriend
 
 from post.search_indexes import PostIndex
 
@@ -60,7 +61,42 @@ class UserPostDetail(APIView):
         post.save()
         return Response({"status":"success", "error":"", "results":"Succesfully deleted."}, status=status.HTTP_202_ACCEPTED)
 
+class UserFriendsPostList(APIView):
+    """
+    List all User's friends' posts.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
 
+    def get(self, request, user_id):
+        try:
+            friends_ids = UserFriend.objects.filter(user__id=user_id).values_list('friend__id', flat=True)
+            posts = Post.objects.filter(is_deleted=False).filter(poster__id__in=friends_ids).order_by('-created_on')
+            serializer = PostSerializer(posts, many=True)
+            return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserInterestsPostList(APIView):
+    """
+    List all User's interests based posts.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, user_id):
+        try:
+            try:
+                userprofile = UserProfile.objects.get(user__id=user_id)
+            except UserProfile.DoesNotExist:
+                return Response({"status":"failed", "error":"Error fetching userprofile/interests for user.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+            interests_ids = userprofile.interests.all().values_list('id', flat=True)
+            posts = Post.objects.filter(is_deleted=False).filter(interest__id__in=interests_ids).order_by('-created_on')
+            serializer = PostSerializer(posts, many=True)
+            return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
+    
 class PostViewSet(viewsets.ModelViewSet):
     """
     Post apis
