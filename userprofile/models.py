@@ -103,6 +103,8 @@ class UserProfile(models.Model):
     intro_video = models.FileField(upload_to='intro_videos', null=True, blank=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
     dob = models.DateField(null=True, blank=True)
+    profile_story_title = models.CharField(max_length=255, blank=True, null=True)
+    profile_story_description = models.TextField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
 

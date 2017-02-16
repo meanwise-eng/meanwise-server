@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core import exceptions
 
+import ast
+
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from requests.exceptions import HTTPError
@@ -32,7 +34,10 @@ class RegisterUserSerializer(serializers.Serializer):
     profile_photo = serializers.ImageField(required=False)
     cover_photo = serializers.ImageField(required=False)
     bio = serializers.CharField(max_length=200, required=False)
+    profile_story_title = serializers.CharField(max_length=128, required=False)
+    profile_story_description = serializers.CharField(max_length=200, required=False)
     invite_code = serializers.CharField(max_length=128, required=True)
+    dob = serializers.DateField(required=False)
 
     def validate_invite_code(self, value):
         """
@@ -87,6 +92,7 @@ class RegisterUserSerializer(serializers.Serializer):
         token = Token.objects.get_or_create(user=user)
         user_profile = UserProfile()
         user_profile.user = user
+        print ("validated_data", self.validated_data)
         user_profile.first_name = self.validated_data['first_name']
         if self.validated_data.get('middle_name', None):
             user_profile.middle_name = self.validated_data['middle_name']
@@ -100,6 +106,12 @@ class RegisterUserSerializer(serializers.Serializer):
             user_profile.cover_photo = self.validated_data['cover_photo']
         if self.validated_data.get('bio', None):
             user_profile.bio = self.validated_data['bio']
+        if self.validated_data.get('profile_story_title', None):
+            user_profile.profile_story_title = self.validated_data['profile_story_title']
+        if self.validated_data.get('profile_story_description', None):
+            user_profile.profile_story_description = self.validated_data['profile_story_description']
+        if self.validated_data.get('dob', None):
+            user_profile.dob = self.validated_data['dob']
         if self.validated_data.get('facebook_token', None):
             user_profile.facebook_token = self.validated_data['facebook_token']
         user_profile.save()
@@ -112,6 +124,11 @@ class RegisterUserSerializer(serializers.Serializer):
                 logger.warning("Error adding profession to profile during registration",
                                self.validated_data['profession'])
         if self.validated_data.get('skills', None):
+            #hack to handle llist as string
+            if type(self.validated_data.get('skills')) == type('abc'):
+                self.validated_data['skills'] = list(self.validated_data['skills'])
+            if type(self.validated_data.get('skills')[0]) == type('abc'):
+                self.validated_data['skills'] = ast.literal_eval(self.validated_data['skills'][0])
             for skill in self.validated_data['skills']:
                 try:
                     skill = Skill.objects.get(id=int(skill))
@@ -119,6 +136,11 @@ class RegisterUserSerializer(serializers.Serializer):
                 except Profession.DoesNotExist:
                     logger.warning("Error adding skill to profile during registration", skill)
         if self.validated_data.get('interests', None):
+            #hack to handle llist as string
+            if type(self.validated_data.get('interests')) == type('abc'):
+                self.validated_data['interests'] = list(self.validated_data['interests'])
+            if type(self.validated_data.get('interests')[0]) == type('abc'):
+                self.validated_data['interests'] = ast.literal_eval(self.validated_data['interests'][0])
             for interest in self.validated_data['interests']:
                 try:
                     interest = Interest.objects.get(id=int(interest))

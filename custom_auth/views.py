@@ -26,7 +26,7 @@ class RegisterUserView(APIView):
 
     def post(self, request):
         logger.info("RegisterUserView - POST ")
-        register_data = request.data.get('register')
+        register_data = request.data
         reg_user_serializer = RegisterUserSerializer(data=register_data)
         if reg_user_serializer.is_valid():
             user, user_profile, auth_token = reg_user_serializer.save()

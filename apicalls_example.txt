@@ -41,18 +41,19 @@ e_photo":"http://127.0.0.1:49100/http:/127.0.0.1:49100/media/profile_photos/IMG_
 
 Register  - normal/django way
 
- curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/user/register/ --dump-header - -H "Content-Type: application/json" -X POST --data '{"register":{"username":"testuser3@test.com", "email":"testuser3@test.com", "password":"testpassthree","first_name":"testfname4", "profession":1,"skills":[1,2],"interests":[1,2], "invite_code":"REALPEOPLE"}}' | more
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/custom_auth/user/register/ --dump-header - -H "Content-Type: multipart/form-data"  -X POST -F username="testuser11@test.com" -F email="testuser11@test.com" -F password="testpass123" -F first_name="testfname11" -F last_name="testlname11" -F profession=1 -F skills=[1,2] -F interests=[1,2] -Finvite_code="REALPEOPLE" -F dob="2000-10-10" -F profile_story_title="profile story title 11" -F profile_story_description="profile story description 11" -F cover_photo="@/home/raj/Pictures/6859429-beach-wallpaper.jpg" -F profile_photo="@/home/raj/Pictures/6859429-beach-wallpaper.jpg" | more
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 201 Created
-Date: Thu, 20 Oct 2016 16:18:06 GMT
+  0  682k    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0HTTP/1.0 201 Created
+Date: Thu, 16 Feb 2017 13:48:50 GMT
 Server: WSGIServer/0.2 CPython/3.5.2
+Vary: Accept, Cookie
+Allow: POST, OPTIONS
 Content-Type: application/json
 X-Frame-Options: SAMEORIGIN
-Allow: POST, OPTIONS
 
-100   291    0    84  100   207    863   2126 --:--:-- --:--:-- --:--:--  2134
-{"userprofile":10,"auth_token":"e73e7c1e402c36a920907c239c7ccd0b324fe18a","user":15}
+100  682k    0   126  100  682k    105   569k  0:00:01  0:00:01 --:--:--  570k
+{"error":"","results":{"auth_token":"e1d54bcce09832b9216088f1603de66f6eae05f1","user":37,"userprofile":34},"status":"success"}
 
 
 ---------------------------------------------------------------------------------------------------------------------------------
