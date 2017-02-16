@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/$', UserPostDetail.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/friends/posts/$', UserFriendsPostList.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/interests/posts/$', UserInterestsPostList.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/home/feed/$', UserHomeFeed.as_view()),
     url(r'^posts/(?P<post_id>[0-9]+)/comments/$', PostCommentList.as_view()),
     url(r'^posts/(?P<post_id>[0-9]+)/comments/(?P<comment_id>[0-9]+)/$', PostCommentDetail.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/like/$', UserPostLike.as_view()),

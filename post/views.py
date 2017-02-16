@@ -2,6 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.http import Http404
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -97,6 +98,28 @@ class UserInterestsPostList(APIView):
         except Exception as e:
             return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
     
+class UserHomeFeed(APIView):
+    """
+    User home feed - comprising 1. User's post 2. User's friend post 3. User's interest based post.
+
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, user_id):
+        try:
+            friends_ids = UserFriend.objects.filter(user__id=user_id).values_list('friend__id', flat=True)
+            try:
+                userprofile = UserProfile.objects.get(user__id=user_id)
+            except UserProfile.DoesNotExist:
+                return Response({"status":"failed", "error":"Error fetching userprofile/interests for user.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+            interests_ids = userprofile.interests.all().values_list('id', flat=True)
+            home_feed_posts = Post.objects.filter(is_deleted=False).filter(Q(poster__id__in=friends_ids) | Q(interest__id__in=interests_ids) | Q(poster__id=user_id))
+            serializer = PostSerializer(home_feed_posts, many=True)
+            return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
 class PostViewSet(viewsets.ModelViewSet):
     """
     Post apis

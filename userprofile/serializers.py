@@ -32,13 +32,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
-    profession = serializers.SerializerMethodField()
+    user_profession = serializers.SerializerMethodField()
     interests = serializers.SerializerMethodField()
     profile_photo_small = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
         fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
-                      'skills', 'profession', 'interests', 'intro_video', 'phone', 'dob']
+                      'skills', 'profession', 'user_profession', 'interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description']
 
     def get_user_id(self, obj):
         user_id = obj.user.id
@@ -66,7 +66,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             skills_list.append(data)
         return skills_list
 
-    def get_profession(self, obj):
+    def get_user_profession(self, obj):
         profession = obj.profession
         data = {}
         if profession:
