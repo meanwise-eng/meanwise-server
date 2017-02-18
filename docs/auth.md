@@ -5,7 +5,7 @@ Official documentation for Meanwise - **[Authentication](https://github.com/mean
 #### 1. For normal registration - Django way
 * **Request URL:**
 
-	`POST` `/api/v4/custom_auth/user/register/` 
+    `POST` `/api/v4/custom_auth/user/register/` 
 
 
 * **Parameters:**
@@ -26,26 +26,34 @@ Username | String | ✓
  Profile Phtoto | Image | ✕
  Cover Photo | Image | ✕
  Bio | String | ✕
+ DOB | Date Field | ✕
+ Profile Story Title | String | ✕
+ Profile Story Description | String | ✕
  
 
 * **Logic:**
 
-	Handle Registering of user for normal django flow. Capture all user information at one go. For each user generate auth token and use the same to authorize further api calls.
-	
+    Handle Registering of user for normal django flow. Capture all user information at one go. For each user generate auth token and use the same to authorize further api calls.
+    
 * **Request:**
 
 ```javascript
-{	
-	"register":
+{   
+    "register":
     {
-    	"username": "testuser3@test.com", 		 
-    	"email": "testuser3@test.com",
-    	"password": "testpassthree",
-        "first_name": "testfname4", 
+        "username": "testuser11@test.com",
+        "email": "testuser11@test.com",
+        "password": "testpass123"
+        "first_name": "testfname11",
+        "last_name": "testlname11",
         "profession": 1,
         "skills": [1,2],
-        "interests": [1,2], 
-        "invite_code": "REALPEOPLE"
+        "interests": [1,2] -Finvite_code": "REALPEOPLE",
+        "dob": "2000-10-10",
+        "profile_story_title": "profile story title 11",
+        "profile_story_description": "profile story description 11",
+        "cover_photo": "./Pictures/6859429-beach-wallpaper.jpg",
+        "profile_photo": "./Pictures/6859429-beach-wallpaper.jpg"
     }
 }
 ```
@@ -55,9 +63,13 @@ Username | String | ✓
 
 ```javascript
 {
-	"userprofile": 10,
-    "auth_token": "e73e7c1e402c36a920907c239c7ccd0b324fe18a",
-    "user": 15
+    "error":"",
+    "results": {
+        "auth_token": "e1d54bcce09832b9216088f1603de66f6eae05f1",
+        "user": 37,
+        "userprofile": 34
+    },
+    "status":"success"
 }
 ```
 
@@ -66,7 +78,7 @@ Username | String | ✓
 #### 2. Facebook Signup
 * **Request URL:** 
 
-	`POST` `/api/v4/custom_auth/user/register/` 
+    `POST` `/api/v4/custom_auth/user/register/` 
 
 * **Parameters:**
 
@@ -90,16 +102,16 @@ Username | String | ✓
  
 
 * **Logic:**
-	
-	Handle Registering of user for facebook flow. Capture all user information at one go. For each user generate auth token and use the same to authorize further api calls.
+    
+    Handle Registering of user for facebook flow. Capture all user information at one go. For each user generate auth token and use the same to authorize further api calls.
     
 * **Request:** 
 
 ```javascript
 
 {
-	"register": {
-    	"username": "testuser8@test.com", 
+    "register": {
+        "username": "testuser8@test.com", 
         "email": "testuser8@test.com",
         "facebook_token": "fbtokeneight",
         "first_name": "testfname8", 
@@ -109,12 +121,12 @@ Username | String | ✓
     }
 }
 ```
-	
+    
 * **Response:**
 
 ```javascript
-{	
-	"auth_token": "63cd2dda1508e2bcfe15550b53930f7792598e84",
+{   
+    "auth_token": "63cd2dda1508e2bcfe15550b53930f7792598e84",
     "user": 13,
     "userprofile": 9
 }
@@ -126,7 +138,7 @@ Username | String | ✓
 
 * **Request URL:**
 
-	`POST` `/api/v4/custom_auth/api-token-auth/` 
+    `POST` `/api/v4/custom_auth/api-token-auth/` 
 
 * **Parameters:**
 
@@ -137,22 +149,22 @@ Password | String | ✓
 
 * **Logic:**
 
-	To retrieve user token given username and password.
+    To retrieve user token given username and password.
     
 * **Request:**
 
 ```javascript
 {
-	"username": "testuser5@test.com",
+    "username": "testuser5@test.com",
     "password": "testpassfive"
 }
 ```
-	
+    
 * **Response:**
 
 ```javascript
 {
-	"token": "93deff3e4c04e5f2ee1349035fd7637bb4df7aa0"
+    "token": "93deff3e4c04e5f2ee1349035fd7637bb4df7aa0"
 }
 ```
 
@@ -162,7 +174,7 @@ Password | String | ✓
 
 * **Request URL:** 
 
-	`POST` `/api/v4/custom_auth/user/verify/` 
+    `POST` `/api/v4/custom_auth/user/verify/` 
 
 * **Parameters:**
 
@@ -172,13 +184,13 @@ Email | String | ✓
 
 * **Logic:**
 
-	Checks if the email exists or not.
+    Checks if the email exists or not.
     
 * **Request:**
 
 ```javascript
 {
-	"email": "testuser5@test.com"
+    "email": "testuser5@test.com"
 }
 ```
 
@@ -186,6 +198,6 @@ Email | String | ✓
 
 ```json
 {
-	"exists": "true"
+    "exists": "true"
 }
 ```

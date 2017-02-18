@@ -5,7 +5,7 @@ Official documentation for Meanwise - **[Post](https://github.com/meanwise-eng/m
 #### 1. Post a 'Post':
 * **Request URL:**
 
-    `POST` `/api/v4/user/user_id/posts`
+    `POST` `/api/v4/user/<user_id>/posts`
     
 * **Parameters:**
 
@@ -68,7 +68,7 @@ Parameter | Type | Required Field |
 #### 2. List user's posts:
 * **Request URL:**
 
-    `GET` `/api/v4/user/user_id/posts/`
+    `GET` `/api/v4/user/<user_id>/posts/`
     
 * **Logic:** `Authentication Required`
 
@@ -129,7 +129,7 @@ Parameter | Type | Required Field |
 #### 3. Delete a post:
 * **Request URL:**
 
-    `DELETE` `/api/v4/user/user_id/posts/post_id/`
+    `DELETE` `/api/v4/user/<user_id>/posts/<post_id>/`
     
 * **Logic:** `Authentication Token Required`
     
@@ -150,7 +150,7 @@ Parameter | Type | Required Field |
 #### 4. Adding comment to a post:
 * **Request URL:**
 
-    `POST` `/api/v4/posts/post_id/comments/`
+    `POST` `/api/v4/posts/<post_id>/comments/`
 
 * **Parameters:**
 
@@ -200,7 +200,7 @@ post | Post object | ✕
 
 * **Request URL:**
 
-    `GET` `/api/v4/posts/post_id/comments/`
+    `GET` `/api/v4/posts/<post_id>/comments/`
     
 * **Logic:** `Authentication Required`
 
@@ -239,7 +239,7 @@ post | Post object | ✕
 
 * **Request URL:**
 
-    `DELETE` `/api/v4/posts/post_id/comments/comment_id/`
+    `DELETE` `/api/v4/posts/<post_id>/comments/<comment_id>/`
     
 * **Logic:** `Authentication Required`
 
@@ -289,7 +289,7 @@ post | Post object | ✕
 
 * **Request URL:**
 
-    `POST` `/api/v4/user/user_id/posts/post_id/like/`
+    `POST` `/api/v4/user/<user_id>/posts/<post_id>/like/`
     
 * **Logic:** `Authentication Required`
     
@@ -316,7 +316,7 @@ post | Post object | ✕
 
 * **Request URL:**
 
-    `POST` `/api/v4/user/user_id/posts/`
+    `POST` `/api/v4/user/<user_id>/posts/`
     
 * **Parameters:**
 
@@ -373,4 +373,249 @@ Parameter | Type | Required Field |
     },
     "status": "success"
 }
+```
+<br/>
+
+#### 10. Home Feed:
+* **Request URL:**
+
+	`GET` `/api/v4/user/<user_id>/home/feed/`
+	
+* **Logic** `Authentication Required`
+
+	List the user's home feed. Authorization token will be required in the request header while sending the request.
+
+* **Response** 
+
+```javascript
+{
+	"error": "",
+	"results": [
+		{
+			"id": 1,
+			"text": "test post one",
+			"user_id": 9,
+			"num_likes": 2,
+			"num_comments": 1,
+			"interest_id": 2,
+			"user_firstname": "fname2",
+			"user_lastname": "lname2",
+			"user_profile_photo": "/media/profile_photos/6859429-beach-wallpaper_HwW9VbE.jpg",
+			"user_cover_photo": "/media/cover_photos/luna-more-noch-lyudi-serfing_XmPS2Ta.jpg",
+			"user_profile_photo_small": "/media/profile_photos/6859429-beach-wallpaper_HwW9VbE.jpg..jpg",
+			"user_profession": {
+				"id": 1,
+				"name": "IT"
+			},
+			"image_url": "",
+			"video_url": "",
+			"video_thumb_url": "",
+			"resolution": null,
+			"liked_by": [10, 11],
+			"created_on": "2016-10-06T12: 39: 14.532570Z"
+		},
+		{
+			"id": 2,
+			"text": "text post dec22",
+			"user_id": 17,
+			"num_likes": 1,
+			"num_comments": 2,
+			"interest_id": 1,
+			"user_firstname": "testfname10",
+			"user_lastname": "",
+			"user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+			"user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
+			"user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg..jpg",
+			"user_profession": {},
+			"image_url": "",
+			"video_url": "",
+			"video_thumb_url": "",
+			"resolution": null,
+			"liked_by": [17],
+			"created_on": "2016-12-22T09: 11: 01.777737Z"
+		},
+		{
+			"id": 4,
+			"text": null,
+			"user_id": 17,
+			"num_likes": 0,
+			"num_comments": 0,
+			"interest_id": 1,
+			"user_firstname": "testfname10",
+			"user_lastname": "",
+			"user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+			"user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
+			"user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg..jpg",
+			"user_profession": {},
+			"image_url": "/media/post_images/IMG_20140310_195139094.jpg",
+			"video_url": "",
+			"video_thumb_url": "",
+			"resolution": {
+				"height": 1456,
+				"width": 2592
+			},
+			"liked_by": [],
+			"created_on": "2017-01-06T05: 06: 58.651977Z"
+		},
+		{
+			"id": 5,
+			"text": null,
+			"user_id": 17,
+			"num_likes": 0,
+			"num_comments": 0,
+			"interest_id": 1,
+			"user_firstname": "testfname10",
+			"user_lastname": "",
+			"user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+			"user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
+			"user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg..jpg",
+			"user_profession": {},
+			"image_url": "/media/post_images/IMG_20140310_195139094_7dJj2zz.jpg",
+			"video_url": "",
+			"video_thumb_url": "",
+			"resolution": {
+				"height": 1456,
+				"width": 2592
+			},
+			"liked_by": [],
+			"created_on": "2017-01-06T05: 10: 47.490990Z"
+		}
+	],
+	"status": "success"
+}
+
+```
+</br>
+
+#### 11. Friend's Post:
+* **Request URL**
+	
+	`GET` `/api/v4/user/<user_id>/friends/posts/`
+	
+* **Logic:** `Authentication Required`
+
+	List the post of a user's friends. Authorization token will be required while sending a request.
+	
+* **Response**
+
+```javascript
+{
+	"status": "success",
+	"results": [
+		{
+			"id": 1,
+			"text": "test post one",
+			"user_id": 9,
+			"num_likes": 2,
+			"num_comments": 1,
+			"interest_id": 2,
+			"user_firstname": "fname2",
+			"user_lastname": "lname2",
+			"user_profile_photo": "/media/profile_photos/6859429-beach-wallpaper_HwW9VbE.jpg",
+			"user_cover_photo":"/media/cover_photos/luna-more-noch-lyudi-serfing_XmPS2Ta.jpg",
+			"user_profile_photo_small": "/media/profile_photos/6859429-beach-wallpaper_HwW9VbE.jpg..jpg",
+			"user_profession": {
+				"name": "IT",
+				"id":1
+			},
+			"image_url": "",
+			"video_url": "",
+			"video_thumb_url": "",
+			"resolution": null,
+			"liked_by": [10,11],
+			"created_on": "2016-10-06T12:39:14.532570Z"
+		}
+	],
+	"error": ""
+}
+```
+</br>
+
+#### 12. User's Interest based post:
+
+* **Request URL**
+
+	`GET` `/api/v4/user/<user_id>/interests/posts/`
+	
+* **Logic** `Authentication Required`
+
+	List user's interest posts. Authorization token will be required for this request.
+	
+* **Response**
+
+```javascript
+{
+    "results": [
+        {
+            "id": 5,
+            "text": null,
+            "user_id": 17,
+            "num_likes": 0,
+            "num_comments": 0,
+            "interest_id": 1,
+            "user_firstname": "testfname10",
+            "user_lastname": "",
+            "user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+            "user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
+            "user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg.jpg",
+            "user_profession": {},
+            "image_url": "/media/post_images/IMG_20140310_195139094_7dJj2zz.jpg",
+            "video_url": "",
+            "video_thumb_url": "",
+            "resolution": {
+                "width": 2592,
+                "height": 1456
+            },
+            "liked_by": [],
+            "created_on": "2017-01-06T05: 10: 47.490990Z"
+        },
+        {
+            "id": 4,
+            "text": null,
+            "user_id": 17,
+            "num_likes": 0,
+            "num_comments": 0,
+            "interest_id": 1,
+            "user_firstname": "testfname10",
+            "user_lastname": "",
+            "user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+            "user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
+            "user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi
+            -serfing_H81m58R.jpg..jpg",
+            "user_profession": {},
+            "image_url": "/media/post_images/IMG_20140310_195139094.jpg",
+            "video_url": "",
+            "video_thumb_url": "",
+            "resolution": {
+                "width": 2592,
+                "height": 1456},
+            "liked_by": [],
+            "created_on": "2017-01-06T05: 06: 58.651977Z"
+        },
+        {
+            "id": 2,
+            "text": "text post dec22",
+            "user_id": 17,
+            "num_likes": 1,
+            "num_comments": 2,
+            "interest_id": 1,
+            "user_firstname": "testfname10",
+            "user_lastname": "",
+            "user_pro
+            file_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+            "user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
+            "user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+            "user_profession": {},
+            "image_url": "",
+            "video_url": "",
+            "video_thumb_url": "",
+            "resolution": null,
+            "liked_by": [17],
+            "created_on": "2016-12-22T09: 11: 01.777737Z"
+        }
+    ],
+    "status": "success",
+    "error": ""
+}
+
 ```
