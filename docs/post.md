@@ -93,9 +93,9 @@ Parameter | Type | Required Field |
             "user_cover_photo": "/media/cover_photos/lunamore-noch-lyudi-serfing_XmPS2Ta.jpg",
             "user_profile_photo_small": "/media/profile_photos/6859429beach-wallpaper_HwW9VbE.jpg..jpg",
             "user_profession": {
-                    "id": 1,
-                    "name": "IT"
-                },
+                "id": 1,
+                "name": "IT"
+            },
             "image_url": "",
             "video_url": "",
             "video_thumb_url": "",
@@ -557,7 +557,7 @@ Parameter | Type | Required Field |
             "user_lastname": "",
             "user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
             "user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
-            "user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg.jpg",
+            "user_profile_photo_small": "/media/profile_photo/luna-more-noch-lyudi-serfing_H81m58R.jpg.jpg",
             "user_profession": {},
             "image_url": "/media/post_images/IMG_20140310_195139094_7dJj2zz.jpg",
             "video_url": "",
@@ -580,8 +580,7 @@ Parameter | Type | Required Field |
             "user_lastname": "",
             "user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
             "user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
-            "user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi
-            -serfing_H81m58R.jpg..jpg",
+            "user_profile_photo_small": "/media/profile_photos/luna-more-noch-serfing_H81m58R.jpg..jpg",
             "user_profession": {},
             "image_url": "/media/post_images/IMG_20140310_195139094.jpg",
             "video_url": "",
@@ -601,8 +600,7 @@ Parameter | Type | Required Field |
             "interest_id": 1,
             "user_firstname": "testfname10",
             "user_lastname": "",
-            "user_pro
-            file_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
+            "user_profile_photo": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
             "user_cover_photo": "/media/cover_photos/6859429-beach-wallpaper_UrUDeN4.jpg",
             "user_profile_photo_small": "/media/profile_photos/luna-more-noch-lyudi-serfing_H81m58R.jpg",
             "user_profession": {},

@@ -48,7 +48,8 @@ Username | String | ✓
         "last_name": "testlname11",
         "profession": 1,
         "skills": [1,2],
-        "interests": [1,2] -Finvite_code": "REALPEOPLE",
+        "interests": [1,2],
+        "invite_code": "REALPEOPLE",
         "dob": "2000-10-10",
         "profile_story_title": "profile story title 11",
         "profile_story_description": "profile story description 11",
@@ -63,13 +64,13 @@ Username | String | ✓
 
 ```javascript
 {
-    "error":"",
+    "error": "",
     "results": {
         "auth_token": "e1d54bcce09832b9216088f1603de66f6eae05f1",
         "user": 37,
         "userprofile": 34
     },
-    "status":"success"
+    "status": "success"
 }
 ```
 
@@ -196,8 +197,49 @@ Email | String | ✓
 
 * **Response:**
 
-```json
+```javascript
 {
     "exists": "true"
 }
+```
+</br>
+
+#### 5. Fetch token and user id using email and password
+
+* **Request URL:**
+
+	`POST` `/api/v4/custom_auth/fetch/token/`
+	
+* **Paramenters:**
+
+Parameter | Type | Required Field 
+:------------: | :-------------: | :------------: 
+Email | String | ✓ 
+Password | String | ✓
+
+* **Logic:**
+
+	Fetches a User's token and user id using their email id and password.
+	
+* **Request:**
+
+```javascript
+{
+    "email": "testuser8@test.com",
+    "password": "P@ssword123!"
+}
+```
+
+* **Response:**
+
+```javascript
+{
+    "status": "success",
+    "result": {
+        "user_id": 13,
+        "token": "63cd2dda1508e2bcfe15550b53930f7792598e84"
+    },
+    "error": ""
+}
+
 ```
