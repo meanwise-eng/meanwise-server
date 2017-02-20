@@ -314,7 +314,8 @@ Username | String
 	"bio": "test bio 11", 
 	"professphone": "+11234567891", 
 	"dob": "1980-10-30", 
-	"cover_photo": "/Pictures/mobile/IMG_20140310_195139094.jpg"ion": 1, 
+	"cover_photo": "/Pictures/mobile/IMG_20140310_195139094.jpg"
+	"profession": 1, 
 	"city": "bangalore", 
 	"first_name": "newfnameagain", 
 	"last_name": "newlnameagain"
