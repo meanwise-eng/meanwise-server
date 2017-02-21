@@ -27,7 +27,7 @@ class RegisterUserSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=128)
     middle_name = serializers.CharField(required=False)
     last_name = serializers.CharField(max_length=128, required=False)
-    profession = serializers.IntegerField(source='Profession')
+    profession = serializers.IntegerField(source='Profession', required=False)
     city = serializers.CharField(max_length=128, required=False)
     skills = serializers.ListField()
     interests = serializers.ListField()
@@ -82,8 +82,9 @@ class RegisterUserSerializer(serializers.Serializer):
                 errors['password'] = list(e.messages)
             if errors:
                 raise serializers.ValidationError(errors)
-            user = User.objects.create(username=username,
-                                       password=password, email=email)
+            user = User.objects.create(username=username, email=email)
+            user.set_password(password)
+            user.save()
         elif self.validated_data.get('facebook_token', None):
             user = User.objects.create(username=username,
                                        email=email)

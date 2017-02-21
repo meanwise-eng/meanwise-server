@@ -35,10 +35,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user_profession = serializers.SerializerMethodField()
     interests = serializers.SerializerMethodField()
     profile_photo_small = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
         fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
-                      'skills', 'profession', 'user_profession', 'interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description']
+                      'skills', 'profession', 'user_profession', 'interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city']
 
     def get_user_id(self, obj):
         user_id = obj.user.id
@@ -47,6 +48,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_email(self, obj):
         email = obj.user.email
         return email
+
+    def get_username(self, obj):
+        username = obj.user.username
+        return username
 
     def get_profile_photo_small(self, obj):
         small = {'size': (48, 48), 'crop': True}
