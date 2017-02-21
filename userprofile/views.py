@@ -3,7 +3,9 @@ from django.conf import settings
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core import exceptions
 
+import django.contrib.auth.password_validation as validators
 
 import logging
 
@@ -364,6 +366,45 @@ class RemoveFriend(APIView):
         
         logger.info("Friendslist - POST - Finished [API / views.py /")
         return Response({"status":"success", "error":"", "results":"successfully removed friend"}, status=status.HTTP_201_CREATED)
+
+class ChangePasswordView(APIView):
+    """
+    An endpoint for changing password.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    serializer_class = ChangePasswordSerializer
+    model = UserProfile
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"status":"failed", "error":"User not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        return user
+
+    def post(self, request, user_id):
+        self.object = self.get_object(user_id)
+        serializer = ChangePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"status":"failed", "error":"Wrong old password", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+            #check new password
+            errors = dict()
+            try:
+                validators.validate_password(password=serializer.data.get("new_password"), user=User)
+            except exceptions.ValidationError as e:
+                errors['password'] = list(e.messages)
+            if errors:
+                return Response({"status":"failed", "error":errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            return Response({"status":"success", "error":"", "results":"successfully changes password"}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
 class UserProfileHSSerializer(HaystackSerializer):

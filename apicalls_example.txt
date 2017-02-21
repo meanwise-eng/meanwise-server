@@ -419,3 +419,20 @@ ia/post_images/IMG_20140310_195139094_7dJj2zz.jpg","video_url":"","video_thumb_u
 success"}
 
 ----------------------------------------------------------------------------------
+user change password
+
+aj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/user/41/change/password/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"old_password":"testpass321", "new_password":"testpass123"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 200 OK
+Date: Tue, 21 Feb 2017 07:00:54 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+Allow: POST, OPTIONS
+Vary: Accept
+X-Frame-Options: SAMEORIGIN
+
+100   133    0    73  100    60    600    493 --:--:-- --:--:-- --:--:--   603
+{"results":"successfully changes password","status":"success","error":""}
+
+-------------------------------------

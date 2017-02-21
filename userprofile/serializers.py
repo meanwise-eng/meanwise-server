@@ -92,3 +92,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 }
             interests_list.append(data)
         return interests_list
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer for password change endpoint.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
