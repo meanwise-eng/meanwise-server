@@ -108,13 +108,13 @@ class UserHomeFeed(APIView):
 
     def get(self, request, user_id):
         try:
-            friends_ids = UserFriend.objects.filter(user__id=user_id).values_list('friend__id', flat=True).order_by('-created_on')
+            friends_ids = UserFriend.objects.filter(user__id=user_id).values_list('friend__id', flat=True)
             try:
                 userprofile = UserProfile.objects.get(user__id=user_id)
             except UserProfile.DoesNotExist:
                 return Response({"status":"failed", "error":"Error fetching userprofile/interests for user.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
             interests_ids = userprofile.interests.all().values_list('id', flat=True)
-            home_feed_posts = Post.objects.filter(is_deleted=False).filter(Q(poster__id__in=friends_ids) | Q(interest__id__in=interests_ids) | Q(poster__id=user_id))
+            home_feed_posts = Post.objects.filter(is_deleted=False).filter(Q(poster__id__in=friends_ids) | Q(interest__id__in=interests_ids) | Q(poster__id=user_id)).order_by('-created_on')
             serializer = PostSerializer(home_feed_posts, many=True)
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
