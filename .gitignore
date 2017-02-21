@@ -6,3 +6,5 @@ whoosh_index/
 geodata/
 squelo_backend/uwsgi.dev.ini
 .DS_STORE
+migrations/
+
