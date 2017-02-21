@@ -108,7 +108,7 @@ class UserHomeFeed(APIView):
 
     def get(self, request, user_id):
         try:
-            friends_ids = UserFriend.objects.filter(user__id=user_id).values_list('friend__id', flat=True)
+            friends_ids = UserFriend.objects.filter(user__id=user_id).values_list('friend__id', flat=True).order_by('-created_on')
             try:
                 userprofile = UserProfile.objects.get(user__id=user_id)
             except UserProfile.DoesNotExist:
