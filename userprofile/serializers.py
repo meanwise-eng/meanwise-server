@@ -3,6 +3,7 @@ from taggit_serializer.serializers import TagListSerializerField, TaggitSerializ
 from easy_thumbnails.files import get_thumbnailer
 
 from userprofile.models import Profession, Skill, Interest, UserProfile
+from django.contrib.auth.models import User
 
 class ProfessionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +29,7 @@ class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
             return photo_url
         return ""
 
+    
 class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
@@ -93,6 +95,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             interests_list.append(data)
         return interests_list
 
+class UserSerializer(serializers.ModelSerializer):
+    userprofile = UserProfileSerializer(read_only=True)
+    class Meta:
+        model = User
+        fields = ('id', 'userprofile')
+
+class UserFriendSerializer(serializers.ModelSerializer):
+    friend = UserSerializer(read_only=True)
+    class Meta:
+        model = User
+        fields = ('id', 'friend')
+        
 class ChangePasswordSerializer(serializers.Serializer):
     """
     Serializer for password change endpoint.

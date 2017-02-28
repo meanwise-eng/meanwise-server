@@ -18,6 +18,7 @@ from drf_haystack.viewsets import HaystackViewSet
 from post.models import Post, Comment, Share
 from post.serializers import *
 from userprofile.models import UserFriend
+from mnotifications.models import Notification
 
 from post.search_indexes import PostIndex
 
@@ -157,6 +158,8 @@ class UserPostLike(APIView):
         post = self.get_object(post_id)
         user = User.objects.get(id=user_id)
         post.liked_by.add(user)
+        #Add notification
+        notification = Notification.objects.create(receiver=post.poster, notification_type='LP',  post=post, post_liked_by=user)
         return Response({"status":"success", "error":"", "results":"Succesfully liked."}, status=status.HTTP_202_ACCEPTED)
 
 class UserPostUnLike(APIView):
@@ -199,7 +202,9 @@ class PostCommentList(APIView):
         data['post'] = post_id
         serializer = CommentSaveSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            comment = serializer.save()
+            #Add notification
+            notification = Notification.objects.create(receiver=comment.post.poster, notification_type='CP',  post=comment.post, comment=comment)
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 

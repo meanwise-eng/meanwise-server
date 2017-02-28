@@ -24,6 +24,7 @@ from drf_haystack.viewsets import HaystackViewSet
 
 from userprofile.models import Profession, Skill, Interest, UserProfile, UserFriend
 from userprofile.serializers import *
+from mnotifications.models import Notification
 
 from userprofile.search_indexes import UserProfileIndex
 
@@ -279,6 +280,8 @@ class FriendsList(APIView):
         if friend_status.lower() == "pending":
             if not uf:
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
+                #Add notification
+                notification = Notification.objects.create(receiver=user, notification_type='FR',  user_friend=uf)
                 logger.info("Friendslist - POST - Finished [API / views.py /")
                 return Response({"status":"success", "error":"", "results":"successfully added friend request"}, status=status.HTTP_201_CREATED)
             else:
@@ -306,6 +309,8 @@ class FriendsList(APIView):
                 elif uf.status.lower() == 'pe':
                     uf.status = 'AC'
                     uf.save()
+                    #Add notification
+                    notification = Notification.objects.create(receiver=user, notification_type='FA',  user_friend=uf)
                     logger.info("Friendslist - POST - Finished [API / views.py /")
                     return Response({"status":"success", "error":"", "results":"Successfully accepted."}, status=status.HTTP_201_CREATED)
         elif friend_status.lower() == 'rejected':
