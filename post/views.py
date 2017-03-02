@@ -250,15 +250,14 @@ class ShareViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     fields = ('id', 'post', 'messag', 'shared_by', 'recepients', 'created_on', 'modified_on')
 
-
-
 class PostHSerializer(HaystackSerializer):
+    user_id = serializers.SerializerMethodField()
     class Meta:
         index_classes = [PostIndex]
         fields = [
-            "text", "post_text", "id", "interest_name"
+            "text",
         ]
 
 class PostSearchView(HaystackViewSet):
     index_models = [Post]
-    serializer_class = PostHSerializer
+    serializer_class = PostSearchSerializer

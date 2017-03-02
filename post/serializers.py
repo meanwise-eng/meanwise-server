@@ -6,6 +6,8 @@ from easy_thumbnails.files import get_thumbnailer
 from userprofile.models import UserProfile
 from post.models import Post, Comment, Share
 
+from drf_haystack.serializers import HaystackSerializerMixin
+
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     #tags = TagListSerializerField()
     user_id = serializers.SerializerMethodField()
@@ -223,5 +225,9 @@ class ShareSerializer(serializers.ModelSerializer):
     class Meta:
         model = Share
 
+class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
+    class Meta(PostSerializer.Meta):
+        search_fields = ("text", "interest_name", "post_text")
 
 
+        
