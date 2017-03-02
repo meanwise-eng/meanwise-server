@@ -2,6 +2,8 @@ from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 from easy_thumbnails.files import get_thumbnailer
 
+from drf_haystack.serializers import HaystackSerializerMixin
+
 from userprofile.models import Profession, Skill, Interest, UserProfile
 from django.contrib.auth.models import User
 
@@ -113,3 +115,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     """
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
+class UserProfileSearchSerializer(HaystackSerializerMixin, UserProfileSerializer):
+    class Meta(UserProfileSerializer.Meta):
+        search_fields = ("text", "id", "first_name", "last_name", "username", "skills_text")

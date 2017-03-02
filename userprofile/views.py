@@ -421,4 +421,4 @@ class UserProfileHSSerializer(HaystackSerializer):
 
 class UserProfileSearchView(HaystackViewSet):
     index_models = [UserProfile]
-    serializer_class = UserProfileHSSerializer
+    serializer_class = UserProfileSearchSerializer
