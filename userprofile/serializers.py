@@ -4,7 +4,7 @@ from easy_thumbnails.files import get_thumbnailer
 
 from drf_haystack.serializers import HaystackSerializerMixin
 
-from userprofile.models import Profession, Skill, Interest, UserProfile
+from userprofile.models import *
 from django.contrib.auth.models import User
 
 class ProfessionSerializer(serializers.ModelSerializer):
@@ -30,7 +30,6 @@ class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
             photo_url = obj.cover_photo.url
             return photo_url
         return ""
-
     
 class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
@@ -40,10 +39,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
     interests = serializers.SerializerMethodField()
     profile_photo_small = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
+    user_friends = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
         fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
-                      'skills', 'profession', 'user_profession', 'interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city']
+                      'skills', 'profession', 'user_profession', 'interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
+                      'user_friends']
 
     def get_user_id(self, obj):
         user_id = obj.user.id
@@ -96,6 +97,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 }
             interests_list.append(data)
         return interests_list
+
+    def get_user_friends(self, obj):
+        ufs = UserFriend.objects.filter(user=obj.user)
+        ufs_list = []
+        for uf in ufs:
+            data ={
+                'friend_id':uf.friend.id,
+                'friend_name': uf.friend.username,
+                'friend_email': uf.friend.email,
+                'status':uf.get_status_display()
+                }
+            ufs_list.append(data)
+        return ufs_list
 
 class UserSerializer(serializers.ModelSerializer):
     userprofile = UserProfileSerializer(read_only=True)

@@ -120,7 +120,7 @@ FRIEND_STATUS = (
 class UserFriend(models.Model):
     user = models.ForeignKey(User, related_name='user')
     friend = models.ForeignKey(User, related_name='friend')
-    status = models.CharField(max_length=2, default="PE")
+    status = models.CharField(max_length=2, choices=FRIEND_STATUS, default="PE")
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
     class Meta:
