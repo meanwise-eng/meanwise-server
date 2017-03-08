@@ -36,14 +36,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
     email = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
-    interests = serializers.SerializerMethodField()
+    user_interests = serializers.SerializerMethodField()
     profile_photo_small = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     user_friends = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
         fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
-                      'skills', 'profession', 'user_profession', 'interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
+                      'skills', 'profession', 'user_profession', 'interests', 'user_interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
                       'user_friends']
 
     def get_user_id(self, obj):
@@ -87,7 +87,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return data
 
 
-    def get_interests(self, obj):
+    def get_user_interests(self, obj):
         interests = obj.interests.all()
         interests_list = []
         for interest in interests:
