@@ -227,7 +227,7 @@ class ShareSerializer(serializers.ModelSerializer):
 
 class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
     class Meta(PostSerializer.Meta):
-        search_fields = ("text", "interest_name", "post_text")
+        search_fields = ("text", "interest_name", "post_text", "created_on")
 
 
         

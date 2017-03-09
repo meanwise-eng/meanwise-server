@@ -261,3 +261,7 @@ class PostHSerializer(HaystackSerializer):
 class PostSearchView(HaystackViewSet):
     index_models = [Post]
     serializer_class = PostSearchSerializer
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super(PostSearchView, self).filter_queryset(self.get_queryset())
+        return queryset.order_by('-created_on')

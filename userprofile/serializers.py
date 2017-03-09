@@ -132,4 +132,4 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class UserProfileSearchSerializer(HaystackSerializerMixin, UserProfileSerializer):
     class Meta(UserProfileSerializer.Meta):
-        search_fields = ("text", "id", "first_name", "last_name", "username", "skills_text")
+        search_fields = ("text", "id", "first_name", "last_name", "username", "skills_text", 'created_on')

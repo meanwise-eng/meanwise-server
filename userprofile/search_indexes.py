@@ -10,6 +10,7 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     last_name = indexes.CharField(model_attr="last_name")
     username = indexes.CharField(model_attr='username')
     skills_text = indexes.MultiValueField()
+    created_on = indexes.DateTimeField(model_attr='created_on')
     #autocomplete = indexes.EdgeNgramField()
 
     #@staticmethod
