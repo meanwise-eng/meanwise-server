@@ -6,7 +6,7 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
 
     text = indexes.CharField(document=True, use_template=False)
     post_text = indexes.CharField(model_attr="text", null=True)
-    id = indexes.CharField(model_attr="id")
+    post_id = indexes.CharField(model_attr="id")
     interest_name = indexes.CharField()
     created_on = indexes.DateTimeField(model_attr='created_on')
     #interest = 

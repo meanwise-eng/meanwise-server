@@ -5,7 +5,7 @@ from userprofile.models import UserProfile
 class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
 
     text = indexes.CharField(document=True, use_template=False)
-    id = indexes.CharField(model_attr="id")
+    userprofile_id = indexes.CharField(model_attr="id")
     first_name = indexes.CharField(model_attr="first_name")
     last_name = indexes.CharField(model_attr="last_name")
     username = indexes.CharField(model_attr='username')
