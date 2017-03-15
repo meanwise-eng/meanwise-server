@@ -436,3 +436,42 @@ X-Frame-Options: SAMEORIGIN
 {"results":"successfully changes password","status":"success","error":""}
 
 -------------------------------------
+
+posting with tags
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/user/17/posts/ --dump-header - -H "Content-Type: multipart/form-data" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST -F interest=1 -F image="@/home/raj/Pictures/mobile/IMG_20140310_195139094.jpg" -F tags='["ttag1", "ttag2"]' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 1149k    0     0  100 1149k      0  1070k  0:00:01  0:00:01 --:--:-- 1070kHTTP/1.0 201 Created
+Date: Wed, 15 Mar 2017 05:06:06 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+X-Frame-Options: SAMEORIGIN
+Vary: Accept
+Allow: GET, POST, HEAD, OPTIONS
+Content-Type: application/json
+
+100 1150k    0   383  100 1149k    356  1070k  0:00:01  0:00:01 --:--:-- 1069k
+{"status":"success","error":"","results":{"id":9,"tags":["ttag1","ttag2"],"image":"/media/post_images/IMG_20140310_195139094_iAcrdFy.jpg","video":null,"text":null,"is_deleted":false,"video_height":n
+ull,"video_width":null,"video_thumbnail":null,"created_on":"2017-03-15T05:06:06.736868Z","modified_on":"2017-03-15T05:06:06.736932Z","interest":1,"poster":17,"topics":[],"liked_by":[]}}
+
+---------------------------------------------------------------------------------------------------------
+
+post with topics example
+
+curl -X POST http://127.0.0.1:8000/api/v4/user/17/posts/ --dump-header - -H "Content-Type: multipart/form-data" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST -F interest=1 -F image="@/home/raj/Pictures/mobile/IMG_20140310_195139094.jpg" -F tags='["ttag1", "ttag3"]' -F  topic_names="testtopic1,testtopic2"| more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0 1149k    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0HTTP/1.0 201 Created
+Date: Wed, 15 Mar 2017 05:50:48 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Allow: GET, POST, HEAD, OPTIONS
+Vary: Accept
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+
+100 1150k    0   409  100 1149k    368  1036k  0:00:01  0:00:01 --:--:-- 1037k
+{"status":"success","results":{"id":25,"tags":["ttag1","ttag3"],"topics":["testtopic1","testtopic2"],"image":"/media/post_images/IMG_20140310_195139094_HcyDIT6.jpg","video":null,"text":null,"is_dele
+ted":false,"video_height":null,"video_width":null,"video_thumbnail":null,"created_on":"2017-03-15T05:50:48.165265Z","modified_on":"2017-03-15T05:50:48.165329Z","interest":1,"poster":17,"liked_by":[]
+},"error":""}
+
+----------------------------------------------------------------------------------------------------

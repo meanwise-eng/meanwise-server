@@ -13,6 +13,14 @@ from django.core.files import File
 
 from userprofile.models import Interest
 
+class Topic(models.Model):
+    text = models.CharField(max_length=128, unique=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return "Topic id: " + str(self.id)  + " text: " + str(self.text)
+
 class Post(models.Model):
     interest = models.ForeignKey(Interest, db_index=True)
     image = models.ImageField(upload_to='post_images', null=True, blank=True)
@@ -20,6 +28,7 @@ class Post(models.Model):
     text = models.CharField(max_length=200, null=True, blank=True)
     poster = models.ForeignKey(User, related_name='poster')
     tags = TaggableManager()
+    topics = models.ManyToManyField(Topic, blank=True)
     liked_by = models.ManyToManyField(User, related_name='liked_by', blank=True)
     is_deleted = models.BooleanField(default=False)
     video_height = models.IntegerField(null=True, blank=True)
@@ -63,3 +72,4 @@ class Share(models.Model):
     
     def __str__(self):
         return "Share id: " + str(self.id)  + " post: " + str(self.post)
+

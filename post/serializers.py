@@ -9,7 +9,7 @@ from post.models import Post, Comment, Share
 from drf_haystack.serializers import HaystackSerializerMixin
 
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
-    #tags = TagListSerializerField()
+    tags = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
     num_likes = serializers.SerializerMethodField()
     num_comments = serializers.SerializerMethodField()
@@ -25,12 +25,13 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     resolution = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
+    topics = serializers.SerializerMethodField()
     
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession',
-                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on')
+                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -100,6 +101,12 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_num_likes(self, obj):
         return obj.liked_by.all().count()
 
+    def get_topics(self, obj):
+        return obj.topics.all().values_list('text',flat=True)
+
+    def get_tags(self, obj):
+        return obj.tags.all().values_list('name',flat=True)
+
     def get_num_comments(self, obj):
         return Comment.objects.filter(post=obj).count()
 
@@ -140,8 +147,14 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return {'height':320, 'width':240}
 
 class PostSaveSerializer(serializers.ModelSerializer):
+    tags = TagListSerializerField()
+    topics = serializers.SerializerMethodField()
+    topic_names = serializers.CharField(required=False, max_length=100, allow_blank=True)
     class Meta:
         model = Post
+
+    def get_topics(self, obj):
+        return obj.topics.all().values_list('text',flat=True)
 
 class CommentSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
@@ -227,7 +240,7 @@ class ShareSerializer(serializers.ModelSerializer):
 
 class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
     class Meta(PostSerializer.Meta):
-        search_fields = ("text", "interest_name", "post_text", "created_on", "post_id")
+        search_fields = ("text", "interest_name", "post_text", "created_on", "post_id", "topic_texts", "tag_names")
 
 
         

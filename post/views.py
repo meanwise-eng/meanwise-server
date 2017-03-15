@@ -15,7 +15,7 @@ from rest_framework import authentication, permissions
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
 
-from post.models import Post, Comment, Share
+from post.models import Post, Comment, Share, Topic
 from post.serializers import *
 from userprofile.models import UserFriend
 from mnotifications.models import Notification
@@ -39,7 +39,23 @@ class UserPostList(APIView):
         request.data['poster'] = user_id
         serializer = PostSaveSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            #handle topics
+            if serializer.validated_data['topic_names']:
+                topic_names = serializer.validated_data.pop('topic_names')
+            if serializer.validated_data['tags']:
+                ts = serializer.validated_data.pop('tags')
+            post = serializer.save()
+            topic_names = topic_names.split(",")
+            for topic in topic_names:
+                try:
+                    t = Topic.objects.get(text=topic)
+                except Topic.DoesNotExist:
+                    t = Topic.objects.create(text=topic)
+                post.topics.add(t)
+            #handle tags
+            for t in ts:
+                post.tags.add(t)
+
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 

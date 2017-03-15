@@ -9,6 +9,8 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
     post_id = indexes.CharField(model_attr="id")
     interest_name = indexes.CharField()
     created_on = indexes.DateTimeField(model_attr='created_on')
+    tag_names =  indexes.MultiValueField()
+    topic_texts =  indexes.MultiValueField()
     #interest = 
 
     #autocomplete = indexes.EdgeNgramField()
@@ -29,4 +31,10 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_interest_name(self, obj):
         return obj.interest.name
+
+    def prepare_topic_texts(self, obj):
+        return  [topic.text for topic in obj.topics.all()]
+
+    def prepare_tag_names(self, obj):
+        return  [tag.name for tag in obj.tags.all()]
 
