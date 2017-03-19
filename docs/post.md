@@ -617,3 +617,148 @@ Parameter | Type | Required Field |
 }
 
 ```
+</br>
+
+#### 13. Posting with tags
+
+* **Request URL:**
+	
+	`POST` `/api/v4/user/<user_id>/posts/`
+	
+* **Parameters Required:**
+
+Parameter | Type | Required Field | 
+:------------: | :-------------: | :------------: | 
+ interest | Interest Object | ✓ 
+ image | Image | ✕
+ video | File | ✕
+ text | String | ✕
+ poster | User object | ✓
+ tags | Hashtags | ✕
+ liked_by | User's object | ✕
+ video_height | Integer | ✕
+ video_width | Integer | ✕
+ video_thumbnail | Image | ✕
+ created_on | Datetime | auto
+ modified_on | Datetime | auto
+ 
+* **Logic** `Authetication Required`
+
+	Let's a user to post a story with tags.
+	
+* **Request:**
+
+```javascript
+{
+	interest: 1,
+	image: "/Pictures/mobile/IMG_20140310_195139094.jpg",
+	tags: [
+		"ttag1",
+		"ttag2"
+	]  
+}
+```
+
+* **Response:**
+
+```javascript
+{
+	"status": "success",
+	"error": "",
+	"results": {
+	    "id": 9,
+	    "tags": [
+	        "ttag1",
+	        "ttag2"
+	    ],
+	    "image": "/media/post_images/IMG_20140310_195139094_iAcrdFy.jpg",
+	    "video": null,
+	    "text": null,
+	    "is_deleted": false,
+	    "video_height": null,
+	    "video_width": null,
+	    "video_thumbnail": null,
+	    "created_on": "2017-03-15T05:06:06.736868Z",
+	    "modified_on": "2017-03-15T05:06:06.736932Z",
+	    "interest": 1,
+	    "poster": 17,
+	    "topics": [],
+	    "liked_by": []
+	}
+}
+```
+</br>
+
+#### 14. Post with topic 
+
+* **Request URL:**
+	
+	`POST` `/api/v4/user/<user_id>/posts/`
+	
+* **Parameters Required:**
+
+Parameter | Type | Required Field | 
+:------------: | :-------------: | :------------: | 
+ interest | Interest Object | ✓ 
+ image | Image | ✕
+ video | File | ✕
+ text | String | ✕
+ poster | User object | ✓
+ tags | Hashtags | ✕
+ liked_by | User's object | ✕
+ video_height | Integer | ✕
+ video_width | Integer | ✕
+ video_thumbnail | Image | ✕
+ created_on | Datetime | auto
+ modified_on | Datetime | auto
+ 
+* **Logic:** `Authetication Required`
+
+	Let's a user to post a story with topics.
+	
+* **Request:**
+
+```javascript
+{
+	interest: 1,
+	image: "/Pictures/mobile/IMG_20140310_195139094.jpg",
+	tags: [
+	    "ttag1",
+	    "ttag3"
+	],
+	topic_names: "testtopic1,testtopic2"
+}
+```
+* **Response:**
+
+```javascript
+{
+	"status": "success",
+	"results": { 
+	    "id": 25,
+	    "tags": [
+	        "ttag1",
+	        "ttag3"
+	    ],
+	    "topics": [
+	        "testtopic1",
+	        "testtopic2"
+	    ],
+	    "image": "/media/post_images/IMG_20140310_195139094_HcyDIT6.jpg",
+	    "video": null,
+	    "text": null,
+	    "is_deleted": false,
+	    "video_height": null,
+	    "video_width": null,
+	    "video_thumbnail": null,
+	    "created_on": "2017-03-15T05:50:48.165265Z",
+	    "modified_on": "2017-03-15T05:50:48.165329Z",
+	    "interest": 1,
+	    "poster": 17,
+	    "liked_by": []
+	    },
+	"error": ""
+}
+```
+
+	
