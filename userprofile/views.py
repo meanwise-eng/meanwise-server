@@ -259,6 +259,11 @@ class FriendsList(APIView):
         friend_id = request.data.get('friend_id', None)
         friend_status = request.data.get('status', 'pending')
 
+        #check if request for self, if so raise error
+        if friend_id:
+            if int(friend_id) == int(user_id):
+                return Response({"status":"failed","error":"Can't send friend request for self","results":""}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             friend_user = User.objects.get(id=int(friend_id))
         except User.DoesNotExist:
