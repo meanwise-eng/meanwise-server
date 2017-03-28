@@ -251,7 +251,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     Comment apis
 
     """
-    queryset = Comment.objects.all().order_by('-created_on')
+    queryset = Comment.objects.all().order_by('-created_on').filter(is_deleted=False)
     serializer_class = CommentSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)

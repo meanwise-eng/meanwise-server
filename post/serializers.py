@@ -108,7 +108,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.tags.all().values_list('name',flat=True)
 
     def get_num_comments(self, obj):
-        return Comment.objects.filter(post=obj).count()
+        return Comment.objects.filter(post=obj).filter(is_deleted=False).count()
 
     def get_liked_by(self, obj):
         liked_by = []
