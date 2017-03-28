@@ -52,7 +52,7 @@ class UserNotificationsLatest(APIView):
 
     def get(self, request, user_id):
         latest_timestamp = datetime.datetime.now() - datetime.timedelta(hours=24)
-        notifications = Notification.objects.filter(created_on__gte=latest_timestamp).order_by('-created_on')
+        notifications = Notification.objects.filter(created_on__gte=latest_timestamp).filter(receiver__id=user_id).order_by('-created_on')
         serializer = NotificationSerializer(notifications, many=True)
         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
