@@ -115,14 +115,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         rufs_list = []
         for ruf in rufs:
             data ={
-                'friend_receiver_id':uf.user.id,
-                'friend_receiver_email':uf.user.email,
-                'friend_sender_id':uf.friend.id,
-                'friend_sender_name': uf.friend.username,
-                'friend_sender_email': uf.friend.email,
-                'status':uf.get_status_display()
+                'friend_receiver_id':ruf.user.id,
+                'friend_receiver_email':ruf.user.email,
+                'friend_sender_id':ruf.friend.id,
+                'friend_sender_name': ruf.friend.username,
+                'friend_sender_email': ruf.friend.email,
+                'status':ruf.get_status_display()
                 }
-            ufs_list.append(data)
+            rufs_list.append(data)
         return ufs_list + rufs_list
 
 class UserSerializer(serializers.ModelSerializer):
