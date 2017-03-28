@@ -40,18 +40,20 @@ class UserPostList(APIView):
         serializer = PostSaveSerializer(data=data)
         if serializer.is_valid():
             #handle topics
-            if serializer.validated_data['topic_names']:
+            topic_names = None
+            if serializer.validated_data.get('topic_names', None):
                 topic_names = serializer.validated_data.pop('topic_names')
             if serializer.validated_data['tags']:
                 ts = serializer.validated_data.pop('tags')
             post = serializer.save()
-            topic_names = topic_names.split(",")
-            for topic in topic_names:
-                try:
-                    t = Topic.objects.get(text=topic)
-                except Topic.DoesNotExist:
-                    t = Topic.objects.create(text=topic)
-                post.topics.add(t)
+            if topic_names:
+                topic_names = topic_names.split(",")
+                for topic in topic_names:
+                    try:
+                        t = Topic.objects.get(text=topic)
+                    except Topic.DoesNotExist:
+                        t = Topic.objects.create(text=topic)
+                    post.topics.add(t)
             #handle tags
             for t in ts:
                 post.tags.add(t)
