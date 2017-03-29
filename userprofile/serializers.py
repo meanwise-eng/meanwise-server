@@ -34,7 +34,7 @@ class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
-    skills = serializers.SerializerMethodField()
+    user_skills = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
     user_interests = serializers.SerializerMethodField()
     profile_photo_small = serializers.SerializerMethodField()
@@ -43,7 +43,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
-                      'skills', 'profession', 'user_profession', 'interests', 'user_interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
+                      'user_skills', 'skills', 'profession', 'user_profession', 'interests', 'user_interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
                       'user_friends']
 
     def get_user_id(self, obj):
@@ -65,7 +65,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             profile_photo_small_url = get_thumbnailer(obj.profile_photo).get_thumbnail(small).url
         return profile_photo_small_url
 
-    def get_skills(self, obj):
+    def get_user_skills(self, obj):
         skills = obj.skills.all()
         skills_list = []
         for skill in skills:

@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^user/userprofile/$', UserProfileList.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/userprofile/$', UserProfileDetail.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/change/password/$', ChangePasswordView.as_view()),
+    url(r'^user/(?P<user_id>[0-9]+)/forgot/password/$', ForgotPasswordView.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/friends/$', FriendsList.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/friends/remove/$', RemoveFriend.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/posts/$', UserPostList.as_view()),
