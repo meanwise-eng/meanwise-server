@@ -3,6 +3,7 @@ from django.conf import settings
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.utils.datastructures import MultiValueDictKeyError
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -14,6 +15,8 @@ from rest_framework import authentication, permissions
 
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
+
+from taggit.models import Tag
 
 from post.models import Post, Comment, Share, Topic
 from post.serializers import *
@@ -35,7 +38,7 @@ class UserPostList(APIView):
         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request, user_id):
-        data = request.data
+        tag_text = request
         request.data['poster'] = user_id
         serializer = PostSaveSerializer(data=data)
         if serializer.is_valid():
@@ -268,6 +271,38 @@ class ShareViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     fields = ('id', 'post', 'messag', 'shared_by', 'recepients', 'created_on', 'modified_on')
 
+class AutocompleteTag(APIView):
+    """
+    Auto complete tags for given text
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        tag_text = request.data.get('tag', '')
+        try:
+            tags = Tag.objects.filter(name__istartswith=tag_text).values_list('name', flat=True)
+        except MultiValueDictKeyError:
+            pass
+
+        return Response({"status":"success", "error":"", "results":tags}, status=status.HTTP_201_CREATED)
+
+class AutocompleteTopic(APIView):
+    """
+    Auto complete topics for given text
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        topic_text = request.data.get('topic', '')
+        try:
+            topics = Topic.objects.filter(text__istartswith=topic_text).values_list('text', flat=True)
+        except MultiValueDictKeyError:
+            pass
+
+        return Response({"status":"success", "error":"", "results":topics}, status=status.HTTP_201_CREATED)
+    
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()
     class Meta:

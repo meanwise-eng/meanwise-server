@@ -33,6 +33,8 @@ urlpatterns = [
     url(r'^posts/(?P<post_id>[0-9]+)/comments/(?P<comment_id>[0-9]+)/$', PostCommentDetail.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/like/$', UserPostLike.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/unlike/$', UserPostUnLike.as_view()),
+    url(r'^posts/tags/autocomplete/$', AutocompleteTag.as_view()),
+    url(r'^posts/topics/autocomplete/$', AutocompleteTopic.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/new/$', UserNotificationsNew.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/latest/$', UserNotificationsLatest.as_view()),
     url(r'^profession/$', ProfessionListView.as_view()),
