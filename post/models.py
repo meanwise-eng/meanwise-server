@@ -51,7 +51,9 @@ class Post(models.Model):
                     _file = File(open(thumbnail_path, "rb"))
                     self.video_thumbnail.save((os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
                 except Exception as e:
-                    print ("error while generating video thumbnail", e, str(e))
+                    print ("Error generating video thumb", e, str(e))
+                return
+            
         super(Post, self).save(*args, **kwargs)
   
 class Comment(models.Model):
