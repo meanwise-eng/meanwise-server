@@ -38,7 +38,7 @@ class UserPostList(APIView):
         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request, user_id):
-        tag_text = request
+        data = request.data
         request.data['poster'] = user_id
         serializer = PostSaveSerializer(data=data)
         if serializer.is_valid():
