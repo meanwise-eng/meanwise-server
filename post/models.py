@@ -44,11 +44,14 @@ class Post(models.Model):
         if self.video:
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
-                clip = VideoFileClip(self.video.path)
-                thumbnail_path = os.path.join(os.path.dirname(self.video.path), os.path.splitext(os.path.basename(self.video.name))[0]) + ".jpg"
-                clip.save_frame(thumbnail_path , t=1.00)
-                _file = File(open(thumbnail_path, "rb"))
-                self.video_thumbnail.save((os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+                try:
+                    clip = VideoFileClip(self.video.path)
+                    thumbnail_path = os.path.join(os.path.dirname(self.video.path), os.path.splitext(os.path.basename(self.video.name))[0]) + ".jpg"
+                    clip.save_frame(thumbnail_path , t=1.00)
+                    _file = File(open(thumbnail_path, "rb"))
+                    self.video_thumbnail.save((os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+                except Exception as e:
+                    print ("error while generating video thumbnail", e, str(e))
         super(Post, self).save(*args, **kwargs)
   
 class Comment(models.Model):
