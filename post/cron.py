@@ -2,6 +2,9 @@ from post.models import TrendingTopicsInterest, Post
 from userprofile.models import Interest
 
 def my_scheduled_job():
+    #delete old values
+    for tt in TrendingTopicsInterest.objects.all():
+        tt.delete()
     for interest in Interest.objects.all():
         topics_rank = {}
         #fetch all posts for given interests
