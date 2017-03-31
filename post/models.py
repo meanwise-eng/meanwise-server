@@ -7,6 +7,7 @@ from django.conf import settings
 from taggit.managers import TaggableManager
 from common.utils import slugify
 from moviepy.editor import *
+from jsonfield import JSONField
 
 from django.contrib.auth.models import User
 from django.core.files import File
@@ -87,4 +88,14 @@ class Share(models.Model):
     
     def __str__(self):
         return "Share id: " + str(self.id)  + " post: " + str(self.post)
+
+class TrendingTopicsInterest(models.Model):
+    interest = models.ForeignKey(Interest)
+    topics = JSONField()
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return "Interest name: " + str(self.interest.name)  + " topics: " + str(self.topics)
+
 

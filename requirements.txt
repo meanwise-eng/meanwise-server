@@ -57,3 +57,4 @@ Whoosh==2.7.0
 django-taggit-serializer==0.1.5
 drf-haystack
 moviepy
+django-crontab
