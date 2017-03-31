@@ -475,3 +475,19 @@ ted":false,"video_height":null,"video_width":null,"video_thumbnail":null,"create
 },"error":""}
 
 ----------------------------------------------------------------------------------------------------
+
+top trending topics for interest
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl http://127.0.0.1:8000/api/v4/interests/1/topics/trending/ --dump-header - -H "Content-Type: multipart/form-data" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 201 Created
+Date: Fri, 31 Mar 2017 01:53:37 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+X-Frame-Options: SAMEORIGIN
+Vary: Accept
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+
+100   138    0   138    0     0    356      0 --:--:-- --:--:-- --:--:--   356
+{"error":"","status":"success","results":["testtopic3","wtest12","wtesttopic2","wtest2","testtopic2","wtesttopic3","wtest3","testtopic1"]}
+--------------------------------------------------------------------

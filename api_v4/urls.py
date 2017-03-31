@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/unlike/$', UserPostUnLike.as_view()),
     url(r'^posts/tags/autocomplete/$', AutocompleteTag.as_view()),
     url(r'^posts/topics/autocomplete/$', AutocompleteTopic.as_view()),
+    url(r'^interests/(?P<interest_id>[0-9]+)/topics/trending/$', TrendingTopicForInterest.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/new/$', UserNotificationsNew.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/latest/$', UserNotificationsLatest.as_view()),
     url(r'^profession/$', ProfessionListView.as_view()),

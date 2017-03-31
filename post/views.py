@@ -20,7 +20,7 @@ from taggit.models import Tag
 
 from post.models import Post, Comment, Share, Topic
 from post.serializers import *
-from userprofile.models import UserFriend
+from userprofile.models import UserFriend, Interest
 from mnotifications.models import Notification
 
 from post.search_indexes import PostIndex
@@ -302,6 +302,36 @@ class AutocompleteTopic(APIView):
             pass
 
         return Response({"status":"success", "error":"", "results":topics}, status=status.HTTP_201_CREATED)
+
+class TrendingTopicForInterest(APIView):
+    """
+    Fetch top ten trending topics for an interest
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, interest_id):
+        try:
+            interest = Interest.objects.get(id=interest_id)
+        except Interest.DoesNotExist:
+            return Response({"status":"failed", "error":"Interest with given id does not Exist", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        topics_rank = {}
+        #fetch all posts for given interests
+        posts = Post.objects.filter(interest=interest)
+        #calculate topic rank value for last one week, based on num of likes and num of comments
+        for post in posts:
+            post_rank_value = post.rank_post_value()
+            post_topics = post.topics.all()
+            for post_topic in post_topics:
+                if post_topic.text in topics_rank:
+                    topics_rank[post_topic.text] += post_rank_value
+                else:
+                    topics_rank[post_topic.text] = post_rank_value
+        #sort the topics based on rank value
+        topics = sorted(topics_rank, key=topics_rank.get, reverse=True)[:10]
+                
+        return Response({"status":"success", "error":"", "results":topics}, status=status.HTTP_201_CREATED)
+
     
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()

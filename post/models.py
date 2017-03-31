@@ -55,6 +55,16 @@ class Post(models.Model):
                 return
             
         super(Post, self).save(*args, **kwargs)
+
+    def num_likes(self):
+        return self.liked_by.all().distinct().count()
+
+    def num_comments(self):
+        return self.comment_set.all().distinct().count()
+
+    def rank_post_value(self):
+        value = self.num_likes()  + self.num_comments()
+        return value
   
 class Comment(models.Model):
     post = models.ForeignKey(Post, db_index=True)
