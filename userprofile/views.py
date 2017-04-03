@@ -322,7 +322,7 @@ class FriendsList(APIView):
                     uf.status = 'AC'
                     uf.save()
                     #Add notification
-                    notification = Notification.objects.create(receiver=user, notification_type='FA',  user_friend=uf)
+                    notification = Notification.objects.create(receiver=friend_user, notification_type='FA',  user_friend=uf)
                     logger.info("Friendslist - POST - Finished [API / views.py /")
                     return Response({"status":"success", "error":"", "results":"Successfully accepted."}, status=status.HTTP_201_CREATED)
         elif friend_status.lower() == 'rejected':
