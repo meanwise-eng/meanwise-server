@@ -8,7 +8,7 @@ def my_scheduled_job():
     for interest in Interest.objects.all():
         topics_rank = {}
         #fetch all posts for given interests
-        posts = Post.objects.filter(interest=interest)
+        posts = Post.objects.filter(interest=interest).filter(is_deleted=False)
         #calculate topic rank value for last one week, based on num of likes and num of comments
         for post in posts:
             post_rank_value = post.rank_post_value()
