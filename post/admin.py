@@ -12,7 +12,11 @@ class CommentAdmin(admin.ModelAdmin):
 class ShareAdmin(admin.ModelAdmin):
     pass
 
+class TopicAdmin(admin.ModelAdmin):
+    pass
+
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Share, ShareAdmin)
+admin.site.register(Topic, TopicAdmin)
