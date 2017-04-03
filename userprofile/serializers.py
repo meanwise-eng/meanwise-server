@@ -145,6 +145,12 @@ class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
 
+class ForgotPasswordSerializer(serializers.Serializer):
+    """
+    Serializer for forgot password endpoint.
+    """
+    email = serializers.EmailField(required=True)
+
 class UserProfileSearchSerializer(HaystackSerializerMixin, UserProfileSerializer):
     class Meta(UserProfileSerializer.Meta):
         search_fields = ("text", "userprofile_id", "first_name", "last_name", "username", "skills_text", 'created_on')

@@ -439,26 +439,27 @@ class ForgotPasswordView(APIView):
             return Response({"status":"failed", "error":"User not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
         return user
 
-    def get(self, request, user_id):
+    def post(self, request, user_id):
         self.object = self.get_object(user_id)
-        if not self.object.email:
-            return Response({"status":"failed", "error":"User has not valid email to send new password", "results":""}, status=status.HTTP_400_BAD_REQUEST)
-        # set_password also hashes the password that the user will get
-        password = User.objects.make_random_password()
-        self.object.set_password(password)
-        self.object.save()
-        try:
-            subject, from_email, to = 'New password', 'hello@meanwise.com', self.object.email
-            text_content = 'New generated password - ' + str(password) + ' .'
-            html_content = '<p>New generated password - ' + str(password) + '.</p>'
-            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
-        except Exception as e:
-            return Response({"status":"failed", "error":"Could not email the new password", "results":""}, status=status.HTTP_400_BAD_REQUEST)
-
-        
-        return Response({"status":"success", "error":"", "results":"successfully sent email with new password"}, status=status.HTTP_200_OK)
+        data = request.data
+        serializer = ForgotPasswordSerializer(data=data)
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            # set_password also hashes the password that the user will get
+            password = User.objects.make_random_password()
+            self.object.set_password(password)
+            self.object.save()
+            try:
+                subject, from_email, to = 'New password', 'hello@meanwise.com', self.object.email
+                text_content = 'New generated password - ' + str(password) + ' .'
+                html_content = '<p>New generated password - ' + str(password) + '.</p>'
+                msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
+            except Exception as e:
+                return Response({"status":"failed", "error":"Could not email the new password", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status":"success", "error":"", "results":"Successfully sent email with new password"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
     
 class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
