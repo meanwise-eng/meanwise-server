@@ -39,10 +39,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user_interests = serializers.SerializerMethodField()
     profile_photo_small = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
+    user_username = serializers.CharField(required=False, max_length=100, allow_blank=True)
     user_friends = serializers.SerializerMethodField()
     class Meta:
         model = UserProfile
-        fields = ['id', 'user_id', 'email', 'username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
+        fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
                       'user_skills', 'skills', 'profession', 'user_profession', 'interests', 'user_interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
                       'user_friends']
 

@@ -322,22 +322,15 @@ l,"created_on":"2017-01-06T05:10:47.490990Z","modified_on":"2017-01-06T05:10:47.
 
 userprofile update, using patch
 
-raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl http://127.0.0.1:8000/api/v4/user/11/userprofile/ --dump-header - -H "Content-Type: multipart/form-data" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X PATCH -F phone="+11234567891" -F dob="1980-10-30" -F cover_photo="@/home/raj/Pictures/mobile/IMG_20140310_195139094.jpg" -F profile_photo="@/home/raj/Pictures/mobile/IMG_20140310_195139094.jpg" -F bio="test bio 11" -F profession=1 -F city="bangalore" -F first_name="newfnameagain" -F last_name="newlnameagain" | more
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0 2299k    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0HTTP/1.0 201 Created
-Date: Thu, 16 Feb 2017 17:00:04 GMT
-Server: WSGIServer/0.2 CPython/3.5.2
-X-Frame-Options: SAMEORIGIN
-Vary: Accept
-Allow: GET, PATCH, HEAD, OPTIONS
-Content-Type: application/json
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl http://127.0.0.1:8000/api/v4/user/11/userprofile/ --dump-header - -H "Content-Type: multipart/form-data" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X PATCH -F phone="+11234567891" -F dob="1980-10-30" -F cover_photo="@/home/raj/Pictures/mobile/IMG_20140310_195139094.jpg" -F profile_photo="@/home/raj/Pictures/mobile/IMG_20140310_195139094.jpg" -F bio="test bio 11" -F profession=1 -F city="bangalore" -F first_name="newfnameagain" -F last_name="newlnameagain" -F user_username="testuser5patched@test.com" | more
 
-100 2300k    0   714  100 2299k    566  1826k  0:00:01  0:00:01 --:--:-- 1826k
-{"error":"","status":"success","results":{"id":7,"user_id":11,"email":"testuser5@test.com","username":"","profile_photo":"/media/profile_photos/IMG_20140310_195139094_qSzEtGF.jpg","cover_photo":"/me
-dia/cover_photos/IMG_20140310_195139094_38xc5sd.jpg","profile_photo_small":"/media/profile_photos/IMG_20140310_195139094_qSzEtGF.jpg..jpg","first_name":"newfnameagain","last_name":"newlnameagain","b
-io":"test bio 11","skills":[{"id":1,"name":"python"},{"id":2,"name":"django"}],"profession":1,"user_profession":{"id":1,"name":"IT"},"interests":[{"id":1,"name":"sports"},{"id":2,"name":"music"}],"i
-ntro_video":null,"phone":"+11234567891","dob":"1980-10-30","profile_story_title":null,"profile_story_description":null}}
+{"results":{"id":7,"user_id":11,"email":"testuser5@test.com","username":"testuser5patched@test.com","user_username":"testuser5patched@test.com","profile_photo":"/media/profile_photos/IMG_20140310_19
+5139094_shre755.jpg","cover_photo":"/media/cover_photos/IMG_20140310_195139094_V7AqkRn.jpg","profile_photo_small":"/media/profile_photos/IMG_20140310_195139094_shre755.jpg..jpg","first_name":"newfna
+meagain","last_name":"newlnameagain","bio":"test bio 11","user_skills":[{"name":"python","id":1},{"name":"django","id":2}],"skills":[1,2],"profession":1,"user_profession":{"name":"IT","id":1},"inter
+ests":[1],"user_interests":[{"name":"sports","id":1}],"intro_video":null,"phone":"+11234567891","dob":"1980-10-30","profile_story_title":"test","profile_story_description":"test","city":"bangalore",
+"user_friends":[{"friend_receiver_id":17,"status":"Accepted","friend_receiver_email":"testuser10@test.com","friend_sender_name":"testuser5patched@test.com","friend_sender_id":11,"friend_sender_email
+":"testuser5@test.com"}]},"status":"success","error":""}
+
 
 ---------------------------------------------------------------------------------------------------
 

@@ -144,7 +144,13 @@ class UserProfileDetail(APIView):
         userprofile = self.get_object(user_id)
         serialized_up = UserProfileSerializer(userprofile, data=data, partial=True)
         if serialized_up.is_valid():
-            serialized_up.save()
+            up = serialized_up.save()
+            #handle username
+            user_username = None
+            if serialized_up.validated_data.get('user_username', None):
+                user_username = serialized_up.validated_data.pop('user_username')
+                up.user.username = user_username
+                up.user.save()
             return Response({"status":"success", "error":"", "results":serialized_up.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serialized_up.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
