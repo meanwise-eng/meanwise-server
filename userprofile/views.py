@@ -445,7 +445,7 @@ class ForgotPasswordView(APIView):
             user.set_password(password)
             user.save()
             try:
-                subject, from_email, to = 'New password', 'hello@meanwise.com', self.object.email
+                subject, from_email, to = 'New password', 'hello@meanwise.com', email
                 text_content = 'New generated password - ' + str(password) + ' .'
                 html_content = '<p>New generated password - ' + str(password) + '.</p>'
                 msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
