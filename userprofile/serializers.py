@@ -134,9 +134,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserFriendSerializer(serializers.ModelSerializer):
     friend = UserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     class Meta:
         model = User
-        fields = ('id', 'friend')
+        fields = ('id', 'friend', 'user')
         
 class ChangePasswordSerializer(serializers.Serializer):
     """
