@@ -24,6 +24,7 @@ from userprofile.models import UserProfile, UserFriend
 from post.models import Post, Comment
 
 from mnotifications.serializers import NotificationSerializer
+from common.api_helper import get_objects_paginated
 
 logger = logging.getLogger('delighter')
 
@@ -36,12 +37,15 @@ class UserNotificationsNew(APIView):
 
     def get(self, request, user_id):
         notifications = Notification.objects.filter(was_notified=False).filter(receiver__id=user_id).order_by('-created_on')
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+        notifications, has_next_page, num_pages  = get_objects_paginated(notifications, page, page_size)
         serializer = NotificationSerializer(notifications, many=True)
         #set them as notified
         for notification in notifications:
             notification.was_notified = True
             notification.save()
-        return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+        return Response({"status":"success", "error":"", "results":{"data":serializer.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
 
 class UserNotificationsLatest(APIView):
     """
@@ -53,6 +57,9 @@ class UserNotificationsLatest(APIView):
     def get(self, request, user_id):
         latest_timestamp = datetime.datetime.now() - datetime.timedelta(hours=24)
         notifications = Notification.objects.filter(created_on__gte=latest_timestamp).filter(receiver__id=user_id).order_by('-created_on')
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+        notifications, has_next_page, num_pages  = get_objects_paginated(notifications, page, page_size)
         serializer = NotificationSerializer(notifications, many=True)
-        return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+        return Response({"status":"success", "error":"", "results":{"data":serializer.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
 

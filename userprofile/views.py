@@ -28,6 +28,7 @@ from userprofile.serializers import *
 from mnotifications.models import Notification
 
 from userprofile.search_indexes import UserProfileIndex
+from common.api_helper import get_objects_paginated
 
 logger = logging.getLogger('delighter')
 
@@ -51,9 +52,7 @@ class ProfessionListView(APIView):
             # If page is out of range (e.g. 9999), deliver last page of results.
             professions = paginator.page(paginator.num_pages)
         serializer = ProfessionSerializer(professions, many=True)
-        return Response({"status":"success", "error":"", "results":serializer.data,
-                             #'has_previous_page':professions.previous_page_number(), 'has_next_page':professions.next_page_number(), 
-                             'num_pages':professions.paginator.num_pages}, status=status.HTTP_200_OK)
+        return Response({"status":"success", "error":"", "results":{"data":serializer.data, 'num_pages':professions.paginator.num_pages}}, status=status.HTTP_200_OK)
 
 
 class SkillListView(APIView):
@@ -76,9 +75,7 @@ class SkillListView(APIView):
             # If page is out of range (e.g. 9999), deliver last page of results.
             skills = paginator.page(paginator.num_pages)
         serializer = SkillSerializer(skills, many=True)
-        return Response({"status":"success", "error":"", "results":serializer.data,
-                             #'has_previous_page':skills.previous_page_number(), 'has_next_page':skills.next_page_number(), 
-                             'num_pages':skills.paginator.num_pages}, status=status.HTTP_200_OK)
+        return Response({"status":"success", "error":"", "results":{"data":serializer.data, 'num_pages':skills.paginator.num_pages}}, status=status.HTTP_200_OK)
 
 class InterestListView(APIView):
     """
@@ -100,9 +97,7 @@ class InterestListView(APIView):
             # If page is out of range (e.g. 9999), deliver last page of results.
             interests = paginator.page(paginator.num_pages)
         serializer = InterestSerializer(interests, many=True)
-        return Response({"status":"success", "error":"", "results":serializer.data,
-                             #'has_previous_page':interests.previous_page_number(), 'has_next_page':interests.next_page_number(), 
-                             'num_pages':interests.paginator.num_pages}, status=status.HTTP_200_OK)
+        return Response({"status":"success", "error":"", "results":{"data":serializer.data, 'num_pages':interests.paginator.num_pages}}, status=status.HTTP_200_OK)
    
 
 class UserProfileList(APIView):
@@ -241,10 +236,13 @@ class FriendsList(APIView):
                 user_friends_profiles.append(UserProfile.objects.get(user=userfriendr.user).id)
             except UserProfile.DoesNotExist:
                 pass
-            
+
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+        user_friends_profiles, has_next_page, num_pages  = get_objects_paginated(user_friends_profiles, page, page_size)
         serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(id__in=user_friends_profiles), many=True)
 
-        return Response({"status":"success", "error":"", "results":serialized_friends_list.data}, status=status.HTTP_200_OK)
+        return Response({"status":"success", "error":"", "results":{"data":serialized_friends_list.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
 
     
     def post(self, request, user_id):
