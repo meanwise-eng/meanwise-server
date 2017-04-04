@@ -429,28 +429,21 @@ class ForgotPasswordView(APIView):
     """
     An endpoint for forgotten password.
     """
-    authentication_classes = (authentication.TokenAuthentication,)
-    serializer_class = ChangePasswordSerializer
-    model = UserProfile
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
-    def get_object(self, user_id):
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response({"status":"failed", "error":"User not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
-        return user
-
-    def post(self, request, user_id):
-        self.object = self.get_object(user_id)
+    def post(self, request):
         data = request.data
         serializer = ForgotPasswordSerializer(data=data)
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response({"status":"failed", "error":"User not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
             # set_password also hashes the password that the user will get
             password = User.objects.make_random_password()
-            self.object.set_password(password)
-            self.object.save()
+            user.set_password(password)
+            user.save()
             try:
                 subject, from_email, to = 'New password', 'hello@meanwise.com', self.object.email
                 text_content = 'New generated password - ' + str(password) + ' .'
