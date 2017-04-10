@@ -291,7 +291,7 @@ class AutocompleteTag(APIView):
     def post(self, request):
         tag_text = request.data.get('tag', '')
         try:
-            tags = Tag.objects.filter(name__istartswith=tag_text).values_list('name', flat=True)
+            tags = Tag.objects.filter(name__istartswith=tag_text).filter(post__is_deleted=False).distinct().values_list('name', flat=True)
         except MultiValueDictKeyError:
             pass
 
@@ -307,7 +307,7 @@ class AutocompleteTopic(APIView):
     def post(self, request):
         topic_text = request.data.get('topic', '')
         try:
-            topics = Topic.objects.filter(text__istartswith=topic_text).values_list('text', flat=True)
+            topics = Topic.objects.filter(text__istartswith=topic_text).filter(post__is_deleted=False).distinct().values_list('text', flat=True)
         except MultiValueDictKeyError:
             pass
 
