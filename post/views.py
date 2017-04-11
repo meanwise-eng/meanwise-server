@@ -50,8 +50,10 @@ class UserPostList(APIView):
             topic_names = None
             if serializer.validated_data.get('topic_names', None):
                 topic_names = serializer.validated_data.pop('topic_names')
-            if serializer.validated_data['tags']:
-                ts = serializer.validated_data.pop('tags')
+            ts = []
+            if 'tags' in  serializer.validated_data:
+                if serializer.validated_data['tags']:
+                    ts = serializer.validated_data.pop('tags')
             post = serializer.save()
             if topic_names:
                 topic_names = topic_names.split(",")

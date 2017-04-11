@@ -147,7 +147,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return {'height':320, 'width':240}
 
 class PostSaveSerializer(serializers.ModelSerializer):
-    tags = TagListSerializerField()
+    tags = TagListSerializerField(required=False)
     topics = serializers.SerializerMethodField()
     topic_names = serializers.CharField(required=False, max_length=100, allow_blank=True)
     class Meta:
