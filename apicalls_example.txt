@@ -484,3 +484,55 @@ Content-Type: application/json
 100   138    0   138    0     0    356      0 --:--:-- --:--:-- --:--:--   356
 {"error":"","status":"success","results":["testtopic3","wtest12","wtesttopic2","wtest2","testtopic2","wtesttopic3","wtest3","testtopic1"]}
 --------------------------------------------------------------------
+
+amazon sns register device
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/amazon/notification/device/register/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"device_id":"testdevice1", "device_token":"826b4a72 485bf150 e7913423 a60aeec7 b167f400 37e8cc20 5c2bd541 19f54bf9"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   117    0     0  100   117      0     29  0:0HTTP/1.0 201 Created--    36
+0:04  0:00:03  0:00:01    29Date: Fri, 14 Apr 2017 12:16:26 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+Allow: POST, OPTIONS
+Vary: Accept
+
+100   195    0    78  100   117     19     29  0:00:04  0:00:03  0:00:01    29
+{"results":"Successfully registered the device","status":"success","error":""}
+
+-----------------------------------------------------------------
+amazon sns delete device
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/amazon/notification/device/delete/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"device_id":"aas"}' | more  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    19    0     0  100    19      0     12  0:00:01  0:00HTTP/1.0 201 Created
+:01 --:--:--    12Date: Fri, 14 Apr 2017 12:18:07 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+Allow: POST, OPTIONS
+Vary: Accept
+
+100    94    0    75  100    19     50     12  0:00:01  0:00:01 --:--:--    50
+{"results":"Successfully deleted the device","status":"success","error":""}
+
+------------------------------------------------
+
+Amazon sns send message
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/amazon/notification/message/send/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"message":"test bulk message, amazon sns push"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    48    0     0  100    48      0     39  0:00:01  0:00:01 --:--:--    39HTTP/1.0 201 Created
+Date: Fri, 14 Apr 2017 12:19:30 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+Allow: POST, OPTIONS
+Vary: Accept
+
+100   117    0    69  100    48     43     29  0:00:01  0:00:01 --:--:--    42
+{"results":"Successfully sent message","status":"success","error":""}
+
+-------------------------------------------------------------------------------

@@ -58,3 +58,4 @@ django-taggit-serializer==0.1.5
 drf-haystack
 moviepy
 django-crontab
+django-scarface
