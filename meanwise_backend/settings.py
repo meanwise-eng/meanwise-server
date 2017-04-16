@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'easy_thumbnails',
+    'storages',
     #'subscribe',
     #'api_v3',
     #'common',
@@ -126,6 +127,19 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'geography.middlewares.AddIPMiddleware',
 ]
+
+# setting for S3 storage
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+AWS_S3_REGION_NAME = 'us-west-2'
+AWS_ACCESS_KEY_ID = 'AKIAIHSE2YDOPTH5QQEQ'
+AWS_SECRET_ACCESS_KEY = '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'
+
+# The name of the bucket to store files in.
+AWS_STORAGE_BUCKET_NAME = "mw-uploads"
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_CUSTOM_DOMAIN = 'dtl635379s21p.cloudfront.net'
 
 
 ROOT_URLCONF = 'meanwise_backend.urls'
