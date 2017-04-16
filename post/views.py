@@ -50,8 +50,10 @@ class UserPostList(APIView):
             topic_names = None
             if serializer.validated_data.get('topic_names', None):
                 topic_names = serializer.validated_data.pop('topic_names')
-            if serializer.validated_data['tags']:
-                ts = serializer.validated_data.pop('tags')
+            ts = []
+            if 'tags' in  serializer.validated_data:
+                if serializer.validated_data['tags']:
+                    ts = serializer.validated_data.pop('tags')
             post = serializer.save()
             if topic_names:
                 topic_names = topic_names.split(",")
@@ -291,7 +293,7 @@ class AutocompleteTag(APIView):
     def post(self, request):
         tag_text = request.data.get('tag', '')
         try:
-            tags = Tag.objects.filter(name__istartswith=tag_text).values_list('name', flat=True)
+            tags = Tag.objects.filter(name__istartswith=tag_text).filter(post__is_deleted=False).distinct().values_list('name', flat=True)
         except MultiValueDictKeyError:
             pass
 
@@ -307,7 +309,7 @@ class AutocompleteTopic(APIView):
     def post(self, request):
         topic_text = request.data.get('topic', '')
         try:
-            topics = Topic.objects.filter(text__istartswith=topic_text).values_list('text', flat=True)
+            topics = Topic.objects.filter(text__istartswith=topic_text).filter(post__is_deleted=False).distinct().values_list('text', flat=True)
         except MultiValueDictKeyError:
             pass
 
