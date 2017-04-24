@@ -8,3 +8,4 @@ squelo_backend/uwsgi.dev.ini
 .DS_STORE
 migrations/
 
+/.idea
