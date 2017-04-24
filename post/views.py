@@ -27,7 +27,7 @@ from mnotifications.models import Notification
 from post.search_indexes import PostIndex
 from common.api_helper import get_objects_paginated
 
-post_qs = Post.objects.filter(is_deleted=True).filter(Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
+post_qs = Post.objects.filter(is_deleted=False).filter(Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
 
 class UserPostList(APIView):
     """
