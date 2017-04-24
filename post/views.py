@@ -189,7 +189,10 @@ class UserHomeFeed(APIView):
             page = request.GET.get('page')
             page_size = request.GET.get('page_size')
             home_feed_posts, has_next_page, num_pages  = get_objects_paginated(home_feed_posts, page, page_size)
-            serializer = PostSerializer(home_feed_posts, many=True)
+            serializer_context = {
+                'request': request,
+            }
+            serializer = PostSerializer(home_feed_posts, many=True, context=serializer_context)
             return Response({"status":"success", "error":"", "results":{"data":serializer.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
