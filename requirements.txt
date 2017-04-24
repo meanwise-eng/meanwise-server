@@ -59,3 +59,4 @@ drf-haystack
 moviepy
 django-crontab
 django-scarface
+django-storages==1.5.2

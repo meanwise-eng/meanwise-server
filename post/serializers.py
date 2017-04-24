@@ -5,8 +5,9 @@ from easy_thumbnails.files import get_thumbnailer
 
 from userprofile.models import UserProfile
 from post.models import Post, Comment, Share, Story
+from post.search_indexes import PostIndex
 
-from drf_haystack.serializers import HaystackSerializerMixin
+from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
 
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -32,6 +33,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         lookup_url_kwarg='story_id',
         view_name='post-story'
     )
+    queryset=Post.objects.filter(is_deleted=False)
     
     class Meta:
         model = Post
@@ -164,10 +166,13 @@ class PostSaveSerializer(serializers.ModelSerializer):
         return obj.topics.all().values_list('text',flat=True)
 
 class StorySerializer(serializers.ModelSerializer):
-    post_set = PostSerializer(many=True)
+    posts = serializers.SerializerMethodField()
     class Meta:
         model = Story
-        fields = ('id', 'main_post', 'post_set')
+        fields = ('id', 'main_post', 'posts')
+
+    def get_posts(self, obj):
+        return PostSerializer(obj.posts.filter(is_deleted=False), many=True, context=self.context).data
 
 class CommentSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
@@ -254,6 +259,8 @@ class ShareSerializer(serializers.ModelSerializer):
 class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
     class Meta(PostSerializer.Meta):
         search_fields = ("text", "interest_name", "post_text", "created_on", "post_id", "topic_texts", "tag_names")
+        field_aliases = {}
+        exclude = tuple()
 
 
         

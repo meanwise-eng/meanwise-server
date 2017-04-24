@@ -37,7 +37,7 @@ class Post(models.Model):
     video_thumbnail = models.ImageField(upload_to='post_video_thumbnails', null=True, blank=True)
 
     parent = models.ForeignKey('self', db_index=True, null=True)
-    story = models.ForeignKey('Story', db_index=True, null=True)
+    story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
 
     created_on = models.DateTimeField(auto_now_add=True)
@@ -74,6 +74,7 @@ class Post(models.Model):
 
 class Story(models.Model):
     main_post = models.ForeignKey(Post, db_index=True, related_name='+')
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return "Story id: " + str(self.id) + " main post: " + str(self.main_post)
