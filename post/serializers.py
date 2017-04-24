@@ -4,7 +4,7 @@ from taggit_serializer.serializers import TagListSerializerField, TaggitSerializ
 from easy_thumbnails.files import get_thumbnailer
 
 from userprofile.models import UserProfile
-from post.models import Post, Comment, Share
+from post.models import Post, Comment, Share, Story
 
 from drf_haystack.serializers import HaystackSerializerMixin
 
@@ -26,12 +26,19 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     resolution = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    story = serializers.HyperlinkedRelatedField(
+        read_only=True,
+        allow_null=True,
+        lookup_url_kwarg='story_id',
+        view_name='post-story'
+    )
     
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession',
-                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics')
+                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
+                      'story', 'story_index')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -155,6 +162,12 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text',flat=True)
+
+class StorySerializer(serializers.ModelSerializer):
+    post_set = PostSerializer(many=True)
+    class Meta:
+        model = Story
+        fields = ('id', 'main_post', 'post_set')
 
 class CommentSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()

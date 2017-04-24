@@ -35,6 +35,11 @@ class Post(models.Model):
     video_height = models.IntegerField(null=True, blank=True)
     video_width = models.IntegerField(null=True, blank=True)
     video_thumbnail = models.ImageField(upload_to='post_video_thumbnails', null=True, blank=True)
+
+    parent = models.ForeignKey('self', db_index=True, null=True)
+    story = models.ForeignKey('Story', db_index=True, null=True)
+    story_index = models.IntegerField(null=True)
+
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
@@ -66,7 +71,13 @@ class Post(models.Model):
     def rank_post_value(self):
         value = self.num_likes()  + self.num_comments()
         return value
-  
+
+class Story(models.Model):
+    main_post = models.ForeignKey(Post, db_index=True, related_name='+')
+
+    def __str__(self):
+        return "Story id: " + str(self.id) + " main post: " + str(self.main_post)
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, db_index=True)
     commented_by = models.ForeignKey(User)
