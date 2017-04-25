@@ -129,7 +129,7 @@ class UserFriendsPostList(APIView):
         try:
             friends_ids = UserFriend.objects.filter(user__id=user_id).values_list('friend__id', flat=True)
             posts = post_qs.filter(Q(story__isnull=True) | Q(story_index=1))
-            serializer = PostSerializer(posts, many=True)
+            serializer = PostSerializer(posts, many=True, context={'request': request})
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
@@ -149,7 +149,7 @@ class UserInterestsPostList(APIView):
                 return Response({"status":"failed", "error":"Error fetching userprofile/interests for user.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
             interests_ids = userprofile.interests.all().values_list('id', flat=True)
             posts = post_qs.filter(interest__id__in=interests_ids)
-            serializer = PostSerializer(posts, many=True)
+            serializer = PostSerializer(posts, many=True, context={'request': request})
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
