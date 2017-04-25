@@ -27,6 +27,8 @@ from mnotifications.models import Notification
 from post.search_indexes import PostIndex
 from common.api_helper import get_objects_paginated
 
+from common.push_message import *
+
 post_qs = Post.objects.filter(is_deleted=False).filter(Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
 
 class UserPostList(APIView):
@@ -236,6 +238,11 @@ class UserPostLike(APIView):
         post.liked_by.add(user)
         #Add notification
         notification = Notification.objects.create(receiver=post.poster, notification_type='LP',  post=post, post_liked_by=user)
+        #send push notification
+        devices = find_user_devices(post.poster.id)
+        message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'c', 'message': (str(user.username) + " liked your post")}
+        for device in devices:
+            send_message_device(device.device_id, message_payload)
         return Response({"status":"success", "error":"", "results":"Succesfully liked."}, status=status.HTTP_202_ACCEPTED)
 
 class UserPostUnLike(APIView):
@@ -284,6 +291,11 @@ class PostCommentList(APIView):
             comment = serializer.save()
             #Add notification
             notification = Notification.objects.create(receiver=comment.post.poster, notification_type='CP',  post=comment.post, comment=comment)
+            #send push notification
+            devices = find_user_devices(post.poster.id)
+            message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'l', 'message': (str(comment.commented_by.user.username) + " commented on your post")}
+            for device in devices:
+                send_message_device(device.device_id, message_payload)
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
