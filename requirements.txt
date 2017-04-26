@@ -60,3 +60,4 @@ moviepy
 django-crontab
 django-scarface
 django-storages==1.5.2
+boto3==1.4.4
