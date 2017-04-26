@@ -135,6 +135,7 @@ class InviteGroup(models.Model):
     count = models.IntegerField(default=0)
     invite_code = models.CharField(max_length=128)
     users = models.ManyToManyField(User, blank=True)
+    max_invites = models.IntegerField(default=100)
 
     def __str__(self):
         return 'invite group id %s - %s  count (%s)' % (str(self.id), self.name, self.count)

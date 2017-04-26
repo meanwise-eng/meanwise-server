@@ -461,6 +461,28 @@ class ForgotPasswordView(APIView):
             return Response({"status":"success", "error":"", "results":"Successfully sent email with new password"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
     
+class ValidateInviteCodeView(APIView):
+    """
+    An endpoint to validate invite code.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    model = InviteGroup
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        invite_code = request.data.get('invite_code', '')
+        if not invite_code:
+            return Response({"status":"failed", "error":"Invite code not provided", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            invite_group = InviteGroup.objects.get(invite_code=invite_code)
+        except InviteGroup.DoesNotExist:
+            return Response({"status":"failed", "error":"Invite Group not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        limit_exceeded = False
+        if invite_group.count > invite_group.max_invites:
+            limit_exceeded = True
+        return Response({"status":"success", "error":"", "results":{"limit_exceeded":limit_exceeded}}, status=status.HTTP_200_OK)
+
+
 class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
         index_classes = [UserProfileIndex]

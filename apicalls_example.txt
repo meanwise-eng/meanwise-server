@@ -541,3 +541,21 @@ Vary: Accept
 {"results":"Successfully sent message","status":"success","error":""}
 
 -------------------------------------------------------------------------------
+
+APi to validate invite code
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/invite/code/valid/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"invite_code":"REALPEOPLE"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 200 OK
+Date: Wed, 26 Apr 2017 19:24:17 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+Allow: POST, OPTIONS
+X-Frame-Options: SAMEORIGIN
+Vary: Accept
+
+100    94    0    66  100    28   2016    855 --:--:-- --:--:-- --:--:--  2062
+{"status":"success","error":"","results":{"limit_exceeded":false}}
+
+------------------------------------------------------------------------------------------------------------
