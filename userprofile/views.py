@@ -292,9 +292,10 @@ class FriendsList(APIView):
                 notification = Notification.objects.create(receiver=user, notification_type='FR',  user_friend=uf)
                 #send push notification
                 devices = find_user_devices(user.id)
-                message_payload = {'p':'','u':str(user.id), 't':'r', 'message': (str(friend_user.username) + " sent friend request.")}
+                message_payload = {'p':'','u':str(user.id),
+                                       't':'r', 'message': (str(friend_user.userprofile.first_name) + " " +  str(friend_user.userprofile.last_name) + " sent friend request.")}
                 for device in devices:
-                    send_message_device(device.device_id, message_payload)
+                    send_message_device(device, message_payload)
                 logger.info("Friendslist - POST - Finished [API / views.py /")
                 return Response({"status":"success", "error":"", "results":"successfully added friend request"}, status=status.HTTP_201_CREATED)
             else:
@@ -325,10 +326,10 @@ class FriendsList(APIView):
                     #Add notification
                     notification = Notification.objects.create(receiver=friend_user, notification_type='FA',  user_friend=uf)
                     #send push notification
-                    devices = find_user_devices(uf.id)
-                    message_payload = {'p':'','u':str(friend_user.id), 't':'a', 'message': (str(user.username) + " accepted friend request.")}
+                    devices = find_user_devices(friend_user.id)
+                    message_payload = {'p':'','u':str(friend_user.id), 't':'a', 'message': (str(user.userprofile.first_name) + " " + str(user.userprofile.last_name) + " accepted friend request.")}
                     for device in devices:
-                        send_message_device(device.device_id, message_payload)
+                        send_message_device(device, message_payload)
                     logger.info("Friendslist - POST - Finished [API / views.py /")
                     return Response({"status":"success", "error":"", "results":"Successfully accepted."}, status=status.HTTP_201_CREATED)
         elif friend_status.lower() == 'rejected':

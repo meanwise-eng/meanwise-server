@@ -240,9 +240,9 @@ class UserPostLike(APIView):
         notification = Notification.objects.create(receiver=post.poster, notification_type='LP',  post=post, post_liked_by=user)
         #send push notification
         devices = find_user_devices(post.poster.id)
-        message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'c', 'message': (str(user.username) + " liked your post")}
+        message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'c', 'message': (str(user.userprofile.first_name) + " " + str(user.userprofile.first_name) + " liked your post")}
         for device in devices:
-            send_message_device(device.device_id, message_payload)
+            send_message_device(device, message_payload)
         return Response({"status":"success", "error":"", "results":"Succesfully liked."}, status=status.HTTP_202_ACCEPTED)
 
 class UserPostUnLike(APIView):
@@ -292,10 +292,11 @@ class PostCommentList(APIView):
             #Add notification
             notification = Notification.objects.create(receiver=comment.post.poster, notification_type='CP',  post=comment.post, comment=comment)
             #send push notification
-            devices = find_user_devices(post.poster.id)
-            message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'l', 'message': (str(comment.commented_by.user.username) + " commented on your post")}
+            devices = find_user_devices(comment.post.poster.id)
+            message_payload = {'p':str(comment.post.id),'u':str(comment.post.poster.id),
+                                   't':'l', 'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + " commented on your post")}
             for device in devices:
-                send_message_device(device.device_id, message_payload)
+                send_message_device(device, message_payload)
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
