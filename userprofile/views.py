@@ -465,9 +465,8 @@ class ValidateInviteCodeView(APIView):
     """
     An endpoint to validate invite code.
     """
-    authentication_classes = (authentication.TokenAuthentication,)
     model = InviteGroup
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         invite_code = request.data.get('invite_code', '')
