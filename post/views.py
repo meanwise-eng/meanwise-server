@@ -240,7 +240,7 @@ class UserPostLike(APIView):
         notification = Notification.objects.create(receiver=post.poster, notification_type='LP',  post=post, post_liked_by=user)
         #send push notification
         devices = find_user_devices(post.poster.id)
-        message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'c', 'message': (str(user.userprofile.first_name) + " " + str(user.userprofile.first_name) + " liked your post")}
+        message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'l', 'message': (str(user.userprofile.first_name) + " " + str(user.userprofile.first_name) + " liked your post")}
         for device in devices:
             send_message_device(device, message_payload)
         return Response({"status":"success", "error":"", "results":"Succesfully liked."}, status=status.HTTP_202_ACCEPTED)
@@ -294,7 +294,7 @@ class PostCommentList(APIView):
             #send push notification
             devices = find_user_devices(comment.post.poster.id)
             message_payload = {'p':str(comment.post.id),'u':str(comment.post.poster.id),
-                                   't':'l', 'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + " commented on your post")}
+                                   't':'c', 'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + " commented on your post")}
             for device in devices:
                 send_message_device(device, message_payload)
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
