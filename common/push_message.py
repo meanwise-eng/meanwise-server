@@ -1,4 +1,4 @@
-from scarface.models import *
+from scarface.models import Device, PushMessage
 
 from mnotifications.models import ASNSDevice
 
