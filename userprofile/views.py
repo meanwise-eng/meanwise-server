@@ -29,6 +29,7 @@ from mnotifications.models import Notification
 
 from userprofile.search_indexes import UserProfileIndex
 from common.api_helper import get_objects_paginated
+from common.push_message import *
 
 logger = logging.getLogger('delighter')
 
@@ -289,6 +290,12 @@ class FriendsList(APIView):
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
                 #Add notification
                 notification = Notification.objects.create(receiver=user, notification_type='FR',  user_friend=uf)
+                #send push notification
+                devices = find_user_devices(user.id)
+                message_payload = {'p':'','u':str(user.id),
+                                       't':'r', 'message': (str(friend_user.userprofile.first_name) + " " +  str(friend_user.userprofile.last_name) + " sent friend request.")}
+                for device in devices:
+                    send_message_device(device, message_payload)
                 logger.info("Friendslist - POST - Finished [API / views.py /")
                 return Response({"status":"success", "error":"", "results":"successfully added friend request"}, status=status.HTTP_201_CREATED)
             else:
@@ -318,6 +325,11 @@ class FriendsList(APIView):
                     uf.save()
                     #Add notification
                     notification = Notification.objects.create(receiver=friend_user, notification_type='FA',  user_friend=uf)
+                    #send push notification
+                    devices = find_user_devices(friend_user.id)
+                    message_payload = {'p':'','u':str(friend_user.id), 't':'a', 'message': (str(user.userprofile.first_name) + " " + str(user.userprofile.last_name) + " accepted friend request.")}
+                    for device in devices:
+                        send_message_device(device, message_payload)
                     logger.info("Friendslist - POST - Finished [API / views.py /")
                     return Response({"status":"success", "error":"", "results":"Successfully accepted."}, status=status.HTTP_201_CREATED)
         elif friend_status.lower() == 'rejected':
@@ -449,6 +461,27 @@ class ForgotPasswordView(APIView):
             return Response({"status":"success", "error":"", "results":"Successfully sent email with new password"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
     
+class ValidateInviteCodeView(APIView):
+    """
+    An endpoint to validate invite code.
+    """
+    model = InviteGroup
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        invite_code = request.data.get('invite_code', '')
+        if not invite_code:
+            return Response({"status":"failed", "error":"Invite code not provided", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            invite_group = InviteGroup.objects.get(invite_code=invite_code)
+        except InviteGroup.DoesNotExist:
+            return Response({"status":"failed", "error":"Invite Group not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        limit_exceeded = False
+        if invite_group.count > invite_group.max_invites:
+            limit_exceeded = True
+        return Response({"status":"success", "error":"", "results":{"limit_exceeded":limit_exceeded}}, status=status.HTTP_200_OK)
+
+
 class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
         index_classes = [UserProfileIndex]

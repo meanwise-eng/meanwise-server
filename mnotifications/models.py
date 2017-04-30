@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from post.models import Post, Comment
 from userprofile.models import UserFriend
 
+from scarface.models import Device
+
 NOTIFICATION_TYPES = (
     ('FA', 'FriendRequestAccepted'),
     ('FR', 'FriendRequestReceived'),
@@ -33,3 +35,9 @@ class Notification(models.Model):
     def __str__(self):
         return "Notification id: " + str(self.id)  + " for: " + str(self.receiver) + " type: " + str(self.notification_type)
 
+class ASNSDevice(models.Model):
+    user = models.ForeignKey(User)
+    device = models.ForeignKey(Device)
+
+    def __str__(self):
+        return "ASNS Device id: " + str(self.id)  + " user: " + str(self.user) + " device: " + str(self.device.device_id)

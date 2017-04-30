@@ -62,3 +62,4 @@ django-scarface
 django-storages==1.5.2
 boto3==1.4.4
 django-health-check==2.3.0
+django-admin-views

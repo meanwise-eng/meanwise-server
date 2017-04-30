@@ -19,7 +19,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
 from rest_framework.pagination import PageNumberPagination
 
-from mnotifications.models import Notification
+from mnotifications.models import Notification, ASNSDevice
 from userprofile.models import UserProfile, UserFriend
 from post.models import Post, Comment
 
@@ -88,6 +88,13 @@ class AmazonNotificationAddDevice(APIView):
         device_token = request.data.get('device_token', '')
         if not device_token:
             Response({"status":"failed", "error":"No device_token provided.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = request.data.get('user_id', '')
+        if not user_id:
+            Response({"status":"failed", "error":"No user_id provided.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(id=int(user_id))
+        except User.DoesNotExist:
+            Response({"status":"failed", "error":"User with user_id does not exist.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
         platform = request.data.get('platform', 'APNS')
         if platform == 'APNS':
@@ -105,13 +112,24 @@ class AmazonNotificationAddDevice(APIView):
             device = Device.objects.get(device_id=device_id)
         except Device.DoesNotExist:
             pass
+        ASNSdevice = None
+        try:
+            ASNSdevice = ASNSDevice.objects.get(device__device_id=device_id)
+        except ASNSDevice.DoesNotExist:
+            pass
         if device:
             try:
                 device.delete()
             except Exception as e:
                 return Response({"status":"failed", "error":str(e), "results":"Could not delete existing device record"}, status=status.HTTP_400_BAD_REQUEST)
+        if ASNSdevice:
+            try:
+                ASNSdevice.delete()
+            except Exception as e:
+                return Response({"status":"failed", "error":str(e), "results":"Could not delete existing ASNSdevice record"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             device = Device.objects.create(device_id=device_id,push_token=device_token, platform=platform)
+            ASNSDevice.objects.create(device=device, user=user)
             device.register()
             topic.register_device(device)
         except Exception as e:
@@ -133,13 +151,19 @@ class AmazonNotificationDeleteDevice(APIView):
         try:
             device = Device.objects.get(device_id=device_id)
         except Device.DoesNotExist:
-            Response({"status":"failed", "error":"No Pdevice found.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
-            
+            Response({"status":"failed", "error":"No device found.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+       
         #register device with platform and topic
         try:
             device.delete()
         except Exception as e:
             return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            ASNSdevice = ASNSDevice.objects.get(device__device_id=device_id)
+            if ASNSdevice:
+                ASNSdevice.delete()
+        except ASNSDevice.DoesNotExist:
+            pass
         return Response({"status":"success", "error":"", "results":"Successfully deleted the device"}, status=status.HTTP_201_CREATED)
 
 class AmazonNotificationSendMessage(APIView):

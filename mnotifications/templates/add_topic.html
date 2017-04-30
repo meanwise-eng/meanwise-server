@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block title %}List of Topics{% endblock %}
+
+
+{% block content %}
+
+<h1>Enter topic to add</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% if message %}<p><strong>{{message }}</strong></p>{% endif %}
+<form action="/admin/mnotifications/asnsdevice/add_topic" method='post'>{% csrf_token %}
+{% csrf_token %}
+  {{ form.as_p }}
+<input type='submit' value='Submit' />
+</form>
+{% endblock %}

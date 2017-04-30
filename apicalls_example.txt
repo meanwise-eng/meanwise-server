@@ -486,20 +486,25 @@ Content-Type: application/json
 --------------------------------------------------------------------
 
 amazon sns register device
-
-raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/amazon/notification/device/register/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"device_id":"testdevice1", "device_token":"826b4a72 485bf150 e7913423 a60aeec7 b167f400 37e8cc20 5c2bd541 19f54bf9"}' | more
+raj@raj-ThinkPad-X1-Carbon:~$ curl -X POST http://127.0.0.1:8000/api/v4/amazon/notification/device/register/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"device_id":"testdeviceuuid", "user_id":17, "device_token":"32f6a269 5e18742e 3dc2a66a 0e25ca66 04c0ec6c c14bce62 9b465d18 d28bd82f"}' | more
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100   117    0     0  100   117      0     29  0:0HTTP/1.0 201 Created--    36
-0:04  0:00:03  0:00:01    29Date: Fri, 14 Apr 2017 12:16:26 GMT
-Server: WSGIServer/0.2 CPython/3.5.2
-Content-Type: application/json
-X-Frame-Options: SAMEORIGIN
-Allow: POST, OPTIONS
-Vary: Accept
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 
-100   195    0    78  100   117     19     29  0:00:04  0:00:03  0:00:01    29
+raj@raj-ThinkPad-X1-Carbon:~$ curl -X POST http://ec2-54-86-42-134.compute-1.amazonaws.com:8000/api/v4/amazon/notification/device/register/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 2b40b3899d179376ccf6f86277d576b94c175e90" -X POST --data '{"device_id":"testdeviceuuid", "user_id":2, "device_token":"32f6a269 5e18742e 3dc2a66a 0e25ca66 04c0ec6c c14bce62 9b465d18 d28bd82f"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   211    0    78HTTP/1.0 201 Created    0 --:--:-- --:--:-- --:--:--     0
+  100 Date: Wed, 26 Apr 2017 17:01:40 GMT
+  133 Server: WSGIServer/0.2 CPython/3.5.2
+  Vary: Accept
+  5Allow: POST, OPTIONS
+7   X-Frame-Options: SAMEORIGIN
+  97Content-Type: application/json
+ 
+100   211    0    78  100   133     57     97  0:00:01  0:00:01 --:--:--    97
 {"results":"Successfully registered the device","status":"success","error":""}
+
 
 -----------------------------------------------------------------
 amazon sns delete device
@@ -536,3 +541,21 @@ Vary: Accept
 {"results":"Successfully sent message","status":"success","error":""}
 
 -------------------------------------------------------------------------------
+
+APi to validate invite code
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/invite/code/valid/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"invite_code":"REALPEOPLE"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 200 OK
+Date: Wed, 26 Apr 2017 19:24:17 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+Content-Type: application/json
+Allow: POST, OPTIONS
+X-Frame-Options: SAMEORIGIN
+Vary: Accept
+
+100    94    0    66  100    28   2016    855 --:--:-- --:--:-- --:--:--  2062
+{"status":"success","error":"","results":{"limit_exceeded":false}}
+
+------------------------------------------------------------------------------------------------------------
