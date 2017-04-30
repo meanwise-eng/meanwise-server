@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     #url(r'^api/v3/', include(api_v3_urls)),
     url(r'^api/v4/', include(api_v4_urls)),
+    url(r'^health-check/', include('health_check.urls')),
 ]
 
 urlpatterns +=  static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

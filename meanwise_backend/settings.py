@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'easy_thumbnails',
     'storages',
+    'health_check',
     #'subscribe',
     #'api_v3',
     #'common',
