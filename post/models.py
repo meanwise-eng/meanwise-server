@@ -43,6 +43,8 @@ class Post(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
+    OWNER_FIELD = 'poster'
+
     def __str__(self):
         return "Post id: " + str(self.id)  + " poster: " + str(self.poster)
 

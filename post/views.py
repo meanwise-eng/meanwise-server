@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db import transaction
+from django.core.exceptions import PermissionDenied
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -18,6 +19,8 @@ from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
 
 from taggit.models import Tag
+
+from post.permissions import IsOwnerOrReadOnly
 
 from post.models import *
 from post.serializers import *
@@ -36,7 +39,8 @@ class UserPostList(APIView):
     List all User posts, or create a new User post.
     """
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,
+                          IsOwnerOrReadOnly,)
 
     def get(self, request, user_id):
         posts = post_qs.filter(poster__id=user_id)
@@ -50,6 +54,11 @@ class UserPostList(APIView):
     def post(self, request, user_id):
         data = request.data
         request.data['poster'] = user_id
+
+        if user_id != request.user:
+            raise PermissionDenied("You cannot create a post as another user")
+        user = User.objects.get(pk=user_id)
+
         serializer = PostSaveSerializer(data=data)
         if serializer.is_valid():
             #handle topics
@@ -100,7 +109,8 @@ class UserPostDetail(APIView):
     Delete a post instance.
     """
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,
+                          IsOwnerOrReadOnly,)
 
     def get_object(self, pk):
         try:
@@ -207,7 +217,8 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_on')
     serializer_class = PostSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,
+                          IsOwnerOrReadOnly,)
     fields = ('id', 'interest', 'image', 'video', 'text', 'poster', 'tags', 'liked_by', 'is_deleted', 'created_on', 'modified_on')
     
     def destroy(self, request, *args, **kwargs):
@@ -235,6 +246,10 @@ class UserPostLike(APIView):
     def post(self, request, user_id, post_id):
         post = self.get_object(post_id)
         user = User.objects.get(id=user_id)
+
+        if user != request.user:
+            raise PermissionDenied("You can only like a post as yourself")
+
         post.liked_by.add(user)
         #Add notification
         notification = Notification.objects.create(receiver=post.poster, notification_type='LP',  post=post, post_liked_by=user)
@@ -261,6 +276,10 @@ class UserPostUnLike(APIView):
     def post(self, request, user_id, post_id):
         post = self.get_object(post_id)
         user = User.objects.get(id=user_id)
+
+        if user != request.user:
+            raise PermissionDenied("You cannot create a post as another user")
+
         if user in post.liked_by.all():
             post.liked_by.remove(user)
             return Response({"status":"success", "error":"", "results":"Succesfully unliked."}, status=status.HTTP_202_ACCEPTED)
@@ -287,6 +306,10 @@ class PostCommentList(APIView):
         data = request.data
         data['post'] = post_id
         serializer = CommentSaveSerializer(data=data)
+
+        if serializer.validated_data['commented_by'] != request.user:
+            raise PermissionDenied("You can posts comments as another user")
+
         if serializer.is_valid():
             comment = serializer.save()
             #Add notification
@@ -306,7 +329,8 @@ class PostCommentDetail(APIView):
     Delete a comment instance.
     """
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,
+                          IsOwnerOrReadOnly,)
 
     def get_object(self, pk):
         try:

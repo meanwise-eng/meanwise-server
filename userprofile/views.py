@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import exceptions
+from django.core.exceptions import PermissionDenied
 
 import django.contrib.auth.password_validation as validators
 from django.core.mail import EmailMultiAlternatives
@@ -136,6 +137,10 @@ class UserProfileDetail(APIView):
     def patch(self, request, user_id):
         data = request.data
         userprofile = self.get_object(user_id)
+
+        if user_id != request.user.id:
+            raise PermissionDenied("You cannot change profile for another user")
+
         serialized_up = UserProfileSerializer(userprofile, data=data, partial=True)
         if serialized_up.is_valid():
             up = serialized_up.save()
@@ -249,6 +254,10 @@ class FriendsList(APIView):
         
         """
         logger.info("Friendslist - POST [API / views.py /")
+
+        if user_id != request.user.id:
+            raise PermissionDenied("You can only send friend request as yourself")
+
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -367,6 +376,9 @@ class RemoveFriend(APIView):
         
         """
         logger.info("RemoveFriend - POST [API / views.py /")
+
+        if user_id != request.user.id:
+            raise PermissionDenied("You can remove friend for another user")
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -410,6 +422,9 @@ class ChangePasswordView(APIView):
     def post(self, request, user_id):
         self.object = self.get_object(user_id)
         serializer = ChangePasswordSerializer(data=request.data)
+
+        if user_id != request.user.id:
+            raise PermissionDenied("You cannot change password for other users")
 
         if serializer.is_valid():
             # Check old password
