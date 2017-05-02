@@ -30,10 +30,12 @@ SECRET_KEY = '_ks(exh8ftmi!f_vwma6od!#^$yngksnep2-n(5e6^qql%qcxx'
 # Variables from Environment
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
 DATABASE = os.environ.get('DATABASE')
-DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_HOST = os.environ.get('DB_HOST', 'postgres')
 DB_PORT = os.environ.get('DB_PORT', '5432')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'meanwise1!')
+DB_USER = os.environ.get('DB_PASSWORD', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'M3anw1s3!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'whoosh')
+MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '127.0.0.1')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
@@ -84,7 +86,6 @@ INSTALLED_APPS = [
     #'pages',
     'djcelery',
     'stream',
-    #'notifications',
     #'works',
     #'company',
     # auth
@@ -109,6 +110,9 @@ INSTALLED_APPS = [
     'custom_auth',
     'userprofile',
     'post',
+    'mnotifications',
+    'django-crontab',
+    'scarface',
 ]
 
 SITE_ID = 1
@@ -274,13 +278,19 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'log', 'django.log'),
             'formatter': 'verbose'
         },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'meanwise_backend': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
+        'django': {
+            'handlers': ['console']
+        }
     },
 }
 
@@ -292,8 +302,7 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-MEDIA_URL = '/media/'
-
+# got MEDIA_URL from env at the beginning
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #AUTH_USER_MODEL = 'allauth.User'
@@ -322,7 +331,9 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
-    'PAGE_SIZE': 20
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'EXCEPTION_HANDLER': 'meanwise_backend.utils.custom_exception_handler'
 }
 
 # CORS White listing
@@ -386,10 +397,8 @@ HS_CONNECTIONS = {
 }
 HAYSTACK_CONNECTIONS = {}
 
-if SEARCH_ENGINE:
-    HAYSTACK_CONNECTIONS['default'] = HS_CONNECTIONS[SEARCH_ENGINE]
-else:
-    HAYSTACK_CONNECTIONS['default'] = HS_CONNECTIONS['whoosh']
+HAYSTACK_CONNECTIONS['default'] = HS_CONNECTIONS[SEARCH_ENGINE]
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 # Email settings
 EMAIL_HOST = EMAIL_HOST
@@ -455,3 +464,29 @@ ES_INDEXES = {'default': 'main_index'}
 
 # Taggit Config
 TAGGIT_CASE_INSENSITIVE = True
+
+import mimetypes
+
+mimetypes.add_type("video/mp4", ".mp4", True)
+mimetypes.add_type("video/3gpp", ".3gp", True)
+mimetypes.add_type("video/quicktime", ".mov", True)
+mimetypes.add_type("video/x-msvideo", ".avi", True)
+mimetypes.add_type("video/x-ms-wmv", ".wmv", True)
+
+#cron  to store trending topics
+
+CRONJOBS = [
+    ('0 0 * * *', 'post.cron.my_scheduled_job')
+]
+
+AWS_ACCESS_KEY ="AKIAIKKK53U5PWGQSLZA"
+AWS_SECRET_ACCESS_KEY = "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"
+SCARFACE_REGION_NAME = "us-west-2"
+
+SCARFACE_APNS_CERTIFICATE="-----BEGIN CERTIFICATE-----\nMIIFjzCCBHegAwIBAgIIJ5Pnj/tAdUgwDQYJKoZIhvcNAQEFBQAwgZYxCzAJBgNV\nBAYTAlVTMRMwEQYDVQQKDApBcHBsZSBJbmMuMSwwKgYDVQQLDCNBcHBsZSBXb3Js\nZHdpZGUgRGV2ZWxvcGVyIFJlbGF0aW9uczFEMEIGA1UEAww7QXBwbGUgV29ybGR3\naWRlIERldmVsb3BlciBSZWxhdGlvbnMgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkw\nHhcNMTcwNDEzMDIxODI0WhcNMTgwNDEzMDIxODI0WjCBjjElMCMGCgmSJomT8ixk\nAQEMFWNvbS5tZWFud2lzZS5tZWFud2lzZTFDMEEGA1UEAww6QXBwbGUgRGV2ZWxv\ncG1lbnQgSU9TIFB1c2ggU2VydmljZXM6IGNvbS5tZWFud2lzZS5tZWFud2lzZTET\nMBEGA1UECwwKRlIyOTNGOTNGUTELMAkGA1UEBhMCVVMwggEiMA0GCSqGSIb3DQEB\nAQUAA4IBDwAwggEKAoIBAQCivc2PP5bRKUCPBvdMWvQJ4K7neYKR8AosvLapx+tM\nEcg0d66zBGwUycoTJFKoo2df7IP8sD8KVGaVG946nfJJovABy34m8DI1W1xlo7Td\nWJpZbdeHqqQOBGdYYHiU+XQgmXN9bfa9ecOOHFSNqyl9qeWUTdVrKifKputZrUZH\nGA5397rBZOPIjCMUR3VZ/FIV1Vra39nifZmI/Ml10Wd9bfLgaXanJjE1NOFOK1NL\nqIt4EkB/sRaqb7qjhKXAD8WOFoOE0RbUl755ChG1d4GZs0Bh6oTBgHbncDIjhCpd\n9i/roTyXuA4TAYlB5L+jRfieaRjfLHHpXCjjOVzE1lIzAgMBAAGjggHlMIIB4TAd\nBgNVHQ4EFgQUDJXFS7ImQOp0A/AYmxukU70moPEwCQYDVR0TBAIwADAfBgNVHSME\nGDAWgBSIJxcJqbYYYIvs67r2R1nFUlSjtzCCAQ8GA1UdIASCAQYwggECMIH/Bgkq\nhkiG92NkBQEwgfEwgcMGCCsGAQUFBwICMIG2DIGzUmVsaWFuY2Ugb24gdGhpcyBj\nZXJ0aWZpY2F0ZSBieSBhbnkgcGFydHkgYXNzdW1lcyBhY2NlcHRhbmNlIG9mIHRo\nZSB0aGVuIGFwcGxpY2FibGUgc3RhbmRhcmQgdGVybXMgYW5kIGNvbmRpdGlvbnMg\nb2YgdXNlLCBjZXJ0aWZpY2F0ZSBwb2xpY3kgYW5kIGNlcnRpZmljYXRpb24gcHJh\nY3RpY2Ugc3RhdGVtZW50cy4wKQYIKwYBBQUHAgEWHWh0dHA6Ly93d3cuYXBwbGUu\nY29tL2FwcGxlY2EvME0GA1UdHwRGMEQwQqBAoD6GPGh0dHA6Ly9kZXZlbG9wZXIu\nYXBwbGUuY29tL2NlcnRpZmljYXRpb25hdXRob3JpdHkvd3dkcmNhLmNybDALBgNV\nHQ8EBAMCB4AwEwYDVR0lBAwwCgYIKwYBBQUHAwIwEAYKKoZIhvdjZAYDAQQCBQAw\nDQYJKoZIhvcNAQEFBQADggEBAKnynAkkDi3GX2eRgg2SsSbUnGSDEbwloCYRpKti\n8YM/rMK6Dk7ROQXQt5ML+lZ7mycAWhIfC9+XYqHCAifPYaTMWbBekktar3OboCoE\nXmfdIYT74VFL8wtC9mFX8s6Dq42fjYz/NOvDcMmdBcSzrSN/XiQvNIDfZNJQ35dE\nUQ8YJ6CIntiELAbO3umC9zQL9Jw5hwGD+1YA6lEYp7OqIQM+gH0aY0eT1g3pg6bs\ntkLrHRIuZI3kQk6DL0KYr7fgdxSnlbXgoVSxTfcLHA1ANUfyrUcd35sT84IRIu0S\nc40OTp4kQHzz+Puqrc4BKN3mXUdl4htcSdNZSd3z5wBNGPc=\n-----END CERTIFICATE-----"
+
+SCARFACE_APNS_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCivc2PP5bRKUCP\nBvdMWvQJ4K7neYKR8AosvLapx+tMEcg0d66zBGwUycoTJFKoo2df7IP8sD8KVGaV\nG946nfJJovABy34m8DI1W1xlo7TdWJpZbdeHqqQOBGdYYHiU+XQgmXN9bfa9ecOO\nHFSNqyl9qeWUTdVrKifKputZrUZHGA5397rBZOPIjCMUR3VZ/FIV1Vra39nifZmI\n/Ml10Wd9bfLgaXanJjE1NOFOK1NLqIt4EkB/sRaqb7qjhKXAD8WOFoOE0RbUl755\nChG1d4GZs0Bh6oTBgHbncDIjhCpd9i/roTyXuA4TAYlB5L+jRfieaRjfLHHpXCjj\nOVzE1lIzAgMBAAECggEAa4M46gn4ePXn0JWpiqgL0Pq+ke2UdRU/o46InmGU8QxO\nV1s57spdHN6ywTKd6QsKoDSAfc9x1kEsBBYFGnR+PGeIZ6coEFFe2iEhSYR9WD3Q\nuoP2f4ocF6aRH7Gb989VCLRXt+WNvF9U8e2FbpJFNt+m6/L/q2yOHTNpCDWQ2CXe\nt+Ivj6pKEVmyazNCUjrO7M3M1t5I+MhVHHRyN2IjNTyxEHdnyjv+wku6lzhnQmCR\niUkn1mlSWH+2RgHnTAd0wmna5V+mzqeKNoC7e9duwE8ABCF7eT7uMqRohfNJG4Ts\njjvlbIYVqVkoZK6EdcyUyu3Sc2JIHT6ihC/sTJhcAQKBgQDMtHYjW7YcKCi+c2So\nzMEXzj5Ej+IWq9qGf1cDbk6gF7I8Hmatilk0XkFifHQZXfK1fJz2WVfF21rBv/Ar\nfc+USAF/Gp7r4OviQi8AsYPW90aQiL0gkGBhq0ent4atyLU4H6mmSyn20QaVQkW5\n3YOIEegxua5fKlzWXNByYIs5YwKBgQDLhXC1L8tjLqa6sI6FYGffyuuzf4aPzSUr\nCfgul5FhRoOrtLdWQLpkWOA25vvrDyduzhRQNQF4iDX/GVyVC0r5BTEJPoVZCMcm\nBHYck9QBh8JlkLOLAs1awpN49A5tK2cj9Vqd0U/T/0qBWb0NgSpAuqe0z0ebjA9o\nFAS5+Y1E8QKBgEsEYzrn9B/zc6L/xMa7apPfyB/2HqOyTP33Eps2RGgU5wNzHKvC\nRJiVZh7CfwWA0V5DEX6SFUFz9pmETm6Rx42OqcW7qrvEjI05NeJqK2eO7PQwuCaD\n4l5Il5TWA+wR3p93swM3DmTeCyyNweGwVPB7p3z5j/ZeHvGLx/Pyf3MDAoGBAKR3\nnII/MmxfSct6XGI6axb15A21U6enz459SvtT7t8eXc+HhdUFD9uB2wdjGFd3cpVf\nohjDDQI7iO8yrpeffaHJaTwgMyClMFJvrocfi2cFL7pl+kGvLQZYUVagW3wrY/ky\nEF2SxaD7IFlxjI56QAv5CwfZrfNsdxLTgpJLsbbxAoGAcqlKxHkvMYnSrpNHXzAY\nuyIO4q/KvOKpyw9iouqOviOBGB6bSjtenF5jIAJSevllx/lWjgtkSPPPBlMzRIBd\n9AJ6DSWBUdxnHmVOmt5ymovqtH+eEmPpTiWQdYPTY8WevzAs3k8ZdeZBDYQ0neWh\nsswadpMw0JvsPznL3IHDlJ8=\n-----END PRIVATE KEY-----"
+
+AMAZON_SNS_APP_NAME = 'Meanwise_Dev'
+AMAZON_SNS_TOPIC_NAME =  'notification_dev'
+AMAZON_SNS_PLATFORM_APNS = 'APNS_SANDBOX'
