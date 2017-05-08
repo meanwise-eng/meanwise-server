@@ -8,6 +8,23 @@ raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://12
 {"count":2,"next":null,"previous":null,"results":[{"id":1,"text":"IT","slug":"IT","created_on":"2016-09-15T12:13:26.916938Z","last_updated":"2016-09-15T12:13:26.916964Z","searchable":true},{"id":2,"
 text":"athlete","slug":"athlete","created_on":"2016-09-15T12:13:44.737235Z","last_updated":"2016-09-15T12:13:44.737299Z","searchable":true}]}
 --------------------------------------------------------------------------------------------------------------------
+Add profession call
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/profession/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"text":"test profession api add"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 200 OK
+Date: Mon, 08 May 2017 17:07:27 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json
+Vary: Accept, Cookie
+Allow: GET, POST, HEAD, OPTIONS
+
+100   107    0    73  100    34   2655   1236 --:--:-- --:--:-- --:--:--  2703
+{"error":"","results":"successfully added profession","status":"success"}
+
+-------------------------------------------------------------------------------------------------------------------------------
 skill call
 
 raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:49100/api/v4/skill/ -H 'Authorization: Token 7fac7ea0fff0510487b6d8910cadd3c7a373f5f3' | more
@@ -17,6 +34,23 @@ raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://12
 {"count":2,"next":null,"previous":null,"results":[{"id":1,"text":"python","lower":"python","slug":"python","created_on":"2016-09-15T12:13:54.964147Z","last_updated":"2016-09-15T12:13:54.964201Z","se
 archable":true},{"id":2,"text":"django","lower":"django","slug":"django","created_on":"2016-09-15T12:14:14.290444Z","last_updated":"2016-09-15T12:14:14.290471Z","searchable":true}]}
 -----------------------------------------------------------------------------------------------------------------
+Add skill call
+
+raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X POST http://127.0.0.1:8000/api/v4/skill/ --dump-header - -H "Content-Type: application/json" -H "Authorization: Token 638b5d5a3b8d83b28fdd580d25c717cf574a4710" -X POST --data '{"text":"test skill api add"}' | more
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.0 200 OK
+Date: Mon, 08 May 2017 17:10:17 GMT
+Server: WSGIServer/0.2 CPython/3.5.2
+X-Frame-Options: SAMEORIGIN
+Vary: Accept, Cookie
+Content-Type: application/json
+Allow: GET, POST, HEAD, OPTIONS
+
+100   102    0    73  100    29   2805   1114 --:--:-- --:--:-- --:--:--  2920
+{"status":"success","error":"","results":"successfully added profession"}
+
+---------------------------------------------------------------------------------------------------------------
 interest call
 
 raj@raj-ThinkPad-X1-Carbon:/work/meanwise/meanwise-server$ curl -X GET http://127.0.0.1:49100/api/v4/interest/ -H 'Authorization: Token 7fac7ea0fff0510487b6d8910cadd3c7a373f5f3' | more
