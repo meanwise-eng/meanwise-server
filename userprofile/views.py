@@ -56,6 +56,15 @@ class ProfessionListView(APIView):
         serializer = ProfessionSerializer(professions, many=True)
         return Response({"status":"success", "error":"", "results":{"data":serializer.data, 'num_pages':professions.paginator.num_pages}}, status=status.HTTP_200_OK)
 
+    def post(self, request):
+        serializer = ProfessionSerializer(data=request.data)
+        if serializer.is_valid():
+            profession = serializer.save()
+            return Response({"status":"success", "error":"", "results":"successfully added skill"}, status=status.HTTP_200_OK)
+
+        return Response({"status":"failed", "error":serializer.errors, "results":"Failed to add skill"}, status=status.HTTP_400_BAD_REQUEST)
+
+    
 class SkillListView(APIView):
     """
     Skill apis
@@ -77,6 +86,15 @@ class SkillListView(APIView):
             skills = paginator.page(paginator.num_pages)
         serializer = SkillSerializer(skills, many=True)
         return Response({"status":"success", "error":"", "results":{"data":serializer.data, 'num_pages':skills.paginator.num_pages}}, status=status.HTTP_200_OK)
+      
+    def post(self, request):
+        serializer = SkillSerializer(data=request.data)
+        if serializer.is_valid():
+            skill = serializer.save()
+            return Response({"status":"success", "error":"", "results":"successfully added profession"}, status=status.HTTP_200_OK)
+
+        return Response({"status":"failed", "error":serializer.errors, "results":"Failed to add profession"}, status=status.HTTP_400_BAD_REQUEST)
+
     
 class InterestListView(APIView):
     """

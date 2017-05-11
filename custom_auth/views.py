@@ -39,7 +39,7 @@ class RegisterUserView(APIView):
             
             return Response(response_data, status=status.HTTP_201_CREATED)
 
-        logger.error("RegisterUserView - POST - Invalid Serializer")
+        logger.error("RegisterUserView - POST - Invalid Serializer - " + str(reg_user_serializer.errors))
         
         return Response({'status':'failed','error':reg_user_serializer.errors, 'data':''},
                         status=status.HTTP_400_BAD_REQUEST)
