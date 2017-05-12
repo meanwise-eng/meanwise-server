@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+import sys
+from PIL import Image
+from io import BytesIO
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.contrib import auth
@@ -8,6 +12,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save, post_delete
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
@@ -72,6 +77,16 @@ class Interest(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+
+        if self.cover_photo:
+            im = Image.open(self.cover_photo)
+            output = BytesIO()
+            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
+            self.cover_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+
+        super(Interest, self).save(*args, **kwargs)
+
     def __str__(self):
         return "Interest id: " + str(self.id) + " name " + str(self.name)
 
@@ -107,6 +122,22 @@ class UserProfile(models.Model):
     profile_story_description = models.TextField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
+
+    def save(self, *args, **kwargs):
+
+        if self.cover_photo:
+            im = Image.open(self.cover_photo)
+            output = BytesIO()
+            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
+            self.cover_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            
+        if self.profile_photo:
+            im = Image.open(self.profile_photo)
+            output = BytesIO()
+            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
+            self.profile_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            
+        super(UserProfile, self).save(*args, **kwargs)
 
     def __str__(self):
         return 'user profile id %s - %s %s %s' % (str(self.id), self.first_name, self.last_name, self.username)

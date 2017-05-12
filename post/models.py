@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import os
+import sys
 
 from django.db import models
 from django.conf import settings
@@ -11,6 +12,10 @@ from jsonfield import JSONField
 
 from django.contrib.auth.models import User
 from django.core.files import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
+from PIL import Image
+from io import BytesIO
 
 from userprofile.models import Interest
 
@@ -59,6 +64,12 @@ class Post(models.Model):
                 except Exception as e:
                     print ("Error generating video thumb", e, str(e))
                 return
+
+        if self.image:
+            im = Image.open(self.image)
+            output = BytesIO()
+            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
+            self.image = InMemoryUploadedFile(output, 'ImageField', self.image.name, 'image/jpeg', sys.getsizeof(output), None)
             
         super(Post, self).save(*args, **kwargs)
 
