@@ -12,7 +12,7 @@ from post.serializers import PostSerializer, CommentSerializer
 class NotificationSerializer(serializers.ModelSerializer):
     receiver = UserSerializer(read_only=True)
     post_liked_by = UserSerializer(read_only=True)
-    post = PostSerializer(read_only=True)
+    post = PostSerializer(read_only=True, context=self.context)
     comment = CommentSerializer(read_only=True)
     notification_type = serializers.SerializerMethodField()
     user_friend = UserFriendSerializer(read_only=True)
