@@ -7,6 +7,9 @@ geodata/
 squelo_backend/uwsgi.dev.ini
 .DS_STORE
 
+# docker related stuff
+/docker/build/app/code
+
 # IDEs and editor
 /.idea
 *.sublime-workspace

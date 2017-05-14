@@ -32,7 +32,8 @@ ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
 DATABASE = os.environ.get('DATABASE')
 DB_HOST = os.environ.get('DB_HOST', 'postgres')
 DB_PORT = os.environ.get('DB_PORT', '5432')
-DB_USER = os.environ.get('DB_PASSWORD', 'root')
+DB_NAME = os.environ.get('DB_NAME', 'meanwise1')
+DB_USER = os.environ.get('DB_USER', 'meanwise')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'M3anw1s3!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'whoosh')
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
@@ -111,7 +112,7 @@ INSTALLED_APPS = [
     'userprofile',
     'post',
     'mnotifications',
-    'django-crontab',
+    'django_crontab',
     'scarface',
 ]
 
@@ -134,17 +135,18 @@ MIDDLEWARE_CLASSES = [
 ]
 
 # setting for S3 storage
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', None)
 THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
-AWS_S3_REGION_NAME = 'us-west-2'
-AWS_ACCESS_KEY_ID = 'AKIAIHSE2YDOPTH5QQEQ'
-AWS_SECRET_ACCESS_KEY = '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'
+
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-west-2')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'AKIAIHSE2YDOPTH5QQEQ')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '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')
 
 # The name of the bucket to store files in.
-AWS_STORAGE_BUCKET_NAME = "mw-uploads"
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_FILE_OVERWRITE = False
-AWS_S3_CUSTOM_DOMAIN = 'dtl635379s21p.cloudfront.net'
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', "mw-uploads")
+AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH', False)
+AWS_S3_FILE_OVERWRITE = os.environ.get('AWS_S3_FILE_OVERWRITE', False)
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', 'dtl635379s21p.cloudfront.net')
 
 
 ROOT_URLCONF = 'meanwise_backend.urls'
@@ -207,8 +209,8 @@ SEND_EMAIL_RECEIPTS = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'meanwise',
-        'USER': 'meanwise',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': DB_HOST,
         'PORT': DB_PORT,
