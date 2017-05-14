@@ -7,4 +7,6 @@ geodata/
 squelo_backend/uwsgi.dev.ini
 .DS_STORE
 
+# IDEs and editor
 /.idea
+*.sublime-workspace
