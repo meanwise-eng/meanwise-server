@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 RUN apt-get update && \
-    apt-get install -y python3-pip python3-dev libpq-dev libjpeg-dev ffmpeg python3-venv
+    apt-get install -y python3-pip python3-dev libpq-dev libjpeg-dev ffmpeg python3-venv locales
 
 RUN pip3 install --upgrade pip setuptools &&\
     mkdir ~/venv && cd ~/venv && python3 -m venv meanwise
