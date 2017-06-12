@@ -3,6 +3,7 @@ This is the brand new backend written for Meanwise in Python using Django.
 
 </br>
 ## Installation using Docker
+
 ```
 $ cd meanwise-server
 $ docker-compose up
@@ -23,6 +24,7 @@ $ ./manage.py createsuperuser
 Installation comprises of standard steps used for deploying any Django application.
 
 ### Installing Python Packages
+
 ```
 $ git clone git@github.com:meanwise-eng/meanwise-server.git
 $ cd meanwise-server
@@ -68,7 +70,9 @@ schema. Go to `meanwise_backend` and run the following commands..
 Follow the instructions to create a super user.
 
 </br>
+
 ### Running the server
+
 Meanwise Backend already includes a uWSGI server and config for running it. 
 Before running the following commands make sure you edit `uwsgi.dev.ini` located in `meanwise_backend/meanwise_backend`.  
 Here's a sample config:
