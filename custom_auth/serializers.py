@@ -2,6 +2,7 @@ from django.http import HttpRequest
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core import exceptions
+import logging
 
 import ast
 
@@ -14,6 +15,7 @@ from django.contrib.auth.models import User
 from userprofile.models import *
 from userprofile.serializers import UserProfileSerializer
 
+logger = logging.getLogger(__name__)
 
 class RegisterUserSerializer(serializers.Serializer):
     """
@@ -115,7 +117,11 @@ class RegisterUserSerializer(serializers.Serializer):
             user_profile.dob = self.validated_data['dob']
         if self.validated_data.get('facebook_token', None):
             user_profile.facebook_token = self.validated_data['facebook_token']
-        user_profile.save()
+        try:
+            user_profile.save()
+        except Exception as ex:
+            logger.error(ex)
+            raise
         if self.validated_data.get('profession', None):
             try:
                 profession = Profession.objects.get(id=int(self.validated_data['profession']))
