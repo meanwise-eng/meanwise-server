@@ -88,7 +88,6 @@ INSTALLED_APPS = [
     'mnotifications',
     #'notifications',
     'djcelery',
-    'stream',
     #'works',
     #'company',
     # auth
@@ -302,6 +301,10 @@ LOGGING = {
             'level': 'INFO',
             'handlers': ['console']
         },
+        'custom_auth': {
+            'level': 'INFO',
+            'handlers': ['console']
+        },
         'celery': {
             'level': 'DEBUG',
             'handlers': ['console']
@@ -398,7 +401,7 @@ THUMBNAIL_NAMER = 'easy_thumbnails.namers.alias'
 HS_CONNECTIONS = {
     'elasticsearch': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
+        'URL': 'http://elasticsearch:9200/',
         'INDEX_NAME': 'meanwise_prod',
     },
     'solr': {
@@ -474,7 +477,7 @@ if not DEBUG:
 
 # ElasticSearch Config
 ES_DISABLED = True
-ES_URLS = ['http://127.0.0.1:9200/']
+ES_URLS = ['http://elasticsearch:9200/']
 ES_INDEXES = {'default': 'main_index'}
 
 # Taggit Config
