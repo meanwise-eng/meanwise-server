@@ -272,8 +272,7 @@ class FriendsList(APIView):
         
         """
         logger.info("Friendslist - POST [API / views.py /")
-
-        if user_id != request.user.id:
+        if int(user_id) != request.user.id:
             raise PermissionDenied("You can only send friend request as yourself")
 
         try:

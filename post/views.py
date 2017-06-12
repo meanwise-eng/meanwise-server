@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
+import logging
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -33,6 +34,7 @@ from common.api_helper import get_objects_paginated
 from common.push_message import *
 
 post_qs = Post.objects.filter(is_deleted=False).filter(Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
+logger = logging.getLogger(__name__)
 
 class UserPostList(APIView):
     """
@@ -55,7 +57,7 @@ class UserPostList(APIView):
         data = request.data
         request.data['poster'] = user_id
 
-        if user_id != request.user:
+        if int(user_id) != int(request.user.id):
             raise PermissionDenied("You cannot create a post as another user")
         user = User.objects.get(pk=user_id)
 

@@ -1,11 +1,14 @@
 from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 from easy_thumbnails.files import get_thumbnailer
+import logging
 
 from drf_haystack.serializers import HaystackSerializerMixin
 
 from userprofile.models import *
 from django.contrib.auth.models import User
+
+logger = logging.getLogger(__name__)
 
 class ProfessionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,7 +66,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         small = {'size': (48, 48), 'crop': True}
         profile_photo_small_url = ""
         if obj.profile_photo:
-            profile_photo_small_url = get_thumbnailer(obj.profile_photo).get_thumbnail(small).url
+            try:
+                profile_photo_small_url = get_thumbnailer(obj.profile_photo).get_thumbnail(small).url
+            except Exception as ex:
+                logger.error(ex)
         return profile_photo_small_url
 
     def get_user_skills(self, obj):
