@@ -34,7 +34,7 @@ DB_HOST = os.environ.get('DB_HOST', 'postgres')
 DB_PORT = os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_NAME', 'meanwise')
 DB_USER = os.environ.get('DB_USER', 'meanwise')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'M3anw1s3!')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'meanwise1!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'whoosh')
 MEDIA_URL = os.environ.get('MEDIA_URL', 'https://dtl635379s21p.cloudfront.net/')
 
