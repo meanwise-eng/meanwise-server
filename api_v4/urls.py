@@ -46,5 +46,6 @@ urlpatterns = [
     url(r'^profession/$', ProfessionListView.as_view()),
     url(r'^skill/$', SkillListView.as_view()),
     url(r'^interest/$', InterestListView.as_view()),
+    url(r'^public-feed/$', PublicFeed.as_view()),
     
 ]

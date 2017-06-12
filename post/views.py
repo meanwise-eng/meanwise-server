@@ -211,6 +211,13 @@ class UserHomeFeed(APIView):
         except Exception as e:
             return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
+class PublicFeed(APIView):
+
+    def get(self, request):
+        posts = post_qs.all()[:20]
+        serializer = PostSerializer(posts, many=True, context={'request': request})
+        return Response({"status": "success", "error": "", "results": {"data": serializer.data}}, status=status.HTTP_200_OK)
+
 class PostViewSet(viewsets.ModelViewSet):
     """
     Post apis
