@@ -32,11 +32,11 @@ ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
 DATABASE = os.environ.get('DATABASE')
 DB_HOST = os.environ.get('DB_HOST', 'postgres')
 DB_PORT = os.environ.get('DB_PORT', '5432')
-DB_NAME = os.environ.get('DB_NAME', 'meanwise1')
+DB_NAME = os.environ.get('DB_NAME', 'meanwise')
 DB_USER = os.environ.get('DB_USER', 'meanwise')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'M3anw1s3!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'whoosh')
-MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
+MEDIA_URL = os.environ.get('MEDIA_URL', 'https://dtl635379s21p.cloudfront.net/')
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '127.0.0.1')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
@@ -44,7 +44,7 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_PORT = os.environ.get('EMAIL_PORT', 1025)
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
 
-REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1:6379')
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis:6379')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -85,6 +85,8 @@ INSTALLED_APPS = [
     #'recommendation',
     #'jobs',
     #'pages',
+    'mnotifications',
+    #'notifications',
     'djcelery',
     'stream',
     #'works',
@@ -111,7 +113,6 @@ INSTALLED_APPS = [
     'custom_auth',
     'userprofile',
     'post',
-    'mnotifications',
     'django_crontab',
     'scarface',
 ]
@@ -134,8 +135,10 @@ MIDDLEWARE_CLASSES = [
     'geography.middlewares.AddIPMiddleware',
 ]
 
+DEVSERVER_AUTO_PROFILE = True
+
 # setting for S3 storage
-DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', None)
+DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
 THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
 
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-west-2')
@@ -281,6 +284,7 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'console': {
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
     },
@@ -291,6 +295,15 @@ LOGGING = {
             'propagate': True,
         },
         'django': {
+            'level': 'INFO',
+            'handlers': ['console']
+        },
+        'post': {
+            'level': 'INFO',
+            'handlers': ['console']
+        },
+        'celery': {
+            'level': 'DEBUG',
             'handlers': ['console']
         }
     },
@@ -481,8 +494,8 @@ CRONJOBS = [
     ('0 0 * * *', 'post.cron.my_scheduled_job')
 ]
 
-AWS_ACCESS_KEY ="AKIAIKKK53U5PWGQSLZA"
-AWS_SECRET_ACCESS_KEY = "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"
+#AWS_ACCESS_KEY ="AKIAIKKK53U5PWGQSLZA"
+#AWS_SECRET_ACCESS_KEY = "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"
 SCARFACE_REGION_NAME = "us-west-2"
 
 SCARFACE_APNS_CERTIFICATE="-----BEGIN CERTIFICATE-----\nMIIFjzCCBHegAwIBAgIIJ5Pnj/tAdUgwDQYJKoZIhvcNAQEFBQAwgZYxCzAJBgNV\nBAYTAlVTMRMwEQYDVQQKDApBcHBsZSBJbmMuMSwwKgYDVQQLDCNBcHBsZSBXb3Js\nZHdpZGUgRGV2ZWxvcGVyIFJlbGF0aW9uczFEMEIGA1UEAww7QXBwbGUgV29ybGR3\naWRlIERldmVsb3BlciBSZWxhdGlvbnMgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkw\nHhcNMTcwNDEzMDIxODI0WhcNMTgwNDEzMDIxODI0WjCBjjElMCMGCgmSJomT8ixk\nAQEMFWNvbS5tZWFud2lzZS5tZWFud2lzZTFDMEEGA1UEAww6QXBwbGUgRGV2ZWxv\ncG1lbnQgSU9TIFB1c2ggU2VydmljZXM6IGNvbS5tZWFud2lzZS5tZWFud2lzZTET\nMBEGA1UECwwKRlIyOTNGOTNGUTELMAkGA1UEBhMCVVMwggEiMA0GCSqGSIb3DQEB\nAQUAA4IBDwAwggEKAoIBAQCivc2PP5bRKUCPBvdMWvQJ4K7neYKR8AosvLapx+tM\nEcg0d66zBGwUycoTJFKoo2df7IP8sD8KVGaVG946nfJJovABy34m8DI1W1xlo7Td\nWJpZbdeHqqQOBGdYYHiU+XQgmXN9bfa9ecOOHFSNqyl9qeWUTdVrKifKputZrUZH\nGA5397rBZOPIjCMUR3VZ/FIV1Vra39nifZmI/Ml10Wd9bfLgaXanJjE1NOFOK1NL\nqIt4EkB/sRaqb7qjhKXAD8WOFoOE0RbUl755ChG1d4GZs0Bh6oTBgHbncDIjhCpd\n9i/roTyXuA4TAYlB5L+jRfieaRjfLHHpXCjjOVzE1lIzAgMBAAGjggHlMIIB4TAd\nBgNVHQ4EFgQUDJXFS7ImQOp0A/AYmxukU70moPEwCQYDVR0TBAIwADAfBgNVHSME\nGDAWgBSIJxcJqbYYYIvs67r2R1nFUlSjtzCCAQ8GA1UdIASCAQYwggECMIH/Bgkq\nhkiG92NkBQEwgfEwgcMGCCsGAQUFBwICMIG2DIGzUmVsaWFuY2Ugb24gdGhpcyBj\nZXJ0aWZpY2F0ZSBieSBhbnkgcGFydHkgYXNzdW1lcyBhY2NlcHRhbmNlIG9mIHRo\nZSB0aGVuIGFwcGxpY2FibGUgc3RhbmRhcmQgdGVybXMgYW5kIGNvbmRpdGlvbnMg\nb2YgdXNlLCBjZXJ0aWZpY2F0ZSBwb2xpY3kgYW5kIGNlcnRpZmljYXRpb24gcHJh\nY3RpY2Ugc3RhdGVtZW50cy4wKQYIKwYBBQUHAgEWHWh0dHA6Ly93d3cuYXBwbGUu\nY29tL2FwcGxlY2EvME0GA1UdHwRGMEQwQqBAoD6GPGh0dHA6Ly9kZXZlbG9wZXIu\nYXBwbGUuY29tL2NlcnRpZmljYXRpb25hdXRob3JpdHkvd3dkcmNhLmNybDALBgNV\nHQ8EBAMCB4AwEwYDVR0lBAwwCgYIKwYBBQUHAwIwEAYKKoZIhvdjZAYDAQQCBQAw\nDQYJKoZIhvcNAQEFBQADggEBAKnynAkkDi3GX2eRgg2SsSbUnGSDEbwloCYRpKti\n8YM/rMK6Dk7ROQXQt5ML+lZ7mycAWhIfC9+XYqHCAifPYaTMWbBekktar3OboCoE\nXmfdIYT74VFL8wtC9mFX8s6Dq42fjYz/NOvDcMmdBcSzrSN/XiQvNIDfZNJQ35dE\nUQ8YJ6CIntiELAbO3umC9zQL9Jw5hwGD+1YA6lEYp7OqIQM+gH0aY0eT1g3pg6bs\ntkLrHRIuZI3kQk6DL0KYr7fgdxSnlbXgoVSxTfcLHA1ANUfyrUcd35sT84IRIu0S\nc40OTp4kQHzz+Puqrc4BKN3mXUdl4htcSdNZSd3z5wBNGPc=\n-----END CERTIFICATE-----"
