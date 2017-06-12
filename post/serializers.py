@@ -86,11 +86,8 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
             return  ""
-        small = {'size': (48, 48), 'crop': True}
-        profile_photo_small_url = ""
-        if up.profile_photo:
-            profile_photo_small_url = ''#get_thumbnailer(up.profile_photo).get_thumbnail(small).url
-            return profile_photo_small_url
+        if up.profile_photo_thumbnail:
+            return up.profile_photo_thumbnail.url
         return ""
 
     def get_user_profession(self, obj):
@@ -226,11 +223,8 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
             return  ""
-        small = {'size': (48, 48), 'crop': True}
-        profile_photo_small_url = ""
-        if up.profile_photo:
-            profile_photo_small_url = ''#get_thumbnailer(up.profile_photo).get_thumbnail(small).url
-            return profile_photo_small_url
+        if up.profile_photo_thumbnail:
+            return up.profile_photo_thumbnail.url
         return ""
 
     def get_user_profession(self, obj):

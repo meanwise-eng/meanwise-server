@@ -113,6 +113,8 @@ class UserProfile(models.Model):
                                        related_name='interests', blank=True)
     profile_photo = ThumbnailerImageField(upload_to='profile_photos',
                                           blank=True)
+    profile_photo_thumbnail = ThumbnailerImageField(upload_to='profile_photo_thumbs',
+                                          blank=True)
     cover_photo = ThumbnailerImageField(upload_to='cover_photos', blank=True)
     bio = models.TextField(null=True, blank=True)
     intro_video = models.FileField(upload_to='intro_videos', null=True, blank=True)
@@ -136,6 +138,12 @@ class UserProfile(models.Model):
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
             self.profile_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+
+            thumbnail_size = (48, 48)
+            thumbnail_output = BytesIO()
+            im.thumbnail(thumbnail_size)
+            im.save(output, format='JPEG', quality=100, optimize=True)
+            self.profile_photo_thumbnail = InMemoryUploadedFile(thumbnail_output, 'ThumbnailerImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(thumbnail_output), None)
             
         super(UserProfile, self).save(*args, **kwargs)
 
