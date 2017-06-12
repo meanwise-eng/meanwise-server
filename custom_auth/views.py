@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 
 import logging
 
@@ -24,6 +25,7 @@ class RegisterUserView(APIView):
     """
     permission_classes = (AllowAny,)
 
+    @transaction.atomic()
     def post(self, request):
         logger.info("RegisterUserView - POST ")
         register_data = request.data
@@ -69,6 +71,29 @@ def verify_user(request):
 
     return Response({'status':'success', 'error':'', 'results':response_data}, status=status.HTTP_202_ACCEPTED)
 
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_username(request):
+    """
+    Check if user with given username exists
+
+    """
+    username = request.data.get('username', None)
+    exists = False
+    if username:
+        try:
+            user = User.objects.get(username=username)
+            exists = True
+        except User.DoesNotExist:
+            pass
+    response_data = {}
+    if exists:
+        response_data['exists'] = 'true'
+    else:
+        response_data['exists'] = 'false'
+
+    return Response({'status':'success', 'error':'', 'results':response_data}, status=status.HTTP_202_ACCEPTED)
 
 class FetchToken(APIView):
     permission_classes = (AllowAny,)
