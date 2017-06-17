@@ -17,7 +17,7 @@ from datetime import timedelta
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SITE_URL = 'https://squelo.com'
+SITE_URL = 'https://meanwise.com'
 
 ADMINS = ()
 
@@ -45,7 +45,8 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT', 1025)
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis:6379')
-
+ELASTICSEARCH_USERNAME = os.environ.get('ELASTICSEARCH_USERNAME', 'elastic')
+ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD', 'changeme')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
@@ -137,12 +138,13 @@ MIDDLEWARE_CLASSES = [
 DEVSERVER_AUTO_PROFILE = True
 
 # setting for S3 storage
+#DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'django_s3_storage.storage.S3Storage')
 DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
-THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+#THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
 
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-west-2')
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'AKIAIHSE2YDOPTH5QQEQ')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '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')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'AKIAJW5PLC2EZMSQ4ZQQ')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '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')
 
 # The name of the bucket to store files in.
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', "mw-uploads")
@@ -150,6 +152,11 @@ AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH', False)
 AWS_S3_FILE_OVERWRITE = os.environ.get('AWS_S3_FILE_OVERWRITE', False)
 AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', 'dtl635379s21p.cloudfront.net')
 
+#AWS_REGION = os.environ.get('AWS_REGION', 'us-west-2')
+#AWS_S3_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME', "mw-uploads")
+#AWS_S3_BUCKET_AUTH = False
+#AWS_S3_MAX_AGE_SECONDS = 60 * 60 * 24 * 365
+#AWS_S3_PUBLIC_URL = os.environ.get('AWS_S3_PUBLIC_URL', 'dtl635379s21p.cloudfront.net')
 
 ROOT_URLCONF = 'meanwise_backend.urls'
 
@@ -403,6 +410,10 @@ HS_CONNECTIONS = {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
         'URL': 'http://elasticsearch:9200/',
         'INDEX_NAME': 'meanwise_prod',
+        'KWARGS': {
+            'http_auth': (ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD),
+            'use_ssl': False,
+        }
     },
     'solr': {
         'ENGINE': 'haystack.backends.solr_backend.SolrEngine',

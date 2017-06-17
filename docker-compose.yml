@@ -9,6 +9,7 @@ services:
     links:
       - postgres
       - redis
+      - elasticsearch
     ports:
       - '8000:8000'
 

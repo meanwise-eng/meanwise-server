@@ -6,4 +6,4 @@ rsync -avz --exclude=docker --exclude=.git --exclude=docker-compose*.yml --exclu
 
 docker-compose -f docker-compose.build.yml build
 
-docker tag meanwisebuild_app repository/meanwise/app:latest
+docker tag meanwisebuild_app meanwise/api:latest
