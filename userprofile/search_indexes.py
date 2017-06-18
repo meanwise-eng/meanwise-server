@@ -1,6 +1,6 @@
 from django.utils import timezone
 from haystack import indexes
-from userprofile.models import UserProfile
+from userprofile.models import UserProfile, Profession, Skill
 
 class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
 
@@ -30,3 +30,20 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_skills_text(self, obj):
         return  [skill.text for skill in obj.skills.all()] 
 
+class ProfessionIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(model_attr='text', document=True, use_template=False)
+    profession_id = indexes.IntegerField(model_attr='id')
+
+    autocomplete = indexes.EdgeNgramField(model_attr='text')
+
+    def get_model(self):
+        return Profession
+
+class SkillIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(model_attr='text', document=True, use_template=False)
+    skill_id = indexes.IntegerField(model_attr='id')
+
+    autocomplete = indexes.EdgeNgramField(model_attr='text')
+
+    def get_model(self):
+        return Skill

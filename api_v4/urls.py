@@ -14,6 +14,8 @@ router.register(r'share', ShareViewSet)
 
 router.register(r'search/post', PostSearchView, base_name="post-search")
 router.register(r"search/userprofile", UserProfileSearchView, base_name="userprofile-search")
+router.register(r'autocomplete/profession', ProfessionSearchView, base_name="profession-search")
+router.register(r'autocomplete/skill', SkillSearchView, base_name="skill-search")
 
 urlpatterns = [
     url(r'custom_auth/', include('custom_auth.urls')),

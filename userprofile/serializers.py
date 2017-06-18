@@ -3,10 +3,11 @@ from taggit_serializer.serializers import TagListSerializerField, TaggitSerializ
 from easy_thumbnails.files import get_thumbnailer
 import logging
 
-from drf_haystack.serializers import HaystackSerializerMixin
+from drf_haystack.serializers import HaystackSerializerMixin, HaystackSerializer
 
 from userprofile.models import *
 from django.contrib.auth.models import User
+from userprofile.search_indexes import ProfessionIndex, SkillIndex
 
 logger = logging.getLogger(__name__)
 
@@ -161,3 +162,25 @@ class ForgotPasswordSerializer(serializers.Serializer):
 class UserProfileSearchSerializer(HaystackSerializerMixin, UserProfileSerializer):
     class Meta(UserProfileSerializer.Meta):
         search_fields = ("text", "userprofile_id", "first_name", "last_name", "username", "skills_text", 'created_on')
+
+class ProfessionSearchSerializer(HaystackSerializer):
+
+    class Meta:
+        index_classes = [ProfessionIndex]
+        fields = ["profession_id", "text", "autocomplete"]
+        ignore_fields = ["autocomplete"]
+
+        field_aliases = {
+            'q': 'autocomplete'
+        }
+
+class SkillSearchSerializer(HaystackSerializer):
+
+    class Meta:
+        index_classes = [SkillIndex]
+        fields = ["skill_id", "text", "autocomplete"]
+        ignore_fields = ["autocomplete"]
+
+        field_aliases = {
+            'q': 'autocomplete'
+        }

@@ -23,6 +23,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
+from drf_haystack.filters import HaystackAutocompleteFilter
 
 from userprofile.models import Profession, Skill, Interest, UserProfile, UserFriend
 from userprofile.serializers import *
@@ -528,3 +529,21 @@ class UserProfileSearchView(HaystackViewSet):
     def filter_queryset(self, *args, **kwargs):
         queryset = super(UserProfileSearchView, self).filter_queryset(self.get_queryset())
         return queryset.order_by('-created_on')
+
+class ProfessionSearchView(HaystackViewSet):
+    index_models = [Profession]
+    serializer_class = ProfessionSearchSerializer
+    filter_backends = [HaystackAutocompleteFilter]
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super().filter_queryset(self.get_queryset())
+        return queryset.order_by('text')
+
+class SkillSearchView(HaystackViewSet):
+    index_models = [Skill]
+    serializer_class = SkillSearchSerializer
+    filter_backends = [HaystackAutocompleteFilter]
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super().filter_queryset(self.get_queryset())
+        return queryset.order_by('text')
