@@ -136,27 +136,36 @@ class RegisterUserSerializer(serializers.Serializer):
                 user_profile.save()
             except Profession.DoesNotExist:
                 pass
+        skills_list = list()
         if self.validated_data.get('skills', None):
             #hack to handle llist as string
-            if type(self.validated_data.get('skills')) == type('abc'):
-                self.validated_data['skills'] = list(self.validated_data['skills'])
-            if type(self.validated_data.get('skills')[0]) == type('abc'):
-                self.validated_data['skills'] = ast.literal_eval(self.validated_data['skills'][0])
-            for skill in self.validated_data['skills']:
+            skills = self.validated_data.get('skills')
+            logger.info("Skills: %s of type %s" % (skills, type(skills)))
+            if type(skills) == str or type(skills) == int:
+                skills = list(skills)
+            if type(skills[0]) == type('abc') and skills[0].find('[') != -1:
+                skills = ast.literal_eval(skills[0])
+            for skill in skills:
                 try:
                     skill = Skill.objects.get(id=int(skill))
                     user_profile.skills.add(skill)
                 except Skill.DoesNotExist:
                     logger.warning("Error adding skill to profile during registration", skill)
 
+            skills_list = [skill.text for skill in user_profile.skills.all()]
+
         if self.validated_data.get('skills_list', None):
-            user_profile.skills_list = self.validated_data['skills_list']
-            for skill_text in user_profile.skills_list:
+            for skill_text in self.validated_data['skills_list']:
+                if skill_text in skills_list:
+                    continue
+
                 try:
                     skill = Skill.objects.get(text=skill_text)
                     user_profile.skills.add(skill)
                 except Skill.DoesNotExist:
                     pass
+            user_profile.skills_list = self.validated_data['skills_list']
+            #user_profile.skills_list = list(skills_list)
             user_profile.save()
 
         if self.validated_data.get('interests', None):

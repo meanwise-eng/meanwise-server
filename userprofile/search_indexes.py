@@ -28,7 +28,7 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
         )
 
     def prepare_skills_text(self, obj):
-        return  [skill.text for skill in obj.skills.all()] 
+        return  [skill.lower() for skill in obj.skills_list]
 
 class ProfessionIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(model_attr='text', document=True, use_template=False)

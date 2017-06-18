@@ -7,7 +7,7 @@ from drf_haystack.serializers import HaystackSerializerMixin, HaystackSerializer
 
 from userprofile.models import *
 from django.contrib.auth.models import User
-from userprofile.search_indexes import ProfessionIndex, SkillIndex
+from userprofile.search_indexes import UserProfileIndex, ProfessionIndex, SkillIndex
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +133,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
             rufs_list.append(data)
         return ufs_list + rufs_list
 
+    def update(self, obj, validated_data):
+        skills = validated_data.get('skills', None)
+        if skills == None:
+            UserProfile.skills.through.objects.filter(userprofile_id=obj.id).delete()
+
+        obj.skills_list = list(set(validated_data.get('skills_list', list()) + [skill.text for skill in skills]))
+
+        return super().update(obj, validated_data)
+
 class UserSerializer(serializers.ModelSerializer):
     userprofile = UserProfileSerializer(read_only=True)
     class Meta:
@@ -162,6 +171,8 @@ class ForgotPasswordSerializer(serializers.Serializer):
 class UserProfileSearchSerializer(HaystackSerializerMixin, UserProfileSerializer):
     class Meta(UserProfileSerializer.Meta):
         search_fields = ("text", "userprofile_id", "first_name", "last_name", "username", "skills_text", 'created_on')
+        field_aliases = {}
+        exclude = {}
 
 class ProfessionSearchSerializer(HaystackSerializer):
 
