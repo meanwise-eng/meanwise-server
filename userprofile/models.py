@@ -105,16 +105,17 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=128)
     middle_name = models.CharField(max_length=128, blank=True)
     last_name = models.CharField(max_length=128, blank=True)
-    profession = models.ForeignKey(Profession,
-                                    blank=True, null=True)
+    profession = models.ForeignKey(Profession, blank=True, null=True)
+    profession_text = models.CharField(max_length=128, blank=True)
     city = models.CharField(max_length=128, blank=True, null=True)
     skills = models.ManyToManyField(Skill, related_name='skills', blank=True)
+    skills_list = ArrayField(models.CharField(max_length=128), default=list())
+
     interests = models.ManyToManyField(Interest,
                                        related_name='interests', blank=True)
-    profile_photo = ThumbnailerImageField(upload_to='profile_photos',
-                                          blank=True)
-    profile_photo_thumbnail = ThumbnailerImageField(upload_to='profile_photo_thumbs',
-                                          blank=True)
+    profile_photo = ThumbnailerImageField(upload_to='profile_photos', blank=True)
+    profile_photo_thumbnail = ThumbnailerImageField(upload_to='profile_photo_thumbs', blank=True)
+
     cover_photo = ThumbnailerImageField(upload_to='cover_photos', blank=True)
     bio = models.TextField(null=True, blank=True)
     intro_video = models.FileField(upload_to='intro_videos', null=True, blank=True)
@@ -124,6 +125,9 @@ class UserProfile(models.Model):
     profile_story_description = models.TextField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
+
+    user_type = models.IntegerField(default=int(0), null=False)
+    profile_background_color = models.CharField(default='#FFFFFF', max_length=20)
 
     def save(self, *args, **kwargs):
 

@@ -14,8 +14,7 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 
 from custom_auth.serializers import *
 
-logger = logging.getLogger('meanwise')
-
+logger = logging.getLogger(__name__)
 
 class RegisterUserView(APIView):
     """

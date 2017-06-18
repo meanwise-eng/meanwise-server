@@ -38,18 +38,12 @@ class RegisterUserSerializer(serializers.Serializer):
     bio = serializers.CharField(max_length=200, required=False)
     profile_story_title = serializers.CharField(max_length=128, required=False)
     profile_story_description = serializers.CharField(max_length=200, required=False)
-    invite_code = serializers.CharField(max_length=128, required=True)
     dob = serializers.DateField(required=False)
 
-    def validate_invite_code(self, value):
-        """
-        Check that the invite code is valid.
-        """
-        try:
-            invite_group = InviteGroup.objects.get(invite_code=value)
-        except InviteGroup.DoesNotExist:
-            raise serializers.ValidationError("Not a valid invite code.")
-        return value
+    skills_list = serializers.ListField()
+    profession_text = serializers.CharField(max_length=123, required=False)
+
+    profile_background_color = serializers.CharField(max_length=20)
 
     def validate_username(self, value):
         """
@@ -117,11 +111,15 @@ class RegisterUserSerializer(serializers.Serializer):
             user_profile.dob = self.validated_data['dob']
         if self.validated_data.get('facebook_token', None):
             user_profile.facebook_token = self.validated_data['facebook_token']
+        if self.validated_data.get('profile_background_color', None):
+            user_profile.profile_background_color = self.validated_data['profile_background_color']
+
         try:
             user_profile.save()
         except Exception as ex:
             logger.error(ex)
             raise
+
         if self.validated_data.get('profession', None):
             try:
                 profession = Profession.objects.get(id=int(self.validated_data['profession']))
@@ -130,6 +128,14 @@ class RegisterUserSerializer(serializers.Serializer):
             except Profession.DoesNotExist:
                 logger.warning("Error adding profession to profile during registration",
                                self.validated_data['profession'])
+        if self.validated_data.get('profession_text', None):
+            try:
+                user_profile.profession_text = self.validated_data['profession_text']
+                profession = Profession.objects.get(text=self.validated_data['profession_text'])
+                user_profile.profession = profession
+                user_profile.save()
+            except Profession.DoesNotExist:
+                pass
         if self.validated_data.get('skills', None):
             #hack to handle llist as string
             if type(self.validated_data.get('skills')) == type('abc'):
@@ -140,8 +146,19 @@ class RegisterUserSerializer(serializers.Serializer):
                 try:
                     skill = Skill.objects.get(id=int(skill))
                     user_profile.skills.add(skill)
-                except Profession.DoesNotExist:
+                except Skill.DoesNotExist:
                     logger.warning("Error adding skill to profile during registration", skill)
+
+        if self.validated_data.get('skills_list', None):
+            user_profile.skills_list = self.validated_data['skills_list']
+            for skill_text in user_profile.skills_list:
+                try:
+                    skill = Skill.objects.get(text=skill_text)
+                    user_profile.skills.add(skill)
+                except Skill.DoesNotExist:
+                    pass
+            user_profile.save()
+
         if self.validated_data.get('interests', None):
             #hack to handle llist as string
             if type(self.validated_data.get('interests')) == type('abc'):
@@ -156,10 +173,10 @@ class RegisterUserSerializer(serializers.Serializer):
                     logger.warning("Error adding interest to profile during registration", interest)
 
         #add to invite group count
-        invite_group = InviteGroup.objects.get(invite_code=self.validated_data['invite_code'])
-        invite_group.count += 1
-        invite_group.save()
-        invite_group.users.add(user)
+        #invite_group = InviteGroup.objects.get(invite_code=self.validated_data['invite_code'])
+        #invite_group.count += 1
+        #invite_group.save()
+        #invite_group.users.add(user)
         return user, user_profile, token[0].key
 
 
