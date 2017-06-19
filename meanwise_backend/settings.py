@@ -36,7 +36,7 @@ DB_NAME = os.environ.get('DB_NAME', 'meanwise')
 DB_USER = os.environ.get('DB_USER', 'meanwise')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'meanwise1!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'whoosh')
-MEDIA_URL = os.environ.get('MEDIA_URL', 'https://dtl635379s21p.cloudfront.net/')
+MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '127.0.0.1')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
@@ -312,10 +312,14 @@ LOGGING = {
             'level': 'INFO',
             'handlers': ['console']
         },
+        'userprofile': {
+            'level': 'INFO',
+            'handlers': ['console']
+        },
         'celery': {
             'level': 'DEBUG',
             'handlers': ['console']
-        }
+        },
     },
 }
 
