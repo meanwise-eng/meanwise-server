@@ -2,6 +2,7 @@ from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 from easy_thumbnails.files import get_thumbnailer
 import logging
+import ast
 
 from drf_haystack.serializers import HaystackSerializerMixin, HaystackSerializer
 
@@ -134,13 +135,33 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         return ufs_list + rufs_list
 
     def update(self, obj, validated_data):
+        super().update(obj, validated_data)
+
         skills = validated_data.get('skills', None)
+        skills_list_from_skills = list()
         if skills == None:
             UserProfile.skills.through.objects.filter(userprofile_id=obj.id).delete()
+        else:
+            skills_list_from_skills = [skill.text for skill in skills]
 
-        obj.skills_list = list(set(validated_data.get('skills_list', list()) + [skill.text for skill in skills]))
+        skills_list = validated_data.get('skills_list', list())
+        if type(skills_list) == str or type(skills_list) == int:
+            skills_list = list(skills_list)
+        if type(skills_list[0]) == str and skills_list[0].find('[') != -1:
+            skills_list = ast.literal_eval(skills_list[0])
 
-        return super().update(obj, validated_data)
+        for skill_text in skills_list:
+            if skill_text in skills_list_from_skills:
+                continue
+
+            try:
+                skill = Skill.objects.get(text=skill_text)
+                obj.skills.add(skill)
+            except Skill.DoesNotExist:
+                pass
+        obj.skills_list = list(set(skills_list + skills_list_from_skills))
+        obj.save()
+        return obj
 
 class UserProfileSerializer(UserProfileUpdateSerializer):
     class Meta(UserProfileUpdateSerializer.Meta):

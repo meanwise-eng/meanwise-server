@@ -136,14 +136,14 @@ class RegisterUserSerializer(serializers.Serializer):
                 user_profile.save()
             except Profession.DoesNotExist:
                 pass
-        skills_list = list()
+        skills_list_from_skills = list()
         if self.validated_data.get('skills', None):
             #hack to handle llist as string
             skills = self.validated_data.get('skills')
             logger.info("Skills: %s of type %s" % (skills, type(skills)))
             if type(skills) == str or type(skills) == int:
                 skills = list(skills)
-            if type(skills[0]) == type('abc') and skills[0].find('[') != -1:
+            if type(skills[0]) == str and skills[0].find('(') != -1:
                 skills = ast.literal_eval(skills[0])
             for skill in skills:
                 try:
@@ -152,11 +152,18 @@ class RegisterUserSerializer(serializers.Serializer):
                 except Skill.DoesNotExist:
                     logger.warning("Error adding skill to profile during registration", skill)
 
-            skills_list = [skill.text for skill in user_profile.skills.all()]
+            skills_list_from_skills = [skill.text for skill in user_profile.skills.all()]
 
         if self.validated_data.get('skills_list', None):
-            for skill_text in self.validated_data['skills_list']:
-                if skill_text in skills_list:
+            skills_list = self.validated_data['skills_list']
+
+            if type(skills_list) == str or type(skills_list) == int:
+                skills_list = list(skills_list)
+            if type(skills_list[0]) == str and skills_list[0].find('[') != -1:
+                skills_list = ast.literal_eval(skills_list[0])
+
+            for skill_text in skills_list:
+                if skill_text in skills_list_from_skills:
                     continue
 
                 try:
@@ -164,19 +171,20 @@ class RegisterUserSerializer(serializers.Serializer):
                     user_profile.skills.add(skill)
                 except Skill.DoesNotExist:
                     pass
-            user_profile.skills_list = self.validated_data['skills_list']
+            user_profile.skills_list = list(set(skills_list + skills_list_from_skills))
             #user_profile.skills_list = list(skills_list)
             user_profile.save()
 
         if self.validated_data.get('interests', None):
             #hack to handle llist as string
-            if type(self.validated_data.get('interests')) == type('abc'):
-                self.validated_data['interests'] = list(self.validated_data['interests'])
-            if type(self.validated_data.get('interests')[0]) == type('abc'):
-                self.validated_data['interests'] = ast.literal_eval(self.validated_data['interests'][0])
-            for interest in self.validated_data['interests']:
+            interest_ids = self.validated_data.get('interests')
+            if type(interest_ids) == str or type(interest_ids) == int:
+                interest_ids = list(interest_ids)
+            if type(interest_ids[0]) == str and interest_ids[0].find('[') != -1:
+                interest_ids = ast.literal_eval(interest_ids[0])
+            for interest_id in interest_ids:
                 try:
-                    interest = Interest.objects.get(id=int(interest))
+                    interest = Interest.objects.get(id=int(interest_id))
                     user_profile.interests.add(interest)
                 except Profession.DoesNotExist:
                     logger.warning("Error adding interest to profile during registration", interest)
