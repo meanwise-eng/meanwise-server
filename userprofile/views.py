@@ -160,7 +160,7 @@ class UserProfileDetail(APIView):
         if int(user_id) != request.user.id:
             raise PermissionDenied("You cannot change profile for another user")
 
-        serialized_up = UserProfileSerializer(userprofile, data=data, partial=True)
+        serialized_up = UserProfileUpdateSerializer(userprofile, data=data, partial=True)
         if serialized_up.is_valid():
             up = serialized_up.save()
             #handle username

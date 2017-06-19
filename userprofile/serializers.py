@@ -34,8 +34,8 @@ class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
             photo_url = obj.cover_photo.url
             return photo_url
         return ""
-    
-class UserProfileSerializer(serializers.ModelSerializer):
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     user_skills = serializers.SerializerMethodField()
@@ -141,6 +141,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         obj.skills_list = list(set(validated_data.get('skills_list', list()) + [skill.text for skill in skills]))
 
         return super().update(obj, validated_data)
+
+class UserProfileSerializer(UserProfileUpdateSerializer):
+    class Meta(UserProfileUpdateSerializer.Meta):
+        fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
+                      'user_skills', 'skills', 'profession', 'user_profession', 'interests', 'user_interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
+                      'user_friends', 'profession_text', 'skills_list', 'user_type', 'profile_background_color']
 
 class UserSerializer(serializers.ModelSerializer):
     userprofile = UserProfileSerializer(read_only=True)
