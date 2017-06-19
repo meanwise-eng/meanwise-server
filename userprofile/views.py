@@ -523,6 +523,7 @@ class SetInviteCodeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def put(self, request):
+        user = request.user
         invite_code = request.data.get('invite_code', None)
 
         if not invite_code:
@@ -533,7 +534,7 @@ class SetInviteCodeView(APIView):
         except InviteGroup.DoesNotExist:
             return Response({"status":"failed", "error": "Invite Group not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
-        if InviteGroup.users.through.objects.filter(user=request.user).count() > 0:
+        if user.userprofile.user_type == UserProfile.USERTYPE_INVITED or InviteGroup.users.through.objects.filter(user=user).count() > 0:
             return Response({"status":"failed", "error": "You are already in an Invite Group", "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
         if invite_group.count > invite_group.max_invites:
@@ -541,7 +542,10 @@ class SetInviteCodeView(APIView):
 
         invite_group.count += 1
         invite_group.save()
-        invite_group.users.add(request.user)
+        invite_group.users.add(user)
+
+        user.userprofile.user_type = UserProfile.USERTYPE_INVITED
+        user.userprofile.save()
 
         return Response({"status":"success", "error":"", "results":{"message": "You are now in Invite Group %s" % invite_code}}, status=status.HTTP_200_OK) 
 

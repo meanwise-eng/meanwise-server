@@ -99,6 +99,10 @@ class Interest(models.Model):
 
 
 class UserProfile(models.Model):
+
+    USERTYPE_INVITED = 1
+    USERTYPE_GUEST = 0
+
     user = models.OneToOneField(User, db_index=True)
     facebook_token = models.CharField(max_length=128, null=True, blank=True)
     username = models.CharField(max_length=25, db_index=True)
