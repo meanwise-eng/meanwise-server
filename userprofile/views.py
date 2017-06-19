@@ -514,6 +514,36 @@ class ValidateInviteCodeView(APIView):
             limit_exceeded = True
         return Response({"status":"success", "error":"", "results":{"limit_exceeded":limit_exceeded}}, status=status.HTTP_200_OK)
 
+class SetInviteCodeView(APIView):
+    """
+    User can set their Invite code through this API. Once set, it cannot be changed.
+    """
+
+    model = InviteGroup
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request):
+        invite_code = request.data.get('invite_code', None)
+
+        if not invite_code:
+            return Response({"status":"failed", "error":"Invite code not provided", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            invite_group = InviteGroup.objects.get(invite_code=invite_code)
+        except InviteGroup.DoesNotExist:
+            return Response({"status":"failed", "error": "Invite Group not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        if InviteGroup.users.through.objects.filter(user=request.user).count() > 0:
+            return Response({"status":"failed", "error": "You are already in an Invite Group", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        if invite_group.count > invite_group.max_invites:
+            return Response({"status":"failed", "error":"Invite Group limit exceeded", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        invite_group.count += 1
+        invite_group.save()
+        invite_group.users.add(request.user)
+
+        return Response({"status":"success", "error":"", "results":{"message": "You are now in Invite Group %s" % invite_code}}, status=status.HTTP_200_OK) 
 
 class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
