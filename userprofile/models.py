@@ -14,7 +14,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save, post_delete
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
 
 from rest_framework.authtoken.models import Token
@@ -69,7 +68,7 @@ class Interest(models.Model):
     slug = models.SlugField(max_length=70, unique=True)
     description = models.CharField(max_length=128)
     published = models.BooleanField(default=False, db_index=True)
-    cover_photo = ThumbnailerImageField(upload_to='interest_photos', null=True, blank=True)
+    cover_photo = models.ImageField(upload_to='interest_photos', null=True, blank=True)
     color_code = models.CharField(max_length=7, null=True, blank=True)
     topics = TaggableManager()
     is_deleted = models.BooleanField(default=False)
@@ -83,7 +82,7 @@ class Interest(models.Model):
             im = Image.open(self.cover_photo)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.cover_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            self.cover_photo = InMemoryUploadedFile(output, 'models.ImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
 
         super(Interest, self).save(*args, **kwargs)
 
@@ -117,10 +116,10 @@ class UserProfile(models.Model):
 
     interests = models.ManyToManyField(Interest,
                                        related_name='interests', blank=True)
-    profile_photo = ThumbnailerImageField(upload_to='profile_photos', blank=True)
-    profile_photo_thumbnail = ThumbnailerImageField(upload_to='profile_photo_thumbs', blank=True)
+    profile_photo = models.ImageField(upload_to='profile_photos', blank=True)
+    profile_photo_thumbnail = models.ImageField(upload_to='profile_photo_thumbs', blank=True)
 
-    cover_photo = ThumbnailerImageField(upload_to='cover_photos', blank=True)
+    cover_photo = models.ImageField(upload_to='cover_photos', blank=True)
     bio = models.TextField(null=True, blank=True)
     intro_video = models.FileField(upload_to='intro_videos', null=True, blank=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
@@ -139,19 +138,19 @@ class UserProfile(models.Model):
             im = Image.open(self.cover_photo)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.cover_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            self.cover_photo = InMemoryUploadedFile(output, 'models.ImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
             
         if self.profile_photo:
             im = Image.open(self.profile_photo)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.profile_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            self.profile_photo = InMemoryUploadedFile(output, 'models.ImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(output), None)
 
             thumbnail_size = (48, 48)
             thumbnail_output = BytesIO()
             im.thumbnail(thumbnail_size)
             im.save(output, format='JPEG', quality=100, optimize=True)
-            self.profile_photo_thumbnail = InMemoryUploadedFile(thumbnail_output, 'ThumbnailerImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(thumbnail_output), None)
+            self.profile_photo_thumbnail = InMemoryUploadedFile(thumbnail_output, 'models.ImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(thumbnail_output), None)
             
         super(UserProfile, self).save(*args, **kwargs)
 
