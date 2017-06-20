@@ -171,6 +171,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     user_profile_photo = serializers.SerializerMethodField()
     user_cover_photo = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
+    user_profession_text = serializers.SerializerMethodField()
     user_profile_photo_small = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
@@ -248,6 +249,13 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                 'id': profession.id,
                 }
         return data
+
+    def get_user_profession_text(self, obj):
+        try:
+            up = obj.poster.userprofile
+            return up.profession_text
+        except UserProfile.DoesNotExist:
+            return  None
 
     def get_num_likes(self, obj):
         return obj.liked_by.all().count()
