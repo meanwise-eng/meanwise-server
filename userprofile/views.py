@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import exceptions
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 
 import django.contrib.auth.password_validation as validators
 from django.core.mail import EmailMultiAlternatives
@@ -522,6 +523,7 @@ class SetInviteCodeView(APIView):
     model = InviteGroup
     permission_classes = (IsAuthenticated,)
 
+    @transaction.atomic()
     def put(self, request):
         user = request.user
         invite_code = request.data.get('invite_code', None)
