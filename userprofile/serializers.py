@@ -147,7 +147,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         skills_list = validated_data.get('skills_list', list())
         if type(skills_list) == str or type(skills_list) == int:
             skills_list = list(skills_list)
-        if type(skills_list[0]) == str and skills_list[0].find('[') != -1:
+        if len(skills_list) > 0 and type(skills_list[0]) == str and skills_list[0].find('[') != -1:
             skills_list = ast.literal_eval(skills_list[0])
 
         for skill_text in skills_list:
