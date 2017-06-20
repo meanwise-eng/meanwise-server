@@ -156,7 +156,8 @@ class RegisterUserSerializer(serializers.Serializer):
 
         if self.validated_data.get('skills_list', None):
             skills_list = self.validated_data.get('skills_list', list())
-
+            logger.info("Skills list: %s of type %s" % (skills_list, type(skills_list)))
+            
             if type(skills_list) == str or type(skills_list) == int:
                 skills_list = list(skills_list)
             if len(skills_list) > 0 and type(skills_list[0]) == str and skills_list[0].find('[') != -1:

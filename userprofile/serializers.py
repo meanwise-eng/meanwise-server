@@ -137,29 +137,35 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     def update(self, obj, validated_data):
         super().update(obj, validated_data)
 
-        skills = validated_data.get('skills', None)
         skills_list_from_skills = list()
-        if skills == None:
-            UserProfile.skills.through.objects.filter(userprofile_id=obj.id).delete()
-        else:
-            skills_list_from_skills = [skill.text for skill in skills]
 
-        skills_list = validated_data.get('skills_list', list())
-        if type(skills_list) == str or type(skills_list) == int:
-            skills_list = list(skills_list)
-        if len(skills_list) > 0 and type(skills_list[0]) == str and skills_list[0].find('[') != -1:
-            skills_list = ast.literal_eval(skills_list[0])
+        if 'skills' in validated_data:
+            skills = validated_data.get('skills', None)
+            if skills == None:
+                UserProfile.skills.through.objects.filter(userprofile_id=obj.id).delete()
+            else:
+                skills_list_from_skills = [skill.text for skill in skills]
 
-        for skill_text in skills_list:
-            if skill_text in skills_list_from_skills:
-                continue
+        if 'skills_list' in validated_data:
+            skills_list = validated_data.get('skills_list', list())
+            logger.info("Skills list: %s of type %s" % (skills_list, type(skills_list)))
 
-            try:
-                skill = Skill.objects.get(text=skill_text)
-                obj.skills.add(skill)
-            except Skill.DoesNotExist:
-                pass
-        obj.skills_list = list(set(skills_list + skills_list_from_skills))
+            if type(skills_list) == str or type(skills_list) == int:
+                skills_list = list(skills_list)
+            if len(skills_list) > 0 and type(skills_list[0]) == str and skills_list[0].find('[') != -1:
+                skills_list = ast.literal_eval(skills_list[0])
+
+            for skill_text in skills_list:
+                if skill_text in skills_list_from_skills:
+                    continue
+
+                try:
+                    skill = Skill.objects.get(text=skill_text)
+                    obj.skills.add(skill)
+                except Skill.DoesNotExist:
+                    pass
+            obj.skills_list = list(set(skills_list + skills_list_from_skills))
+
         obj.save()
         return obj
 
