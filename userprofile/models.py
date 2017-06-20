@@ -149,7 +149,7 @@ class UserProfile(models.Model):
             thumbnail_size = (48, 48)
             thumbnail_output = BytesIO()
             im.thumbnail(thumbnail_size)
-            im.save(output, format='JPEG', quality=100, optimize=True)
+            im.save(thumbnail_output, format='JPEG', quality=100, optimize=True)
             self.profile_photo_thumbnail = InMemoryUploadedFile(thumbnail_output, 'models.ImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(thumbnail_output), None)
             
         super(UserProfile, self).save(*args, **kwargs)
