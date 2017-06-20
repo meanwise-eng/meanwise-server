@@ -20,6 +20,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     user_profile_photo = serializers.SerializerMethodField()
     user_cover_photo = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
+    user_profession_text = serializers.SerializerMethodField()
     user_profile_photo_small = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
@@ -38,7 +39,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
-                      'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession',
+                      'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
                       'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
                       'story', 'story_index')
 
@@ -103,6 +104,13 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                 'id': profession.id,
                 }
         return data
+
+    def get_user_profession_text(self, obj):
+        try:
+            up = obj.poster.userprofile
+            return up.profession_text
+        except UserProfile.DoesNotExist:
+            return  None
 
     def get_num_likes(self, obj):
         return obj.liked_by.all().count()
