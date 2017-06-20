@@ -425,7 +425,7 @@ HS_CONNECTIONS = {
     },
     'whoosh': {
         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': '/app/whoosh_index',
+        'PATH': '/whoosh/whoosh_index',
     },
 }
 HAYSTACK_CONNECTIONS = {}

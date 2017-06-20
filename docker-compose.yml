@@ -7,7 +7,7 @@ services:
       - '.:/app'
       - 'logs:/var/logs/meanwise'
       - 'media:/app/media'
-      - 'whoosh:/whoosh_index'
+      - 'whoosh:/whoosh'
     links:
       - postgres
       - redis
