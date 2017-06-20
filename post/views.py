@@ -316,10 +316,11 @@ class PostCommentList(APIView):
         data['post'] = post_id
         serializer = CommentSaveSerializer(data=data)
 
-        if serializer.validated_data['commented_by'] != request.user:
-            raise PermissionDenied("You can posts comments as another user")
-
         if serializer.is_valid():
+
+            if serializer.validated_data['commented_by'] != request.user:
+                raise PermissionDenied("You can't posts comments as another user")
+
             comment = serializer.save()
             #Add notification
             notification = Notification.objects.create(receiver=comment.post.poster, notification_type='CP',  post=comment.post, comment=comment)
