@@ -425,7 +425,7 @@ HS_CONNECTIONS = {
     },
     'whoosh': {
         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+        'PATH': '/app/whoosh_index',
     },
 }
 HAYSTACK_CONNECTIONS = {}
