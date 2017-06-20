@@ -184,7 +184,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
-                      'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession',
+                      'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
                       'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
                       'story_index')
 
