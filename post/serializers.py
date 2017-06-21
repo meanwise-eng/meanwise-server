@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
-from easy_thumbnails.files import get_thumbnailer
 
 from userprofile.models import UserProfile
 from post.models import Post, Comment, Share, Story
@@ -25,7 +24,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
-    resolution = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     story = serializers.HyperlinkedRelatedField(
@@ -151,14 +149,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return ""
 
-    def get_resolution(self, obj):
-        if obj.image:
-            return {'height':obj.image.height, 'width':obj.image.width}
-        elif obj.video:
-            #needs to be done
-            
-            #return {'height':obj.video_height, 'width':obj.video_width}
-            return {'height':320, 'width':240}
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -176,7 +166,6 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
-    resolution = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     queryset=Post.objects.filter(is_deleted=False)
@@ -295,15 +284,6 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                 return obj.video_thumbnail.url
         else:
             return ""
-
-    def get_resolution(self, obj):
-        if obj.image:
-            return {'height':obj.image.height, 'width':obj.image.width}
-        elif obj.video:
-            #needs to be done
-            
-            #return {'height':obj.video_height, 'width':obj.video_width}
-            return {'height':320, 'width':240}
 
 class PostSaveSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)

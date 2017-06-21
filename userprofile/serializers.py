@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
-from easy_thumbnails.files import get_thumbnailer
+
 import logging
 import ast
 
@@ -42,7 +42,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     user_skills = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
     user_interests = serializers.SerializerMethodField()
-    profile_photo_small = serializers.SerializerMethodField()
+    profile_photo_small = serializers.ImageField(source='profile_photo_thumbnail')
     username = serializers.SerializerMethodField()
     user_username = serializers.CharField(required=False, max_length=100, allow_blank=True)
     user_friends = serializers.SerializerMethodField()
@@ -63,16 +63,6 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     def get_username(self, obj):
         username = obj.user.username
         return username
-
-    def get_profile_photo_small(self, obj):
-        small = {'size': (48, 48), 'crop': True}
-        profile_photo_small_url = ""
-        if obj.profile_photo:
-            try:
-                profile_photo_small_url = get_thumbnailer(obj.profile_photo).get_thumbnail(small).url
-            except Exception as ex:
-                logger.error(ex)
-        return profile_photo_small_url
 
     def get_user_skills(self, obj):
         skills = obj.skills.all()

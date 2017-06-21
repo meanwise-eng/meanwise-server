@@ -13,6 +13,7 @@ from jsonfield import JSONField
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.contrib.postgres.fields import JSONField as pgJSONField
 
 from PIL import Image
 from io import BytesIO
@@ -40,6 +41,7 @@ class Post(models.Model):
     video_height = models.IntegerField(null=True, blank=True)
     video_width = models.IntegerField(null=True, blank=True)
     video_thumbnail = models.ImageField(upload_to='post_video_thumbnails', null=True, blank=True)
+    resolution = pgJSONField()
 
     parent = models.ForeignKey('self', db_index=True, null=True)
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
@@ -63,6 +65,11 @@ class Post(models.Model):
                     clip.save_frame(thumbnail_path , t=1.00)
                     _file = File(open(thumbnail_path, "rb"))
                     self.video_thumbnail.save((os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+
+                    self.resolution = {
+                        'height': self.video_thumbnail.height,
+                        'width': self.video_thumbnail.width
+                    }
                 except Exception as e:
                     print ("Error generating video thumb", e, str(e))
                 return
@@ -72,6 +79,11 @@ class Post(models.Model):
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
             self.image = InMemoryUploadedFile(output, 'ImageField', self.image.name, 'image/jpeg', sys.getsizeof(output), None)
+
+            self.resolution = {
+                'height': self.image.height,
+                'width': self.image.width
+            }
             
         super(Post, self).save(*args, **kwargs)
 

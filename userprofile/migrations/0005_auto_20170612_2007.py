@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import easy_thumbnails.fields
 
 
 class Migration(migrations.Migration):
@@ -21,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userprofile',
             name='profile_photo_thumbnail',
-            field=easy_thumbnails.fields.ThumbnailerImageField(blank=True, upload_to='profile_photo_thumbs'),
+            field=models.ImageField(blank=True, upload_to='profile_photo_thumbs'),
         ),
     ]

@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import easy_thumbnails.fields
 
 
 class Migration(migrations.Migration):
@@ -70,7 +69,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='interest',
             name='cover_photo',
-            field=easy_thumbnails.fields.ThumbnailerImageField(blank=True, null=True, upload_to='interest_photos'),
+            field=models.ImageField(blank=True, null=True, upload_to='interest_photos'),
         ),
         migrations.AlterField(
             model_name='userprofile',
