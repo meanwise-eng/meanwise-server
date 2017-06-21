@@ -57,7 +57,7 @@ class UserNotificationsLatest(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, user_id):
-        latest_timestamp = datetime.datetime.now() - datetime.timedelta(hours=24)
+        latest_timestamp = datetime.datetime.now() - datetime.timedelta(weeks=3)
         notifications = Notification.objects.filter(created_on__gte=latest_timestamp).filter(receiver__id=user_id).order_by('-created_on')
         page = request.GET.get('page')
         page_size = request.GET.get('page_size')
