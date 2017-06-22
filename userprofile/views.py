@@ -34,7 +34,7 @@ from userprofile.search_indexes import UserProfileIndex
 from common.api_helper import get_objects_paginated
 from common.push_message import *
 
-logger = logging.getLogger('delighter')
+logger = logging.getLogger(__name__)
 
 class ProfessionListView(APIView):
     """

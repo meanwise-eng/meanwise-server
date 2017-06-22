@@ -264,7 +264,7 @@ class UserPostLike(APIView):
         notification = Notification.objects.create(receiver=post.poster, notification_type='LP',  post=post, post_liked_by=user)
         #send push notification
         devices = find_user_devices(post.poster.id)
-        message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'l', 'message': (str(user.userprofile.first_name) + " " + str(user.userprofile.first_name) + " liked your post")}
+        message_payload = {'p':str(post.id),'u':str(post.poster.id), 't':'l', 'message': (str(user.userprofile.first_name) + " " + str(user.userprofile.last_name) + " liked your post")}
         for device in devices:
             send_message_device(device, message_payload)
         return Response({"status":"success", "error":"", "results":"Succesfully liked."}, status=status.HTTP_202_ACCEPTED)
@@ -311,6 +311,7 @@ class PostCommentList(APIView):
         serializer = CommentSerializer(comments, many=True)
         return Response({"status":"success", "error":"", "results":{"data":serializer.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
 
+    @transaction.atomic
     def post(self, request, post_id):
         data = request.data
         data['post'] = post_id
@@ -318,19 +319,27 @@ class PostCommentList(APIView):
 
         if serializer.is_valid():
 
-            if serializer.validated_data['commented_by'] != request.user:
-                raise PermissionDenied("You can't posts comments as another user")
+            try:
+                if serializer.validated_data['commented_by'] != request.user:
+                    raise PermissionDenied("You can't posts comments as another user")
 
-            comment = serializer.save()
-            #Add notification
-            notification = Notification.objects.create(receiver=comment.post.poster, notification_type='CP',  post=comment.post, comment=comment)
-            #send push notification
-            devices = find_user_devices(comment.post.poster.id)
-            message_payload = {'p':str(comment.post.id),'u':str(comment.post.poster.id),
-                                   't':'c', 'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + " commented on your post")}
-            for device in devices:
-                send_message_device(device, message_payload)
-            return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
+                comment = serializer.save()
+                logger.info("Comment saved");
+                #Add notification
+                notification = Notification.objects.create(receiver=comment.post.poster, notification_type='CP',  post=comment.post, comment=comment)
+                #send push notification
+                devices = find_user_devices(comment.post.poster.id)
+                message_payload = {'p':str(comment.post.id),'u':str(comment.post.poster.id),
+                                       't':'c', 'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + " commented on your post")}
+
+                logger.info("No of devices to send: %s" % len(devices))
+                for device in devices:
+                    logger.info("Sending notification to device: %s" % device)
+                    send_message_device(device, message_payload)
+                return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
+            except Exception as ex:
+                logger.error(ex)
+                return Response({"status":"failed", "error": "Error saving comment.", "results":""}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
     

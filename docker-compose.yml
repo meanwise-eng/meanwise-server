@@ -5,6 +5,7 @@ services:
     build: ./docker/app/
     volumes:
       - '.:/app'
+      - 'python_packages:/usr/local/lib/python3.5/dist-packages'
       - 'logs:/var/logs/meanwise'
       - 'media:/app/media'
       - 'whoosh:/whoosh'
@@ -48,3 +49,4 @@ volumes:
   esdata1: ~
   media: ~
   whoosh: ~
+  python_packages: ~
