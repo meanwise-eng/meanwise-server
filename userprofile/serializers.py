@@ -46,11 +46,12 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
     user_username = serializers.CharField(required=False, max_length=100, allow_blank=True)
     user_friends = serializers.SerializerMethodField()
+    user_type = serializers.IntegerField(read_only=True)
     class Meta:
         model = UserProfile
         fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
                       'user_skills', 'skills', 'profession', 'user_profession', 'interests', 'user_interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
-                      'user_friends', 'profession_text', 'skills_list', 'profile_background_color']
+                      'user_friends', 'profession_text', 'skills_list', 'profile_background_color', 'user_type']
 
     def get_user_id(self, obj):
         user_id = obj.user.id
