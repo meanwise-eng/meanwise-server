@@ -274,7 +274,8 @@ class FriendsList(APIView):
         
         """
         logger.info("Friendslist - POST [API / views.py /")
-        if int(user_id) != request.user.id:
+        friend_id = request.data.get('friend_id', None)
+        if not friend_id or int(friend_id) != request.user.id:
             raise PermissionDenied("You can only send friend request as yourself")
 
         try:
@@ -287,7 +288,6 @@ class FriendsList(APIView):
         except UserProfile.DoesNotExist:
             logger.error("friendslist - GET - up not found [api / views.py /")
             return Response({"status":"failed","error":"Userprofile with id does not exist","results":""}, status=status.HTTP_400_BAD_REQUEST)
-        friend_id = request.data.get('friend_id', None)
         friend_status = request.data.get('status', 'pending')
 
         #check if request for self, if so raise error
