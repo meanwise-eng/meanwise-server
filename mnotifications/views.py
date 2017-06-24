@@ -101,6 +101,8 @@ class AmazonNotificationAddDevice(APIView):
             p_name = settings.AMAZON_SNS_PLATFORM_APNS
         elif platform == 'GCM':
             p_name = settings.AMAZON_SNS_PLATFORM_GCM
+        else:
+            p_name = platform
         try:
             platform = Platform.objects.get(platform=p_name)
         except Platform.DoesNotExist:
