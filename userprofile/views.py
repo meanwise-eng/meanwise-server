@@ -173,6 +173,25 @@ class UserProfileDetail(APIView):
             return Response({"status":"success", "error":"", "results":serialized_up.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serialized_up.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
+class LoggedInUserProfile(APIView):
+    """
+    Edit a userprofile instance.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_object(self, user_id):
+        try:
+            userprofile = UserProfile.objects.get(user_id=user_id)
+        except UserProfile.DoesNotExist:
+            return Response({"status":"failed", "error":"UserProfile not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        return userprofile
+
+    def get(self, request):
+         userprofile = request.user.userprofile
+         serializer = UserProfileSerializer(userprofile)
+         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+
 class UserProfileViewSet(viewsets.ModelViewSet):
     """
     UserProfile apis
