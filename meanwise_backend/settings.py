@@ -35,7 +35,7 @@ DB_PORT = os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_NAME', 'meanwise')
 DB_USER = os.environ.get('DB_USER', 'meanwise')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'meanwise1!')
-SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'whoosh')
+SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'elasticsearch')
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '127.0.0.1')

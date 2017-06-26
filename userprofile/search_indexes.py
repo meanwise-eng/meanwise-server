@@ -8,9 +8,11 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     userprofile_id = indexes.CharField(model_attr="id")
     first_name = indexes.CharField(model_attr="first_name")
     last_name = indexes.CharField(model_attr="last_name")
-    username = indexes.CharField(model_attr='username')
+    username = indexes.CharField()
     skills_text = indexes.MultiValueField()
     created_on = indexes.DateTimeField(model_attr='created_on')
+
+    term = indexes.NgramField()
     #autocomplete = indexes.EdgeNgramField()
 
     #@staticmethod
@@ -27,8 +29,17 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
             created_on__lte=timezone.now()
         )
 
+    def prepare_username(self, obj):
+        return obj.user.username
+
     def prepare_skills_text(self, obj):
         return  [skill.lower() for skill in obj.skills_list]
+
+    def prepare_term(self, obj):
+        value = obj.user.username
+        value += ' ' + ''.join(obj.skills_list)
+
+        return value
 
 class ProfessionIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(model_attr='text', document=True, use_template=False)

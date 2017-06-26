@@ -198,6 +198,13 @@ class UserProfileSearchSerializer(HaystackSerializerMixin, UserProfileSerializer
         field_aliases = {}
         exclude = {}
 
+# class UserProfileSearchSerializer(HaystackSerializer):
+#     class Meta:
+#         index_classes = [UserProfileIndex]
+#         fields = ("text", "userprofile_id", "first_name", "last_name", "username", "skills_text", 'created_on', 'term', 'featured')
+#         field_aliases = {}
+#         exclude = {}
+
 class ProfessionSearchSerializer(HaystackSerializer):
 
     class Meta:
