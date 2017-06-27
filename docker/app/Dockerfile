@@ -25,4 +25,4 @@ EXPOSE 8000
 
 ENTRYPOINT ["/start.sh"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["/usr/local/bin/gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "meanwise_backend.wsgi"]
