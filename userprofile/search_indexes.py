@@ -11,6 +11,7 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     username = indexes.CharField()
     skills_text = indexes.MultiValueField()
     created_on = indexes.DateTimeField(model_attr='created_on')
+    featured = indexes.BooleanField()
 
     term = indexes.NgramField()
     #autocomplete = indexes.EdgeNgramField()
@@ -42,6 +43,9 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
         value += ' ' + ' '.join([interest.name for interest in obj.interests.all()])
 
         return value
+
+    def prepare_featured(self, obj):
+        return True
 
 class ProfessionIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(model_attr='text', document=True, use_template=False)
