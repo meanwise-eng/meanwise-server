@@ -36,8 +36,10 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
         return  [skill.lower() for skill in obj.skills_list]
 
     def prepare_term(self, obj):
-        value = obj.user.username
-        value += ' ' + ''.join(obj.skills_list)
+        value = obj.user.username.lower()
+        value += ' ' + ' '.join([skill.lower() for skill in obj.skills_list])
+        value += ' %s %s %s' % (obj.first_name or '', obj.last_name or '', obj.city or '')
+        value += ' ' + ' '.join([interest.name for interest in obj.interests.all()])
 
         return value
 
