@@ -9,6 +9,7 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
     post_text = indexes.CharField(model_attr="text", null=True)
     post_id = indexes.CharField(model_attr="id")
     interest_name = indexes.MultiValueField()
+    interest_slug = indexes.MultiValueField()
     created_on = indexes.DateTimeField(model_attr='created_on')
     tag_names =  indexes.MultiValueField()
     topic_texts =  indexes.MultiValueField()
@@ -34,9 +35,12 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_text(self, obj):
         if (obj.story):
-            return [post.text for post in obj.story.posts.filter(is_deleted=False)]
+            return ' '.join([post.text.lower() for post in obj.story.posts.filter(is_deleted=False)])
         else:
-            return [obj.text]
+            return obj.text.lower()
+
+    def prepare_term(self, obj):
+        return self.prepare_text(obj)
 
     def prepare_interest_name(self, obj):
         if obj.story:
@@ -44,15 +48,21 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
         else:
             return [obj.interest.name]
 
+    def prepare_interest_slug(self, obj):
+        if obj.story:
+            return [post.interest.slug for post in obj.story.posts.filter(is_deleted=False)]
+        else:
+            return [obj.interest.slug]
+
     def prepare_topic_texts(self, obj):
         if (obj.story):
-            return set([topic.text for p in obj.story.posts.filter(is_deleted=False) for topic in p.topics.all()])
+            return list(set([topic.text.lower() for p in obj.story.posts.filter(is_deleted=False) for topic in p.topics.all()]))
         else:
-            return [topic.text for topic in obj.topics.all()]
+            return [topic.text.lower() for topic in obj.topics.all()]
 
     def prepare_tag_names(self, obj):
         if obj.story:
-            return [tag.name for p in obj.story.posts.filter(is_deleted=False) for tag in p.tags.all()]
+            return [tag.name.lower() for p in obj.story.posts.filter(is_deleted=False) for tag in p.tags.all()]
         else:
-            return  [tag.name for tag in obj.tags.all()]
+            return  [tag.name.lower() for tag in obj.tags.all()]
 

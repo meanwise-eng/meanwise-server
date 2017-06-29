@@ -103,6 +103,8 @@ class UserPostList(APIView):
             for t in ts:
                 post.tags.add(t)
 
+            
+
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 

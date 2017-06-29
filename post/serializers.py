@@ -389,5 +389,10 @@ class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
         field_aliases = {}
         exclude = tuple()
 
-
-        
+# for checking what's actually in the index
+# class PostSearchSerializer(HaystackSerializer):
+#     class Meta:
+#         index_classes = [PostIndex]
+#         fields = ("text", "post_text", "post_id", "interest_name", "interest_slug", "created_on", 'tag_names', 'topic_texts', 'term')
+#         field_aliases = {}
+#         exclude = {}
