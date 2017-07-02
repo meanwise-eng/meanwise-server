@@ -45,8 +45,11 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT', 1025)
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis:6379')
+
 ELASTICSEARCH_USERNAME = os.environ.get('ELASTICSEARCH_USERNAME', 'elastic')
 ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD', 'changeme')
+HAYSTACK_ES_URL = os.environ.get('HAYSTACK_ES_URL', 'http://elasticsearch:9200/')
+HAYSTACK_ES_INDEX_NAME = os.environ.get('HAYSTACK_ES_INDEX_NAME', 'meanwise_prod')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
@@ -103,7 +106,6 @@ INSTALLED_APPS = [
     'djstripe',
 
     # elastic search
-    'elasticutils.contrib.django',
     'taggit',
     'taggit_serializer', 
 
@@ -411,9 +413,10 @@ THUMBNAIL_NAMER = 'easy_thumbnails.namers.alias'
 # Haystack Settings
 HS_CONNECTIONS = {
     'elasticsearch': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://elasticsearch:9200/',
-        'INDEX_NAME': 'meanwise_prod',
+        'ENGINE': 'meanwise_backend.search.MeanwiseElasticSearchEngine',
+        #'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': HAYSTACK_ES_URL,
+        'INDEX_NAME': HAYSTACK_ES_INDEX_NAME,
         'KWARGS': {
             'http_auth': (ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD),
             'use_ssl': False,
@@ -489,11 +492,6 @@ if not DEBUG:
     RAVEN_CONFIG = {
         'dsn': 'https://e9630008d26c488d8b2955db4e97d3c8:a1b497ca107443858e4ed553ed42a8bc@app.getsentry.com/65196',
     }
-
-# ElasticSearch Config
-ES_DISABLED = True
-ES_URLS = ['http://elasticsearch:9200/']
-ES_INDEXES = {'default': 'main_index'}
 
 # Taggit Config
 TAGGIT_CASE_INSENSITIVE = True

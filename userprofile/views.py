@@ -583,7 +583,7 @@ class UserProfileSearchView(HaystackViewSet):
     
     def filter_queryset(self, *args, **kwargs):
         queryset = super(UserProfileSearchView, self).filter_queryset(self.get_queryset())
-        return queryset.order_by('-created_on')
+        return queryset.order_by('-_score')
 
 class ProfessionSearchView(HaystackViewSet):
     index_models = [Profession]

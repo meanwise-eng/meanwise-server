@@ -9,7 +9,8 @@ django-braces==1.9.0
 django-celery==3.1.17
 django-cors-headers==1.1.0
 django-countries==3.4.1
-django-haystack==2.5.0
+django-haystack==2.6.1
+elasticsearch>=2.0.0,<3.0.0
 django-hitcount==1.2.2
 django-model-utils==2.5
 django-phonenumber-field==1.1.0
@@ -19,8 +20,6 @@ djangorestframework==3.3.2
 drf-nested-routers==0.11.1
 easy-thumbnails==2.3
 ecdsa==0.13
-elasticsearch==1.7.0
-elasticutils==0.10.2
 Fabric==1.10.2
 funcsigs==1.0.2
 geoip2==2.2.0
@@ -63,3 +62,4 @@ boto3==1.4.4
 django-health-check==2.3.0
 django-admin-views
 awscli
+requests_aws_sign==0.1.3
