@@ -33,7 +33,7 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
 
 
     def prepare_username(self, obj):
-        return obj.user.username
+        return ' '.join([obj.user.username, obj.first_name, obj.last_name])
 
     def prepare_skills_text(self, obj):
         return  ' '.join([skill.lower() for skill in obj.skills_list])
