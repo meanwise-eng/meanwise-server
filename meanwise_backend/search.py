@@ -11,17 +11,17 @@ class MeanwiseElasticSearchBackend(Elasticsearch2SearchBackend):
 
 	def __init__(self, connection_alias, **connection_options):
 
-		if 'http_auth' not in connection_options:
-			if self.auth:
-				session = session.Session()
-				credentials = session.get_credentials()
-				region = session.region_name or settings.AWS_S3_REGION_NAME
+		# if 'http_auth' not in connection_options:
+		# 	if self.auth:
+		# 		session = session.Session()
+		# 		credentials = session.get_credentials()
+		# 		region = session.region_name or settings.AWS_S3_REGION_NAME
 
-				service = 'es'
-				es_host = settings.HAYSTACK_ES_URL
-				self.auth = AWSV4Sign(credentials, region, service)
+		# 		service = 'es'
+		# 		es_host = settings.HAYSTACK_ES_URL
+		# 		self.auth = AWSV4Sign(credentials, region, service)
 
-			connection_options['KWARGS']['http_auth'] = self.auth
+			#connection_options['KWARGS']['http_auth'] = self.auth
 
 		super().__init__(connection_alias, **connection_options)
 

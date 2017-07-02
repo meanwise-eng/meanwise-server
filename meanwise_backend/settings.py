@@ -46,8 +46,8 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis:6379')
 
-ELASTICSEARCH_USERNAME = os.environ.get('ELASTICSEARCH_USERNAME', 'elastic')
-ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD', 'changeme')
+ELASTICSEARCH_USERNAME = os.environ.get('ELASTICSEARCH_USERNAME', None)
+ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD', None)
 HAYSTACK_ES_URL = os.environ.get('HAYSTACK_ES_URL', 'http://elasticsearch:9200/')
 HAYSTACK_ES_INDEX_NAME = os.environ.get('HAYSTACK_ES_INDEX_NAME', 'meanwise_prod')
 
@@ -410,18 +410,19 @@ THUMBNAIL_ALIASES = {
 
 THUMBNAIL_NAMER = 'easy_thumbnails.namers.alias'
 
+hs_elasticsearch_settings = {
+    'ENGINE': 'meanwise_backend.search.MeanwiseElasticSearchEngine',
+    #'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+    'URL': HAYSTACK_ES_URL,
+    'INDEX_NAME': HAYSTACK_ES_INDEX_NAME,
+    'KWARGS': {}
+}
+if ELASTICSEARCH_USERNAME and ELASTICSEARCH_PASSWORD:
+    hs_elasticsearch_settings['KWARGS']['http_auth'] = (ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD)
+
 # Haystack Settings
 HS_CONNECTIONS = {
-    'elasticsearch': {
-        'ENGINE': 'meanwise_backend.search.MeanwiseElasticSearchEngine',
-        #'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': HAYSTACK_ES_URL,
-        'INDEX_NAME': HAYSTACK_ES_INDEX_NAME,
-        'KWARGS': {
-            'http_auth': (ELASTICSEARCH_USERNAME, ELASTICSEARCH_PASSWORD),
-            'use_ssl': False,
-        }
-    },
+    'elasticsearch': hs_elasticsearch_settings,
     'solr': {
         'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
         'URL': 'http://127.0.0.1:8983/solr/core1',

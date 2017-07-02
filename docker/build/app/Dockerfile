@@ -1,5 +1,6 @@
 FROM meanwise/api-base:latest
 
+ADD awscredentials /root/.aws/credentials
 ADD ./code /app
 
 WORKDIR /app
