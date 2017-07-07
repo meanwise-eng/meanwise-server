@@ -50,5 +50,6 @@ urlpatterns = [
     url(r'^interest/$', InterestListView.as_view()),
     url(r'^public-feed/$', PublicFeed.as_view()),
     url(r'^me/', include('userprofile.me_urls')),
+    url(r'^version/', include('appversion.urls')),
 
 ]
