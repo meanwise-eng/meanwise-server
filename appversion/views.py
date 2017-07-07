@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 
-from .models import Version
+from .models import Version, UserVersion
 from .serializers import VersionSerializer
 
 class VersionView(APIView):
@@ -40,6 +40,19 @@ class VersionView(APIView):
         response['results'] = {
             "version": VersionSerializer(version).data,
         }
+
+        try:
+            user_version = UserVersion.objects.get(user_id=request.user.id)
+            
+            if user_version.version.version_string != version.version_string:
+                user_version.version = version
+                user_version.save()
+        except Exception:
+            user_version = UserVersion()
+            user_version.user_id = request.user.id
+            user_version.version = version
+            user_version.save()
+            pass
 
         try:
             latest_version = Version.objects.filter(status=Version.STATUS_PUBLISHED).latest('version_sort')

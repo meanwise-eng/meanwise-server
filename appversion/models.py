@@ -44,3 +44,9 @@ class Version(models.Model):
 			self.version_sort = ''.join(vParts)
 
 		super().save()
+
+class UserVersion(models.Model):
+
+	user_id = models.IntegerField(db_index=True)
+	version = models.ForeignKey(Version, db_index=True)
+	last_changed_date = models.DateTimeField(auto_now=True)
