@@ -15,6 +15,9 @@ services:
       - elasticsearch
     ports:
       - '8000:8000'
+    environment:
+      ELK_LOGSTASH_HOST: '192.168.22.131'
+      ELK_LOGSTASH_PORT: '12202'
 
   postgres:
     build: ./docker/postgres/
@@ -28,7 +31,7 @@ services:
   elasticsearch:
     image: elasticsearch:2.3
     ports:
-      - '9200:9200'
+      - '9210:9200'
     ulimits:
       memlock:
         soft: -1

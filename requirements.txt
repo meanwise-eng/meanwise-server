@@ -65,3 +65,4 @@ awscli
 requests_aws_sign==0.1.3
 django-enum-field
 semantic_version
+graypy==0.2.14

@@ -53,6 +53,9 @@ ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD', None)
 HAYSTACK_ES_URL = os.environ.get('HAYSTACK_ES_URL', 'http://elasticsearch:9200/')
 HAYSTACK_ES_INDEX_NAME = os.environ.get('HAYSTACK_ES_INDEX_NAME', 'meanwise_prod')
 
+ELK_LOGSTASH_HOST = os.environ.get('ELK_LOGSTASH_HOST', None)
+ELK_LOGSTASH_PORT = os.environ.get('ELK_LOGSTASH_PORT', None)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
     DEBUG = True
@@ -328,6 +331,15 @@ LOGGING = {
     },
 }
 
+if ELK_LOGSTASH_HOST:
+    LOGGING['handlers']['graypy'] = {
+        'level': 'INFO',
+        'class': 'graypy.GELFHandler',
+        'host': ELK_LOGSTASH_HOST,
+        'port': int(ELK_LOGSTASH_PORT),
+        'formatter': 'simple',
+    }
+    LOGGING['loggers']['django']['handlers'].append('graypy')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
