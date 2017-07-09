@@ -129,6 +129,7 @@ REST_USE_JWT = True
 ACCOUNT_ACTIVATION_DAYS = 1
 
 MIDDLEWARE_CLASSES = [
+    'log_request_id.middleware.RequestIDMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -312,18 +313,6 @@ LOGGING = {
             'level': 'INFO',
             'handlers': ['console']
         },
-        'post': {
-            'level': 'INFO',
-            'handlers': ['console']
-        },
-        'custom_auth': {
-            'level': 'INFO',
-            'handlers': ['console']
-        },
-        'userprofile': {
-            'level': 'INFO',
-            'handlers': ['console']
-        },
         'celery': {
             'level': 'DEBUG',
             'handlers': ['console']
@@ -332,14 +321,24 @@ LOGGING = {
 }
 
 if ELK_LOGSTASH_HOST:
+    LOGGING['filters'] = {
+        'add_gelf_data': {
+            '()': 'meanwise_backend.filters.GelfFilter'
+        },
+        'request_id': {
+            '()': 'log_request_id.filters.RequestIDFilter'
+        }
+    }
     LOGGING['handlers']['graypy'] = {
         'level': 'INFO',
         'class': 'graypy.GELFHandler',
         'host': ELK_LOGSTASH_HOST,
         'port': int(ELK_LOGSTASH_PORT),
         'formatter': 'simple',
+        'filters': ['request_id', 'add_gelf_data']
     }
-    LOGGING['loggers']['django']['handlers'].append('graypy')
+    LOGGING['loggers']['django']['handlers'] = ['graypy']
+    LOGGING['loggers']['meanwise_backend']['handlers'].append('graypy')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/

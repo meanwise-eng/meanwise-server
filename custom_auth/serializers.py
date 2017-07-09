@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from userprofile.models import *
 from userprofile.serializers import UserProfileSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class RegisterUserSerializer(serializers.Serializer):
     """

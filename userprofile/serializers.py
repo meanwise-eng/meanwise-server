@@ -10,7 +10,7 @@ from userprofile.models import *
 from django.contrib.auth.models import User
 from userprofile.search_indexes import UserProfileIndex, ProfessionIndex, SkillIndex
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class ProfessionSerializer(serializers.ModelSerializer):
     class Meta:
