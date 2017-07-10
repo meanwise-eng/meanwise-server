@@ -17,7 +17,7 @@ services:
       - '8000:8000'
     environment:
       ELK_LOGSTASH_HOST: '192.168.22.131'
-      ELK_LOGSTASH_PORT: '12202'
+      ELK_LOGSTASH_PORT: '12201'
 
   postgres:
     build: ./docker/postgres/
