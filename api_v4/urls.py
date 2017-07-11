@@ -20,8 +20,8 @@ router.register(r'autocomplete/skill', SkillSearchView, base_name="skill-search"
 urlpatterns = [
     url(r'custom_auth/', include('custom_auth.urls')),
     url(r'^', include(router.urls)),
-    url(r'^user/userprofile/$', UserProfileList.as_view()),
-    url(r'^user/(?P<user_id>[0-9]+)/userprofile/$', UserProfileDetail.as_view()),
+    url(r'^user/userprofile/$', UserProfileList.as_view(), name="profile-list"),
+    url(r'^user/(?P<user_id>[0-9]+)/userprofile/$', UserProfileDetail.as_view(), name="profile-detail"),
     url(r'^user/(?P<user_id>[0-9]+)/change/password/$', ChangePasswordView.as_view()),
     url(r'^user/forgot/password/$', ForgotPasswordView.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/friends/$', FriendsList.as_view()),

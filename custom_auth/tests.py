@@ -12,10 +12,10 @@ class UserRegisterationTests(APITestCase):
         """
         url = reverse("register_user")
         data = {
-            "username": "groverrr",
-            "email": "groverr@gmail.com",
+            "username": "test",
+            "email": "test@gmail.com",
             "password": "password123",
-            "first_name": "test1134",
+            "first_name": "tester",
             "last_name": "last",
             "skills": [],
             "interests": [],
