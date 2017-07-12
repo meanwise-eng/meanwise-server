@@ -1,3 +1,5 @@
+import json
+
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
@@ -106,7 +108,7 @@ class ProfileListTestCase(APITestCase):
 
     def test_profile_list(self):
 
-        # FIrst create a new user
+        # First create a new user
         self.username = "testcase"
         self.email = "test@example.com"
         self.password = "password123"
@@ -128,6 +130,7 @@ class ProfileListTestCase(APITestCase):
 
 class ProfileDetailTestCase(APITestCase):
 
+    # Create User Profile
     def create_profile(self):
         url = reverse("register_user")
         data = {
@@ -161,7 +164,6 @@ class ProfileDetailTestCase(APITestCase):
         response = self.client.get(url, HTTP_AUTHORIZATION='Token {}'.format(self.token))
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(self.user_id, response.data["results"]["id"])
 
     def test_update_profile(self):
         profile_data = self.create_profile()
@@ -179,6 +181,77 @@ class ProfileDetailTestCase(APITestCase):
                                      headers={
                                         "Content-type": "application/json"
                                      })
-        print(response.data)
+
         self.assertEqual(201, response.status_code)
+
+
+class ChangePasswordTestCase(APITestCase):
+
+    # Create User Profile
+    def create_profile(self):
+        url = reverse("register_user")
+        data = {
+            "username": "test2",
+            "email": "test2@gmail.com",
+            "password": "password1234",
+            "first_name": "testerr",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        return response.data
+
+    def test_change_password(self):
+        profile_data = self.create_profile()
+        self.token = profile_data["results"]["auth_token"]
+        self.user_id = profile_data["results"]["user"]
+
+        url = reverse("change-password", kwargs={"user_id": self.user_id})
+        data = {
+            "old_password": "password1234",
+            "new_password": "testpass123"
+        }
+        response = self.client.post(url, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        self.assertEqual(200, response.status_code)
         self.assertEqual(self.user_id, response.data["results"]["id"])
+
+
+class ForgetPasswordTestCase(APITestCase):
+
+    url = reverse("forget-password")
+
+    def test_forget_password(self):
+        # first create a user
+        self.username = "testcase"
+        self.email = "test@example.com"
+        self.password = "password123"
+        user = User.objects.create(username=self.username,
+                                   email=self.email)
+        user.set_password(self.password)
+        user.save()
+
+        data = {
+            "email": self.email
+        }
+
+        response = self.client.post(self.url, data,
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        self.assertEqual(response.data["results"], "Successfully sent email with new password")
+        self.assertEqual(400, response.status_code)
