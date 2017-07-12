@@ -25,6 +25,8 @@ from drf_haystack.viewsets import HaystackViewSet
 
 from taggit.models import Tag
 
+from userprofile.serializers import UserProfileSerializer
+
 from post.permissions import IsOwnerOrReadOnly
 
 from post.models import *
@@ -329,6 +331,28 @@ class UserPostUnLike(APIView):
         else:
             return Response({"status":"failed", "error":"User not in liked list", "results":""}, status=status.HTTP_202_ACCEPTED)
 
+class PostLikes(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_post(self, post_id):
+        try:
+            return Post.objects.get(pk=post_id)
+        except Post.DoesNotExist:
+            raise Http404
+
+    def get(self, request, post_id):
+        post = self.get_post(post_id)
+
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+
+        liked_by_query = UserProfile.objects.filter(user__in=post.liked_by.all()).order_by('username').all()
+        liked_by, has_next_page, num_pages = get_objects_paginated(liked_by_query, page, page_size)
+
+        serializer = UserProfileSerializer(liked_by, many=True, context={'request': request})
+        return Response({"status":"success", "error":"", "results":{"data":serializer.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
 
 class PostCommentList(APIView):
     """
