@@ -27,7 +27,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
-    liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -43,7 +42,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
-                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
+                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on', 'tags', 'topics',
                       'story', 'story_index', 'is_liked', 'likes_url', 'relevance')
 
     def get_user_id(self, obj):
@@ -152,13 +151,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def get_num_comments(self, obj):
         return Comment.objects.filter(post=obj).filter(is_deleted=False).count()
-
-    def get_liked_by(self, obj):
-        liked_by = []
-        for user in obj.liked_by.all():
-            liked_by.append(user.id)
-
-        return liked_by
 
     def get_image_url(self, obj):
         _image = obj.image

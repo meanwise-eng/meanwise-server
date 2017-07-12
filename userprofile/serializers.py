@@ -88,7 +88,6 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                 }
         return data
 
-
     def get_user_interests(self, obj):
         interests = obj.interests.all()
         interests_list = []
@@ -99,33 +98,6 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                 }
             interests_list.append(data)
         return interests_list
-
-    def get_user_friends(self, obj):
-        ufs = UserFriend.objects.filter(user=obj.user)
-        ufs_list = []
-        for uf in ufs:
-            data ={
-                'friend_receiver_id':uf.user.id,
-                'friend_receiver_email':uf.user.email,
-                'friend_sender_id':uf.friend.id,
-                'friend_sender_name': uf.friend.username,
-                'friend_sender_email': uf.friend.email,
-                'status':uf.get_status_display()
-                }
-            ufs_list.append(data)
-        rufs = UserFriend.objects.filter(friend=obj.user)
-        rufs_list = []
-        for ruf in rufs:
-            data ={
-                'friend_receiver_id':ruf.user.id,
-                'friend_receiver_email':ruf.user.email,
-                'friend_sender_id':ruf.friend.id,
-                'friend_sender_name': ruf.friend.username,
-                'friend_sender_email': ruf.friend.email,
-                'status':ruf.get_status_display()
-                }
-            rufs_list.append(data)
-        return ufs_list + rufs_list
 
     def update(self, obj, validated_data):
         super().update(obj, validated_data)
@@ -171,7 +143,7 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
             'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio', 'user_skills',
             'skills', 'profession', 'user_profession', 'interests', 'user_interests',
             'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description',
-            'city', 'user_friends', 'profession_text', 'skills_list', 'user_type',
+            'city', 'profession_text', 'skills_list', 'user_type',
             'profile_background_color', 'friend_request', 'friends_url',
         ]
 
