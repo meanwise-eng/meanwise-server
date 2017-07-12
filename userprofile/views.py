@@ -129,7 +129,7 @@ class UserProfileList(APIView):
 
     def get(self, request):
         userprofiles = UserProfile.objects.all()
-        serializer = UserProfileSerializer(userprofiles, many=True)
+        serializer = UserProfileSerializer(userprofiles, many=True, context={'request': request})
         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
 class UserProfileDetail(APIView):
@@ -151,8 +151,8 @@ class UserProfileDetail(APIView):
 
     def get(self, request, user_id):
          userprofile = self.get_object(user_id)
-         serializer = UserProfileSerializer(userprofile)
-         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+         serializer = UserProfileSerializer(userprofile, context={'request': request, 'user_id': user_id})
+         return Response({"status":"success", "error":"test", "results":serializer.data}, status=status.HTTP_200_OK)
      
     def patch(self, request, user_id):
         data = request.data
@@ -283,7 +283,7 @@ class FriendsList(APIView):
         page = request.GET.get('page')
         page_size = request.GET.get('page_size')
         user_friends_profiles, has_next_page, num_pages  = get_objects_paginated(user_friends_profiles, page, page_size)
-        serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(id__in=user_friends_profiles), many=True)
+        serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(id__in=user_friends_profiles), many=True, context={'request': request, 'user_id': user_id})
 
         return Response({"status":"success", "error":"", "results":{"data":serialized_friends_list.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
     
@@ -332,6 +332,7 @@ class FriendsList(APIView):
             except UserFriend.DoesNotExist:
                 uf = None
                 pass
+
         if friend_status.lower() == "pending":
             if not uf:
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
@@ -595,6 +596,9 @@ class UserProfileHSSerializer(HaystackSerializer):
 class UserProfileSearchView(HaystackViewSet):
     index_models = [UserProfile]
     serializer_class = UserProfileSearchSerializer
+
+    def get_serializer_class(self, *args, **kwargs):
+
     
     def filter_queryset(self, *args, **kwargs):
         queryset = super(UserProfileSearchView, self).filter_queryset(self.get_queryset())
