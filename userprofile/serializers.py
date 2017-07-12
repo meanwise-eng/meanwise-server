@@ -182,6 +182,9 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
             if not request or not hasattr(request, 'user'):
                 return None
 
+            if not request.user.id:
+                return None
+
             user_id = request.user.id
 
         try:

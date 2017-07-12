@@ -596,9 +596,6 @@ class UserProfileHSSerializer(HaystackSerializer):
 class UserProfileSearchView(HaystackViewSet):
     index_models = [UserProfile]
     serializer_class = UserProfileSearchSerializer
-
-    def get_serializer_class(self, *args, **kwargs):
-
     
     def filter_queryset(self, *args, **kwargs):
         queryset = super(UserProfileSearchView, self).filter_queryset(self.get_queryset())

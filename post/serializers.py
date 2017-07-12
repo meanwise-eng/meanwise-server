@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.urls import reverse
 
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 
@@ -12,6 +13,8 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
     num_likes = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    likes_url = serializers.SerializerMethodField()
     num_comments = serializers.SerializerMethodField()
     interest_id = serializers.SerializerMethodField()
     user_firstname = serializers.SerializerMethodField()
@@ -33,6 +36,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         view_name='post-story'
     )
     relevance=serializers.IntegerField()
+
     queryset=Post.objects.filter(is_deleted=False)
     
     class Meta:
@@ -40,7 +44,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
                       'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
-                      'story', 'story_index', 'relevance')
+                      'story', 'story_index', 'is_liked', 'likes_url', 'relevance')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -113,6 +117,32 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def get_num_likes(self, obj):
         return obj.liked_by.all().count()
+
+    def get_is_liked(self, obj):
+        user_id = self.context.get('user_id')
+        if not user_id:
+            request = self.context.get('request')
+            if not request or not hasattr(request, 'user'):
+                return False
+
+            if not request.user.id:
+                return False
+
+            user_id = request.user.id
+
+        liked_ids = obj.liked_by.values_list('id', flat=True)
+
+        if user_id not in liked_ids:
+            return False
+
+        return True
+
+    def get_likes_url(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+
+        return request.build_absolute_uri(reverse('post-likes', args=[obj.id]))
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text',flat=True)

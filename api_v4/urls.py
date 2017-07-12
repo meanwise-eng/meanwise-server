@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^story/(?P<story_id>[0-9]+)/', StoryDetail.as_view(), name='post-story'),
     url(r'^posts/tags/autocomplete/$', AutocompleteTag.as_view()),
     url(r'^posts/topics/autocomplete/$', AutocompleteTopic.as_view()),
+    url(r'^posts/', include('post.urls')),
     url(r'^interests/(?P<interest_id>[0-9]+)/topics/trending/$', TrendingTopicForInterest.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/new/$', UserNotificationsNew.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/latest/$', UserNotificationsLatest.as_view()),
