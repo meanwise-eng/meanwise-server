@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
+from django.db.models import Q
+from django.urls import reverse
 
 import logging
 import ast
@@ -161,10 +163,47 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         return obj
 
 class UserProfileSerializer(UserProfileUpdateSerializer):
+    friend_request = serializers.SerializerMethodField()
+    friends_url = serializers.SerializerMethodField()
+
     class Meta(UserProfileUpdateSerializer.Meta):
-        fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo', 'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
-                      'user_skills', 'skills', 'profession', 'user_profession', 'interests', 'user_interests', 'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description', 'city',
-                      'user_friends', 'profession_text', 'skills_list', 'user_type', 'profile_background_color']
+        fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo',
+            'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio', 'user_skills',
+            'skills', 'profession', 'user_profession', 'interests', 'user_interests',
+            'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description',
+            'city', 'user_friends', 'profession_text', 'skills_list', 'user_type',
+            'profile_background_color', 'friend_request', 'friends_url',
+        ]
+
+    def get_friend_request(self, obj):
+        user_id = self.context.get('user_id')
+        if not user_id:
+            request = self.context.get('request')
+            if not request or not hasattr(request, 'user'):
+                return None
+
+            user_id = request.user.id
+
+        try:
+            friend_request = UserFriend.objects.get(
+                Q(
+                    Q(user_id=user_id) & Q(friend_id=obj.user.id)
+                ) | # or
+                Q(
+                    Q(friend_id=user_id) & Q(user_id=obj.user.id)
+                )
+            )
+        except UserFriend.DoesNotExist:
+            return None
+
+        return friend_request.get_status_display()
+
+    def get_friends_url(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+
+        return request.build_absolute_uri(reverse('friends-list', args=[obj.user.id]))
 
 class UserSerializer(serializers.ModelSerializer):
     userprofile = UserProfileSerializer(read_only=True)
