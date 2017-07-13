@@ -38,11 +38,13 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'meanwise1!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'elasticsearch')
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 
-EMAIL_HOST = os.environ.get('EMAIL_HOST', '127.0.0.1')
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 1025)
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = bool(os.environ.get('EMAIL_USE_TLS', True))
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+DEFAULT_FROM_EMAIL = 'no-reply@meanwise.com'
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis:6379')
 
@@ -437,15 +439,6 @@ HAYSTACK_CONNECTIONS = {}
 
 HAYSTACK_CONNECTIONS['default'] = HS_CONNECTIONS[SEARCH_ENGINE]
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-
-# Email settings
-EMAIL_HOST = EMAIL_HOST
-EMAIL_HOST_USER = EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
-EMAIL_PORT = int(EMAIL_PORT)
-EMAIL_USE_TLS = False if EMAIL_USE_TLS == '0' else True
-DEFAULT_FROM_EMAIL = 'hello@meanwise.com'
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Reset password url
 RESET_PASSWORD_URL = SITE_URL + '/reset_password/'
