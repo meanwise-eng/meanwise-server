@@ -255,3 +255,239 @@ class ForgetPasswordTestCase(APITestCase):
                                     })
         self.assertEqual(response.data["results"], "Successfully sent email with new password")
         self.assertEqual(400, response.status_code)
+
+
+class FriendListTestCase(APITestCase):
+
+    def create_profile(self, username, email):
+        url = reverse("register_user")
+        data = {
+            "username": username,
+            "email": email,
+            "password": "password1234",
+            "first_name": "testerr",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        return response.data
+
+    def test_add_friend(self):
+
+        """
+        Test to add a new friend and get friend list
+        """
+
+        #  create user 1
+        user_1 = self.create_profile("test123", "test@example.com")
+        self.token_1 = user_1["results"]["auth_token"]
+        self.user_id_1 = user_1["results"]["user"]
+
+        # create user 2
+        user_2 = self.create_profile("test1231", "test2@gmail.com")
+        self.token_2 = user_1["results"]["auth_token"]
+        self.user_id_2 = user_2["results"]["user"]
+
+        # url with which user 1 sends a request
+        url_1 = reverse("friend", kwargs={"user_id": self.user_id_1})
+
+        # url with which user 2 sends a request
+        url_2 = reverse("friend", kwargs={"user_id": self.user_id_2})
+
+        # send friend request to user 2
+        data = {
+            "friend_id": self.user_id_2,
+            "status": "pending"
+        }
+        response = self.client.post(url_1, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                                    headers={
+                                       "Content-Type": "application/json"
+                                    })
+        self.assertEqual(201, response.status_code)
+
+        # accept a friend request of user 1
+        data = {
+            "friend_id": self.user_id_1,
+            "status": "accepted"
+        }
+
+        response = self.client.post(url_2, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        self.assertEqual(201, response.status_code)
+
+        # to check if a user is not sending request to himself
+        self.assertTrue(self.user_id_1 != self.user_id_2)
+
+
+        """ 
+            Test for getting friend list.
+        """
+
+        get_response = self.client.get(url_1,
+                                       HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                                       headers={
+                                            "Content-Type": "application/json"
+                                       })
+        self.assertEqual(200, get_response.status_code)
+        self.assertTrue(len(get_response.data["results"]["data"]) >= 1)
+
+    def test_reject_friend(self):
+        """
+        test to reject a friend request
+        """
+
+        # create user 1
+        user_1 = self.create_profile("test12331", "test1@example.com")
+        self.token_1 = user_1["results"]["auth_token"]
+        self.user_id_1 = user_1["results"]["user"]
+
+        # create user 2
+        user_2 = self.create_profile("test12312", "test4@gmail.com")
+        self.token_2 = user_1["results"]["auth_token"]
+        self.user_id_2 = user_2["results"]["user"]
+
+        # url with which user 1 send a request
+        url_1 = reverse("friend", kwargs={"user_id": self.user_id_1})
+
+        # url with which user 2 send a request
+        url_2 = reverse("friend", kwargs={"user_id": self.user_id_2})
+
+        # send friend request to user 2
+        data = {
+            "friend_id": self.user_id_2,
+            "status": "pending"
+        }
+        response = self.client.post(url_1, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                                    headers={
+                                       "Content-Type": "application/json"
+                                    })
+        self.assertEqual(201, response.status_code)
+
+        # reject friend request of user 1
+        data = {
+            "friend_id": self.user_id_1,
+            "status": "rejected"
+        }
+
+        response = self.client.post(url_2, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        self.assertEqual(201, response.status_code)
+
+    def test_request_yourself(self):
+
+        """
+        Test to check if user can send a request to himself
+        """
+
+        # create user
+        user = self.create_profile("test123312", "test12@example.com")
+        self.token = user["results"]["auth_token"]
+        self.user_id = user["results"]["user"]
+
+        # url with which user 1 send a request
+        url = reverse("friend", kwargs={"user_id": self.user_id})
+
+        data = {
+            "friend_id": self.user_id,
+            "status": "pending"
+        }
+
+        response = self.client.post(url, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        self.assertEqual(400, response.status_code)
+
+    # def test_request_again(self):
+    #     """
+    #     test to check if a user A can send friend request to user B,
+    #     after user B has reject the request.
+    #     """
+
+    #     # create user 1
+    #     user_1 = self.create_profile("test12331", "test1@example.com")
+    #     self.token_1 = user_1["results"]["auth_token"]
+    #     self.user_id_1 = user_1["results"]["user"]
+
+    #     # create user 2
+    #     user_2 = self.create_profile("test12312", "test4@gmail.com")
+    #     self.token_2 = user_1["results"]["auth_token"]
+    #     self.user_id_2 = user_2["results"]["user"]
+
+    #     # url with which user 1 send a request
+    #     url_1 = reverse("friend", kwargs={"user_id": self.user_id_1})
+
+    #     # url with which user 2 send a request
+    #     url_2 = reverse("friend", kwargs={"user_id": self.user_id_2})
+
+    #     # send friend request to user 2
+    #     data = {
+    #         "friend_id": self.user_id_2,
+    #         "status": "pending"
+    #     }
+    #     response = self.client.post(url_1, data,
+    #                                 HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+    #                                 headers={
+    #                                    "Content-Type": "application/json"
+    #                                 })
+    #     self.assertEqual(201, response.status_code)
+
+    #     # reject friend request of user 1
+    #     data = {
+    #         "friend_id": self.user_id_1,
+    #         "status": "rejected"
+    #     }
+
+    #     response = self.client.post(url_2, data,
+    #                                 HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+    #                                 headers={
+    #                                     "Content-Type": "application/json"
+    #                                 })
+    #     self.assertEqual(201, response.status_code)
+
+    #     # send friend request to user 1
+    #     data = {
+    #         "friend_id": self.user_id_1,
+    #         "status": "pending"
+    #     }
+    #     response = self.client.post(url_2, data,
+    #                                 HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+    #                                 headers={
+    #                                    "Content-Type": "application/json"
+    #                                 })
+    #     print(response.data)
+    #     self.assertEqual(201, response.status_code)
+
+    #     # accept request of user 1
+    #     data = {
+    #         "friend_id": self.user_id_2,
+    #         "status": "accepted"
+    #     }
+
+    #     response = self.client.post(url_1, data,
+    #                                 HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+    #                                 headers={
+    #                                     "Content-Type": "application/json"
+    #                                 })
+    #     print(response.data)
+    #     self.assertEqual(201, response.status_code)
