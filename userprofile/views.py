@@ -504,8 +504,22 @@ class ForgotPasswordView(APIView):
             user.save()
             try:
                 subject, from_email, to = 'New password', 'no-reply@meanwise.com', email
-                text_content = 'New generated password - ' + str(password) + ' .'
-                html_content = '<p>New generated password - ' + str(password) + '.</p>'
+                text_content = ("Hey,\n\n"
+                    "Uh oh! Looks like you forgot your password. Here’s a temporary password:\n\n" + \
+                    "%s" % (str(password),) + \
+                    "\n\n"
+                    "Use it to sign in, go to settings, and set your new password. Happy Posting!\n\n"
+                    "Cheers,\n\n"
+                    "Meanwise"
+                )
+                html_content = ("Hey,<br/>\n\n"
+                    "<p>Uh oh! Looks like you forgot your password. Here’s a temporary password:</p><br/>\n\n" + \
+                    "%s" % (str(password),) + \
+                    "<br/><br/>\n\n"
+                    "<p>Use it to sign in, go to settings, and set your new password. Happy Posting!</p><br/>\n\n"
+                    "Cheers,<br/>\n\n"
+                    "Meanwise"
+                )
                 msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
                 msg.attach_alternative(html_content, "text/html")
                 msg.send()

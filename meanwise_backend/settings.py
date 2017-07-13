@@ -40,7 +40,7 @@ MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', None)
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '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')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = bool(os.environ.get('EMAIL_USE_TLS', True))
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
