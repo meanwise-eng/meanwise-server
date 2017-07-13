@@ -491,3 +491,85 @@ class FriendListTestCase(APITestCase):
     #                                 })
     #     print(response.data)
     #     self.assertEqual(201, response.status_code)
+
+
+class RemoveFriendTestCase(APITestCase):
+
+    def create_profile(self, username, email):
+        url = reverse("register_user")
+        data = {
+            "username": username,
+            "email": email,
+            "password": "password1234",
+            "first_name": "testerr",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        return response.data
+
+
+    def test_remove_friend(self):
+
+        #  create user 1
+        user_1 = self.create_profile("test123", "test@example.com")
+        self.token_1 = user_1["results"]["auth_token"]
+        self.user_id_1 = user_1["results"]["user"]
+
+        # create user 2
+        user_2 = self.create_profile("test1231", "test2@gmail.com")
+        self.token_2 = user_1["results"]["auth_token"]
+        self.user_id_2 = user_2["results"]["user"]
+
+        # url with which user 1 sends a request
+        url_1 = reverse("friend", kwargs={"user_id": self.user_id_1})
+
+        # url with which user 2 sends a request
+        url_2 = reverse("friend", kwargs={"user_id": self.user_id_2})
+
+        # send friend request to user 2
+        data = {
+            "friend_id": self.user_id_2,
+            "status": "pending"
+        }
+        response = self.client.post(url_1, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                                    headers={
+                                       "Content-Type": "application/json"
+                                    })
+        self.assertEqual(201, response.status_code)
+
+        # accept a friend request of user 1
+        data = {
+            "friend_id": self.user_id_1,
+            "status": "accepted"
+        }
+
+
+        self.client.post(url_2, data,
+                         HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+                         headers={
+                            "Content-Type": "application/json"
+                         })
+
+        # remove a friend
+        url = reverse("remove-friend", kwargs={"user_id": self.user_id_2})
+        
+        response = self.client.post(url, 
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        print(response.data)
+        self.assertEqual(201, response.status_code)
