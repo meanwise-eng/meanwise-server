@@ -503,13 +503,14 @@ class ForgotPasswordView(APIView):
             user.set_password(password)
             user.save()
             try:
-                subject, from_email, to = 'New password', 'hello@meanwise.com', email
+                subject, from_email, to = 'New password', 'no-reply@meanwise.com', email
                 text_content = 'New generated password - ' + str(password) + ' .'
                 html_content = '<p>New generated password - ' + str(password) + '.</p>'
                 msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
                 msg.attach_alternative(html_content, "text/html")
                 msg.send()
             except Exception as e:
+                logger.error(e)
                 return Response({"status":"failed", "error":"Could not email the new password", "results":""}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"status":"success", "error":"", "results":"Successfully sent email with new password"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
