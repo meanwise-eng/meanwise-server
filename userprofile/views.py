@@ -415,7 +415,7 @@ class RemoveFriend(APIView):
         """
         logger.info("RemoveFriend - POST [API / views.py /")
 
-        if user_id != request.user.id:
+        if int(user_id) != request.user.id:
             raise PermissionDenied("You can remove friend for another user")
         try:
             user = User.objects.get(id=user_id)
@@ -461,7 +461,7 @@ class ChangePasswordView(APIView):
         self.object = self.get_object(user_id)
         serializer = ChangePasswordSerializer(data=request.data)
 
-        if user_id != request.user.id:
+        if int(user_id) != request.user.id:
             raise PermissionDenied("You cannot change password for other users")
 
         if serializer.is_valid():
