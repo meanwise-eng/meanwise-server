@@ -41,18 +41,19 @@ class VersionView(APIView):
             "version": VersionSerializer(version).data,
         }
 
-        try:
-            user_version = UserVersion.objects.get(user_id=request.user.id)
-            
-            if user_version.version.version_string != version.version_string:
+        if request.user.id:
+            try:
+                user_version = UserVersion.objects.get(user_id=request.user.id)
+                
+                if user_version.version.version_string != version.version_string:
+                    user_version.version = version
+                    user_version.save()
+            except Exception:
+                user_version = UserVersion()
+                user_version.user_id = request.user.id
                 user_version.version = version
                 user_version.save()
-        except Exception:
-            user_version = UserVersion()
-            user_version.user_id = request.user.id
-            user_version.version = version
-            user_version.save()
-            pass
+                pass
 
         try:
             latest_version = Version.objects.filter(status=Version.STATUS_PUBLISHED).latest('version_sort')
