@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 
-from .models import Profession, Skill, Interest, UserProfile
+from .models import Profession, Skill, Interest, UserProfile, InviteGroup
 
 
 class ProfessionListTestCase(APITestCase):
@@ -519,7 +519,6 @@ class RemoveFriendTestCase(APITestCase):
                                     })
         return response.data
 
-
     def test_remove_friend(self):
 
         #  create user 1
@@ -546,7 +545,7 @@ class RemoveFriendTestCase(APITestCase):
         response = self.client.post(url_1, data,
                                     HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
                                     headers={
-                                       "Content-Type": "application/json"
+                                        "Content-Type": "application/json"
                                     })
         self.assertEqual(201, response.status_code)
 
@@ -556,20 +555,114 @@ class RemoveFriendTestCase(APITestCase):
             "status": "accepted"
         }
 
-
         self.client.post(url_2, data,
                          HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
                          headers={
-                            "Content-Type": "application/json"
+                             "Content-Type": "application/json"
                          })
 
         # remove a friend
         url = reverse("remove-friend", kwargs={"user_id": self.user_id_2})
-        
-        response = self.client.post(url, 
+
+        response = self.client.post(url,
                                     HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
-        print(response.data)
         self.assertEqual(201, response.status_code)
+
+
+class ValidateCodeTestCase(APITestCase):
+    """
+    Test case for ValidateInviteCode View
+    """
+
+    def create_profile(self):
+        url = reverse("register_user")
+        data = {
+            "username": "test10",
+            "email": "test10@gmail.com",
+            "password": "password123",
+            "first_name": "tester",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        return response.data
+
+    def test_validate_invite(self):
+        user_profile = self.create_profile()
+        self.token = user_profile["results"]["auth_token"]
+
+        InviteGroup.objects.create(
+            name="XYZ",
+            invite_code="REALPEOPLE",
+        )
+        url = reverse("validate-invite")
+        data = {
+            "invite_code": "REALPEOPLE"
+        }
+
+        response = self.client.post(url, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        self.assertEqual(200, response.status_code)
+
+
+class SetInviteCodeTestCase(APITestCase):
+    """
+    Test case for ValidateInviteCode View
+    """
+
+    def create_profile(self):
+        url = reverse("register_user")
+        data = {
+            "username": "test11",
+            "email": "test11@gmail.com",
+            "password": "password123",
+            "first_name": "tester",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        return response.data
+
+    def test_set_invite(self):
+        user_profile = self.create_profile()
+        self.token = user_profile["results"]["auth_token"]
+
+        url = reverse("set-invite")
+        data = {
+            "invite_code": "REALPEOPLE"
+        }
+
+        response = self.client.post(url, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        self.assertEqual(200, response.status_code)

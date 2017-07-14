@@ -44,7 +44,7 @@ urlpatterns = [
     url(r'^amazon/notification/device/register/$', AmazonNotificationAddDevice.as_view()),
     url(r'^amazon/notification/device/delete/$', AmazonNotificationDeleteDevice.as_view()),
     url(r'^amazon/notification/message/send/$', AmazonNotificationSendMessage.as_view()),
-    url(r'^invite/code/valid/$', ValidateInviteCodeView.as_view()),
+    url(r'^invite/code/valid/$', ValidateInviteCodeView.as_view(), name="validate-invite"),
     url(r'^profession/$', ProfessionListView.as_view(), name="profession"),
     url(r'^skill/$', SkillListView.as_view(), name="skills"),
     url(r'^interest/$', InterestListView.as_view(), name="interests"),
