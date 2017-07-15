@@ -135,7 +135,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         return obj
 
 class UserProfileSerializer(UserProfileUpdateSerializer):
-    friend_request = serializers.SerializerMethodField()
+    friend_request_status = serializers.SerializerMethodField()
     friends_url = serializers.SerializerMethodField()
 
     class Meta(UserProfileUpdateSerializer.Meta):
@@ -144,10 +144,10 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
             'skills', 'profession', 'user_profession', 'interests', 'user_interests',
             'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description',
             'city', 'profession_text', 'skills_list', 'user_type',
-            'profile_background_color', 'friend_request', 'friends_url',
+            'profile_background_color', 'friend_request_status', 'friends_url',
         ]
 
-    def get_friend_request(self, obj):
+    def get_friend_request_status(self, obj):
         user_id = self.context.get('user_id')
         if not user_id:
             request = self.context.get('request')
