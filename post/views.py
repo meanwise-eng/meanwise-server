@@ -2,11 +2,15 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.http import Http404
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q, F, When, Case, IntegerField, Count, Subquery, OuterRef, Value
+from django.db.models.functions import Coalesce
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 import logging
+import operator
+from functools import reduce
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -202,6 +206,33 @@ class UserHomeFeed(APIView):
                 return Response({"status":"failed", "error":"Error fetching userprofile/interests for user.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
             interests_ids = userprofile.interests.all().values_list('id', flat=True)
             home_feed_posts = post_qs.filter(Q(poster__id__in=friends_ids) | Q(interest__id__in=interests_ids) | Q(poster__id=user_id))
+ 
+            # Sorting by skills
+            skills_list = userprofile.skills_list
+            topics_subq = Topic.objects.filter(post=OuterRef('pk'))
+            topic_wheres = []
+            for skill in skills_list:
+                topic_wheres.append(Q(text__iexact=skill))
+            topics_subq = topics_subq.filter(reduce(operator.or_, topic_wheres))
+            topics_subq = topics_subq.annotate(count=Count('*')).values('count')[:1]
+
+            content_type = ContentType.objects.get_for_model(Post)
+            tags_subq = Tag.objects.filter(taggit_taggeditem_items__content_type=content_type, post=OuterRef('pk'))
+            tag_wheres = []
+            for skill in skills_list:
+                tag_wheres.append(Q(name__iexact=skill))
+            tags_subq = tags_subq.filter(reduce(operator.or_, tag_wheres))
+            tags_subq = tags_subq.annotate(tag_count=Count('*')).values('tag_count')[:1]
+
+            interests_whens = [ When(interest__id__in=interests_ids, then=1) ]
+            home_feed_posts = home_feed_posts.annotate(
+                relevance=Coalesce(Subquery(topics_subq), Value(0), output_field=IntegerField()) + Coalesce(Subquery(tags_subq), Value(0)) + Case(
+                    *interests_whens,
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ).order_by(F('relevance').desc(), '-created_on')
+
             page = request.GET.get('page')
             page_size = request.GET.get('page_size')
             home_feed_posts, has_next_page, num_pages  = get_objects_paginated(home_feed_posts, page, page_size)
@@ -211,6 +242,7 @@ class UserHomeFeed(APIView):
             serializer = PostSerializer(home_feed_posts, many=True, context=serializer_context)
             return Response({"status":"success", "error":"", "results":{"data":serializer.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
         except Exception as e:
+            logger.exception(e)
             return Response({"status":"failed", "error":str(e), "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
 class PublicFeed(APIView):

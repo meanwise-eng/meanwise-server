@@ -121,6 +121,9 @@ INSTALLED_APPS = [
     'scarface',
 ]
 
+if DEBUG:
+    INSTALLED_APPS.append('silk')
+
 SITE_ID = 1
 REST_USE_JWT = True
 ACCOUNT_ACTIVATION_DAYS = 1
@@ -138,6 +141,9 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'geography.middlewares.AddIPMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE_CLASSES = ['silk.middleware.SilkyMiddleware',] + MIDDLEWARE_CLASSES
 
 DEVSERVER_AUTO_PROFILE = True
 

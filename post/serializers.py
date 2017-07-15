@@ -32,6 +32,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         lookup_url_kwarg='story_id',
         view_name='post-story'
     )
+    relevance=serializers.IntegerField()
     queryset=Post.objects.filter(is_deleted=False)
     
     class Meta:
@@ -39,7 +40,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
                       'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
-                      'story', 'story_index')
+                      'story', 'story_index', 'relevance')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
