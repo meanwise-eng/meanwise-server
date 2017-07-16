@@ -130,6 +130,7 @@ ACCOUNT_ACTIVATION_DAYS = 1
 
 MIDDLEWARE_CLASSES = [
     'log_request_id.middleware.RequestIDMiddleware',
+    'meanwise_backend.middleware.ExtraRequestInfoMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -283,6 +284,11 @@ USE_TZ = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'request_id': {
+            '()': 'log_request_id.filters.RequestIDFilter'
+        },
+    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(process)d %(thread)d  %(pathname)s %(funcName)s %(lineno)d %(message)s'
@@ -310,7 +316,7 @@ LOGGING = {
             'propagate': True,
         },
         'django': {
-            'level': 'INFO',
+            'level': 'ERROR',
             'handlers': ['console']
         },
         'celery': {
@@ -321,23 +327,18 @@ LOGGING = {
 }
 
 if ELK_LOGSTASH_HOST:
-    LOGGING['filters'] = {
-        'add_gelf_data': {
-            '()': 'meanwise_backend.filters.GelfFilter'
-        },
-        'request_id': {
-            '()': 'log_request_id.filters.RequestIDFilter'
-        }
+    LOGGING['filters']['add_gelf_data'] = {
+        '()': 'meanwise_backend.filters.GelfFilter'
     }
     LOGGING['handlers']['graypy'] = {
         'level': 'INFO',
         'class': 'graypy.GELFHandler',
         'host': ELK_LOGSTASH_HOST,
         'port': int(ELK_LOGSTASH_PORT),
-        'formatter': 'simple',
+        #'formatter': 'simple',
         'filters': ['request_id', 'add_gelf_data']
     }
-    LOGGING['loggers']['django']['handlers'] = ['graypy']
+    LOGGING['loggers']['django']['handlers'].append('graypy')
     LOGGING['loggers']['meanwise_backend']['handlers'].append('graypy')
 
 # Static files (CSS, JavaScript, Images)
