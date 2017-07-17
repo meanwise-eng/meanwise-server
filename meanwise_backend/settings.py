@@ -53,6 +53,9 @@ ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD', None)
 HAYSTACK_ES_URL = os.environ.get('HAYSTACK_ES_URL', 'http://elasticsearch:9200/')
 HAYSTACK_ES_INDEX_NAME = os.environ.get('HAYSTACK_ES_INDEX_NAME', 'meanwise_prod')
 
+ELK_LOGSTASH_HOST = os.environ.get('ELK_LOGSTASH_HOST', None)
+ELK_LOGSTASH_PORT = os.environ.get('ELK_LOGSTASH_PORT', None)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
     DEBUG = True
@@ -129,6 +132,8 @@ REST_USE_JWT = True
 ACCOUNT_ACTIVATION_DAYS = 1
 
 MIDDLEWARE_CLASSES = [
+    'log_request_id.middleware.RequestIDMiddleware',
+    'meanwise_backend.middleware.ExtraRequestInfoMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -285,6 +290,11 @@ USE_TZ = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'request_id': {
+            '()': 'log_request_id.filters.RequestIDFilter'
+        },
+    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(process)d %(thread)d  %(pathname)s %(funcName)s %(lineno)d %(message)s'
@@ -312,19 +322,7 @@ LOGGING = {
             'propagate': True,
         },
         'django': {
-            'level': 'INFO',
-            'handlers': ['console']
-        },
-        'post': {
-            'level': 'INFO',
-            'handlers': ['console']
-        },
-        'custom_auth': {
-            'level': 'INFO',
-            'handlers': ['console']
-        },
-        'userprofile': {
-            'level': 'INFO',
+            'level': 'ERROR',
             'handlers': ['console']
         },
         'celery': {
@@ -334,6 +332,20 @@ LOGGING = {
     },
 }
 
+if ELK_LOGSTASH_HOST:
+    LOGGING['filters']['add_gelf_data'] = {
+        '()': 'meanwise_backend.filters.GelfFilter'
+    }
+    LOGGING['handlers']['graypy'] = {
+        'level': 'INFO',
+        'class': 'graypy.GELFHandler',
+        'host': ELK_LOGSTASH_HOST,
+        'port': int(ELK_LOGSTASH_PORT),
+        #'formatter': 'simple',
+        'filters': ['request_id', 'add_gelf_data']
+    }
+    LOGGING['loggers']['django']['handlers'].append('graypy')
+    LOGGING['loggers']['meanwise_backend']['handlers'].append('graypy')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/

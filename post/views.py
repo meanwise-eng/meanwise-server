@@ -40,7 +40,7 @@ from common.api_helper import get_objects_paginated
 from common.push_message import *
 
 post_qs = Post.objects.filter(is_deleted=False).filter(Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class UserPostList(APIView):
     """
