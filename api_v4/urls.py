@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^user/(?P<user_id>[0-9]+)/change/password/$', ChangePasswordView.as_view(), name="change-password"),
     url(r'^user/forgot/password/$', ForgotPasswordView.as_view(), name="forget-password"),
     url(r'^user/(?P<user_id>[0-9]+)/friends/$', FriendsList.as_view(), name="friend"),
+     url(r'^user/(?P<user_id>[0-9]+)/friends/$', FriendsList.as_view(), name='friends-list'),
     url(r'^user/(?P<user_id>[0-9]+)/friends/remove/$', RemoveFriend.as_view(), name="remove-friend"),
     url(r'^user/(?P<user_id>[0-9]+)/posts/$', UserPostList.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/$', UserPostDetail.as_view()),

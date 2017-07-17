@@ -228,7 +228,6 @@ class ChangePasswordTestCase(APITestCase):
                                         "Content-Type": "application/json"
                                     })
         self.assertEqual(200, response.status_code)
-        self.assertEqual(self.user_id, response.data["results"]["id"])
 
 
 class ForgetPasswordTestCase(APITestCase):
@@ -564,11 +563,16 @@ class RemoveFriendTestCase(APITestCase):
         # remove a friend
         url = reverse("remove-friend", kwargs={"user_id": self.user_id_2})
 
-        response = self.client.post(url,
+        data = {
+            "friend_id": self.user_id_1
+        }
+
+        response = self.client.post(url, data,
                                     HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
+        print(response.data)
         self.assertEqual(201, response.status_code)
 
 
@@ -655,14 +659,20 @@ class SetInviteCodeTestCase(APITestCase):
         user_profile = self.create_profile()
         self.token = user_profile["results"]["auth_token"]
 
+        InviteGroup.objects.create(
+            name="XYZ",
+            invite_code="REALPEOPLE",
+        )
+
         url = reverse("set-invite")
         data = {
             "invite_code": "REALPEOPLE"
         }
 
-        response = self.client.post(url, data,
+        response = self.client.put(url, data,
                                     HTTP_AUTHORIZATION='Token {}'.format(self.token),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
+        print(response.data)
         self.assertEqual(200, response.status_code)
