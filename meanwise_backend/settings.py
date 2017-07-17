@@ -489,10 +489,10 @@ CELERYBEAT_SCHEDULE = {
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', ]
 
 # Raven/Sentry Config
-if not DEBUG:
-    RAVEN_CONFIG = {
-        'dsn': 'https://e9630008d26c488d8b2955db4e97d3c8:a1b497ca107443858e4ed553ed42a8bc@app.getsentry.com/65196',
-    }
+#if not DEBUG:
+#    RAVEN_CONFIG = {
+#        'dsn': 'https://e9630008d26c488d8b2955db4e97d3c8:a1b497ca107443858e4ed553ed42a8bc@app.getsentry.com/65196',
+#    }
 
 # Taggit Config
 TAGGIT_CASE_INSENSITIVE = True
