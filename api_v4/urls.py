@@ -19,7 +19,7 @@ router.register(r'autocomplete/skill', SkillSearchView, base_name="skill-search"
 
 urlpatterns = [
     url(r'custom_auth/', include('custom_auth.urls')),
-    url(r'^', include(router.urls)),
+    url(r'^', include(router.urls, namespace="route")),
     url(r'^user/userprofile/$', UserProfileList.as_view(), name="profile-list"),
     url(r'^user/(?P<user_id>[0-9]+)/userprofile/$', UserProfileDetail.as_view(), name="profile-detail"),
     url(r'^user/(?P<user_id>[0-9]+)/change/password/$', ChangePasswordView.as_view(), name="change-password"),

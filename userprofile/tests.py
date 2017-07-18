@@ -1,4 +1,4 @@
-import json
+import urllib
 
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -161,7 +161,8 @@ class ProfileDetailTestCase(APITestCase):
         self.user_id = profile_data["results"]["user"]
 
         url = reverse("profile-detail", kwargs={"user_id": self.user_id})
-        response = self.client.get(url, HTTP_AUTHORIZATION='Token {}'.format(self.token))
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION='Token {}'.format(self.token))
 
         self.assertEqual(200, response.status_code)
 
@@ -177,9 +178,10 @@ class ProfileDetailTestCase(APITestCase):
 
         url = reverse("profile-detail", kwargs={"user_id": self.user_id})
         response = self.client.patch(url, updated_data,
-                                     HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                     HTTP_AUTHORIZATION='Token {}'.format(
+                                         self.token),
                                      headers={
-                                        "Content-type": "application/json"
+                                         "Content-type": "application/json"
                                      })
 
         self.assertEqual(201, response.status_code)
@@ -223,7 +225,8 @@ class ChangePasswordTestCase(APITestCase):
             "new_password": "testpass123"
         }
         response = self.client.post(url, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
@@ -252,7 +255,8 @@ class ForgetPasswordTestCase(APITestCase):
                                     headers={
                                         "Content-Type": "application/json"
                                     })
-        self.assertEqual(response.data["results"], "Successfully sent email with new password")
+        self.assertEqual(response.data["results"],
+                         "Successfully sent email with new password")
         self.assertEqual(400, response.status_code)
 
 
@@ -283,7 +287,6 @@ class FriendListTestCase(APITestCase):
         return response.data
 
     def test_add_friend(self):
-
         """
         Test to add a new friend and get friend list
         """
@@ -310,9 +313,10 @@ class FriendListTestCase(APITestCase):
             "status": "pending"
         }
         response = self.client.post(url_1, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token_1),
                                     headers={
-                                       "Content-Type": "application/json"
+                                        "Content-Type": "application/json"
                                     })
         self.assertEqual(201, response.status_code)
 
@@ -323,7 +327,8 @@ class FriendListTestCase(APITestCase):
         }
 
         response = self.client.post(url_2, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token_2),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
@@ -332,15 +337,15 @@ class FriendListTestCase(APITestCase):
         # to check if a user is not sending request to himself
         self.assertTrue(self.user_id_1 != self.user_id_2)
 
-
         """ 
             Test for getting friend list.
         """
 
         get_response = self.client.get(url_1,
-                                       HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                                       HTTP_AUTHORIZATION='Token {}'.format(
+                                           self.token_1),
                                        headers={
-                                            "Content-Type": "application/json"
+                                           "Content-Type": "application/json"
                                        })
         self.assertEqual(200, get_response.status_code)
         self.assertTrue(len(get_response.data["results"]["data"]) >= 1)
@@ -372,9 +377,10 @@ class FriendListTestCase(APITestCase):
             "status": "pending"
         }
         response = self.client.post(url_1, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token_1),
                                     headers={
-                                       "Content-Type": "application/json"
+                                        "Content-Type": "application/json"
                                     })
         self.assertEqual(201, response.status_code)
 
@@ -385,14 +391,14 @@ class FriendListTestCase(APITestCase):
         }
 
         response = self.client.post(url_2, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token_2),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
         self.assertEqual(201, response.status_code)
 
     def test_request_yourself(self):
-
         """
         Test to check if user can send a request to himself
         """
@@ -411,7 +417,8 @@ class FriendListTestCase(APITestCase):
         }
 
         response = self.client.post(url, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
@@ -524,11 +531,12 @@ class RemoveFriendTestCase(APITestCase):
         user_1 = self.create_profile("test123", "test@example.com")
         self.token_1 = user_1["results"]["auth_token"]
         self.user_id_1 = user_1["results"]["user"]
-
+        print("user 1", self.user_id_1)
         # create user 2
         user_2 = self.create_profile("test1231", "test2@gmail.com")
         self.token_2 = user_1["results"]["auth_token"]
         self.user_id_2 = user_2["results"]["user"]
+        print("user 2", self.user_id_2)
 
         # url with which user 1 sends a request
         url_1 = reverse("friend", kwargs={"user_id": self.user_id_1})
@@ -541,12 +549,11 @@ class RemoveFriendTestCase(APITestCase):
             "friend_id": self.user_id_2,
             "status": "pending"
         }
-        response = self.client.post(url_1, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
-                                    headers={
-                                        "Content-Type": "application/json"
-                                    })
-        self.assertEqual(201, response.status_code)
+        self.client.post(url_1, data,
+                         HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
+                         headers={
+                             "Content-Type": "application/json"
+                         })
 
         # accept a friend request of user 1
         data = {
@@ -561,18 +568,19 @@ class RemoveFriendTestCase(APITestCase):
                          })
 
         # remove a friend
-        url = reverse("remove-friend", kwargs={"user_id": self.user_id_2})
+        url = reverse("remove-friend", kwargs={"user_id": self.user_id_1})
 
         data = {
-            "friend_id": self.user_id_1
+            "friend_id": self.user_id_2
         }
 
         response = self.client.post(url, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token_2),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token_1),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
-        print(response.data)
+
         self.assertEqual(201, response.status_code)
 
 
@@ -619,7 +627,8 @@ class ValidateCodeTestCase(APITestCase):
         }
 
         response = self.client.post(url, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        self.token),
                                     headers={
                                         "Content-Type": "application/json"
                                     })
@@ -670,9 +679,57 @@ class SetInviteCodeTestCase(APITestCase):
         }
 
         response = self.client.put(url, data,
-                                    HTTP_AUTHORIZATION='Token {}'.format(self.token),
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       self.token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+        self.assertEqual(200, response.status_code)
+
+
+def reverse_with_queryparams(path, **kwargs):
+    return path + '?' + urllib.parse.urlencode(kwargs)
+
+
+class UserProfileSearchTestCase(APITestCase):
+
+    def create_profile(self, email):
+        url = reverse("register_user")
+        data = {
+            "username": "test111",
+            "email": email,
+            "password": "password123",
+            "first_name": "tester",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
                                     headers={
                                         "Content-Type": "application/json"
                                     })
-        print(response.data)
+        return response.data
+
+    def test_search(self):
+        self.email = "test111@gmail.com"
+        user = self.create_profile(self.email)
+        self.token = user["results"]["auth_token"]
+
+        url = reverse_with_queryparams(
+            reverse("route:userprofile-search-list"), email=self.email)
+
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       self.token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+
         self.assertEqual(200, response.status_code)
