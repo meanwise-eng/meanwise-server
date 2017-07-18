@@ -28,7 +28,7 @@ ADMINS = ()
 SECRET_KEY = '_ks(exh8ftmi!f_vwma6od!#^$yngksnep2-n(5e6^qql%qcxx'
 
 # Variables from Environment
-ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'production')
 DATABASE = os.environ.get('DATABASE')
 DB_HOST = os.environ.get('DB_HOST', 'postgres')
 DB_PORT = os.environ.get('DB_PORT', '5432')
