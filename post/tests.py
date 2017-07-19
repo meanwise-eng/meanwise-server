@@ -96,3 +96,171 @@ class UserPostListTestCase(APITestCase):
                                           "Content-Type": "application/json"
                                       })
         self.assertEqual(202, response.status_code)
+
+
+class UserFriendsPostListTestCase(APITestCase):
+    """
+    Test to view post of a friend
+    """
+
+    def create_profile(self, username, email):
+        url = reverse("register_user")
+        data = {
+            "username": username,
+            "email": email,
+            "password": "password1234",
+            "first_name": "testerr",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+        return response.data
+
+    def test_friends_post(self):
+        user = self.create_profile("test002", "test002@example.com")
+        token = user["results"]["auth_token"]
+        user_id = user["results"]["user"]
+
+        url = reverse("friend-post", kwargs={"user_id": user_id})
+
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+
+        self.assertEqual(200, response.status_code)
+
+
+class UserInterestPostList(APITestCase):
+
+    def create_user(self):
+        url = reverse("register_user")
+        data = {
+            "username": "test010",
+            "email": "test010@gmail.com",
+            "password": "password123",
+            "first_name": "tester",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={"Content-Type": "application/json"})
+        return response.data
+
+    def test_interest_post(self):
+        user = self.create_user()
+        id = user["results"]["user"]
+        token = user["results"]["auth_token"]
+
+        url = reverse("interest-post", kwargs={"user_id": id})
+
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+
+        self.assertEqual(200, response.status_code)
+
+
+class StoryDetailTestCase(APITestCase):
+
+    def create_user(self):
+        url = reverse("register_user")
+        data = {
+            "username": "test011",
+            "email": "test011@gmail.com",
+            "password": "password123",
+            "first_name": "tester",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={"Content-Type": "application/json"})
+        return response.data
+
+    def create_interest(self):
+        url = reverse("interests")
+
+        self.interests = Interest.objects.create(name="Test",
+                                                 slug="test",
+                                                 description="testing interests",
+                                                 topics=["test", "testcase"])
+        response = self.client.get(url)
+        data = json.loads(json.dumps(response.data["results"]["data"][0]))
+        return data["id"]
+
+    def create_post(self):
+        user = self.create_user()
+        interest = self.create_interest()
+        id = user["results"]["user"]
+        token = user["results"]["auth_token"]
+
+        url = reverse("post-list", kwargs={"user_id": id})
+
+        data = {
+            "text": "test data",
+            "interest": [interest],
+            "story": "abc",
+        }
+
+        response = self.client.post(url, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        token),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+
+        res_data = response.data["results"]
+        print(res_data)
+        return ({
+            "post_id": res_data["id"],
+            "token": token
+        })
+
+    def test_story(self):
+        story = self.create_post()
+        story_id = story["post_id"]
+        token = story["token"]
+
+        url = reverse("post-story", kwargs={"story_id": story_id})
+
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+        print(response.data)
+
+        self.assertEqual(200, response.status_code)
