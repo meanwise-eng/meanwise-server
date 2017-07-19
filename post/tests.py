@@ -1,3 +1,98 @@
-from django.test import TestCase
+import json
+from itertools import islice
 
-# Create your tests here.
+from django.core.urlresolvers import reverse
+
+from rest_framework.test import APITestCase
+from rest_framework.authtoken.models import Token
+
+from userprofile.models import Interest
+
+
+class UserPostListTestCase(APITestCase):
+    """
+    Test case for UserPostList View
+    """
+
+    def create_user(self):
+        url = reverse("register_user")
+        data = {
+            "username": "test01",
+            "email": "test01@gmail.com",
+            "password": "password123",
+            "first_name": "tester",
+            "last_name": "last",
+            "skills": [],
+            "interests": [],
+            "skills_list": [],
+            "invite_code": "REALPEOPLE",
+            "dob": "2000-10-10",
+            "profile_story_title": "sfdsfs",
+            "profile_story_description": "dfssfsfs",
+            "profile_background_color": "Blue"
+        }
+
+        response = self.client.post(url, data,
+                                    headers={"Content-Type": "application/json"})
+        return response.data
+
+    def create_interest(self):
+        url = reverse("interests")
+
+        self.interests = Interest.objects.create(name="Test",
+                                                 slug="test",
+                                                 description="testing interests",
+                                                 topics=["test", "testcase"])
+        response = self.client.get(url)
+        data = json.loads(json.dumps(response.data["results"]["data"][0]))
+        return data["id"]
+
+    def test_post(self):
+        user = self.create_user()
+        interest = self.create_interest()
+        id = user["results"]["user"]
+        token = user["results"]["auth_token"]
+
+        url = reverse("post-list", kwargs={"user_id": id})
+
+        data = {
+            "text": "test data",
+            "interest": [interest]
+        }
+
+        response = self.client.post(url, data,
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        token),
+                                    headers={
+                                        "Content-Type": "application/json"
+                                    })
+
+        self.assertEqual(201, response.status_code)
+
+        """
+        Test to get the post by a user
+        """
+
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+        data = response.data["results"]["data"]
+
+        post_id = dict(data[0])["id"]
+        self.assertEqual(200, response.status_code)
+
+        """
+        Test to delete a post by the user
+        """
+        url = reverse(
+            "post-detail", kwargs={"user_id": id, "post_id": post_id})
+        response = self.client.delete(url,
+                                      HTTP_AUTHORIZATION='Token {}'.format(
+                                          token),
+                                      headers={
+                                          "Content-Type": "application/json"
+                                      })
+        self.assertEqual(202, response.status_code)
