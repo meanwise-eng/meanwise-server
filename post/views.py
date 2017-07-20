@@ -413,7 +413,7 @@ class PostCommentList(APIView):
 
     @transaction.atomic
     def post(self, request, post_id):
-        data = request.data
+        data = request.data.copy()
         data['post'] = post_id
         serializer = CommentSaveSerializer(data=data)
 
