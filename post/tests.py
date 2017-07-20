@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 
 from userprofile.models import Interest
+from .models import Story, Post
 
 
 class UserPostListTestCase(APITestCase):
@@ -231,7 +232,6 @@ class StoryDetailTestCase(APITestCase):
         data = {
             "text": "test data",
             "interest": [interest],
-            "story": "abc",
         }
 
         response = self.client.post(url, data,
@@ -242,17 +242,20 @@ class StoryDetailTestCase(APITestCase):
                                     })
 
         res_data = response.data["results"]
-        print(res_data)
         return ({
             "post_id": res_data["id"],
             "token": token
         })
 
     def test_story(self):
-        story = self.create_post()
-        story_id = story["post_id"]
-        token = story["token"]
+        post = self.create_post()
+        post_id = post["post_id"]
+        token = post["token"]
 
+        post_ins = Post.objects.get(id=post_id)
+        Story.objects.create(main_post=post_ins)
+        query_set = Story.objects.filter(pk=post_id)
+        story_id = query_set.values()[0]["id"]
         url = reverse("post-story", kwargs={"story_id": story_id})
 
         response = self.client.get(url,
@@ -261,6 +264,5 @@ class StoryDetailTestCase(APITestCase):
                                    headers={
                                        "Content-Type": "application/json"
                                    })
-        print(response.data)
 
         self.assertEqual(200, response.status_code)
