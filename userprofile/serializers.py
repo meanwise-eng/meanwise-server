@@ -136,6 +136,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(UserProfileUpdateSerializer):
     friend_request_status = serializers.SerializerMethodField()
     friends_url = serializers.SerializerMethodField()
+    friend_count = serializers.SerializerMethodField()
 
     class Meta(UserProfileUpdateSerializer.Meta):
         fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo',
@@ -143,7 +144,7 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
             'skills', 'profession', 'user_profession', 'interests', 'user_interests',
             'intro_video', 'phone', 'dob', 'profile_story_title', 'profile_story_description',
             'city', 'profession_text', 'skills_list', 'user_type',
-            'profile_background_color', 'friend_request_status', 'friends_url',
+            'profile_background_color', 'friend_request_status', 'friends_url', 'friend_count',
         ]
 
     def get_friend_request_status(self, obj):
@@ -178,6 +179,28 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
             return None
 
         return request.build_absolute_uri(reverse('friends-list', args=[obj.user.id]))
+
+    def get_friend_count(self, obj):
+        user_id = self.context.get('user_id')
+
+        if not user_id:
+            request = self.context.get('request')
+            if not request or not hasattr(request, 'user'):
+                return 0
+
+            if not request.user.id:
+                return 0
+
+            user_id = request.user.id
+
+        try:
+            friend_count = UserFriend.objects\
+                .filter(Q(Q(user_id=user_id) | Q(friend_id=obj.user.id)))\
+                .filter(status=UserFriend.STATUS_ACCEPTED)
+        except UserFriend.DoesNotExist:
+            return 0
+
+        return friend_count.count()
 
 class UserSerializer(serializers.ModelSerializer):
     userprofile = UserProfileSerializer(read_only=True)

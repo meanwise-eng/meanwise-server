@@ -164,6 +164,11 @@ FRIEND_STATUS = (
     )
     
 class UserFriend(models.Model):
+
+    STATUS_PENDING = 'PE'
+    STATUS_ACCEPTED = 'AC'
+    STATUS_REJECTED = 'RE'
+
     user = models.ForeignKey(User, related_name='user')
     friend = models.ForeignKey(User, related_name='friend')
     status = models.CharField(max_length=2, choices=FRIEND_STATUS, default="PE")
