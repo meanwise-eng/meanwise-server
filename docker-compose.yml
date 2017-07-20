@@ -5,19 +5,27 @@ services:
     build: ./docker/app/
     volumes:
       - '.:/app'
-      - 'python_packages:/usr/local/lib/python3.5/dist-packages'
       - 'logs:/var/logs/meanwise'
       - 'media:/app/media'
+      - 'static:/app/static'
       - 'whoosh:/whoosh'
     links:
       - postgres
-      - redis
       - elasticsearch
+      - nginx
     ports:
       - '8000:8000'
     environment:
       ELK_LOGSTASH_HOST: '192.168.22.131'
       ELK_LOGSTASH_PORT: '12201'
+
+  nginx:
+    image: nginx:1.12.0
+    ports:
+      - 8001:80
+    volumes:
+      - media:/usr/share/nginx/html/media
+      - static:/usr/share/nginx/html/static
 
   postgres:
     build: ./docker/postgres/
@@ -45,5 +53,5 @@ volumes:
   logs: ~
   esdata1: ~
   media: ~
+  static: ~
   whoosh: ~
-  python_packages: ~

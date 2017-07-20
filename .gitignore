@@ -9,6 +9,8 @@ squelo_backend/uwsgi.dev.ini
 
 # docker related stuff
 /docker/build/app/code
+/docker/build/appbase/requirements.txt
+/docker/build/appbase/start.sh
 
 # IDEs and editor
 /.idea

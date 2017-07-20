@@ -36,7 +36,7 @@ DB_NAME = os.environ.get('DB_NAME', 'meanwise')
 DB_USER = os.environ.get('DB_USER', 'meanwise')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'meanwise1!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'elasticsearch')
-MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
+MEDIA_URL = os.environ.get('MEDIA_URL', 'http://localhost:8001/media/')
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')
@@ -350,7 +350,7 @@ if ELK_LOGSTASH_HOST:
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'http://localhost:8001/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
