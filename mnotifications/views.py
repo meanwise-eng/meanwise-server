@@ -42,7 +42,7 @@ class UserNotificationsNew(APIView):
         page = request.GET.get('page')
         page_size = request.GET.get('page_size')
         notifications, has_next_page, num_pages  = get_objects_paginated(notifications, page, page_size)
-        serializer = NotificationSerializer(notifications, many=True)
+        serializer = NotificationSerializer(notifications, many=True, context={request: request})
         #set them as notified
         for notification in notifications:
             notification.was_notified = True
@@ -57,12 +57,12 @@ class UserNotificationsLatest(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, user_id):
-        latest_timestamp = datetime.datetime.now() - datetime.timedelta(hours=24)
+        latest_timestamp = datetime.datetime.now() - datetime.timedelta(weeks=3)
         notifications = Notification.objects.filter(created_on__gte=latest_timestamp).filter(receiver__id=user_id).order_by('-created_on')
         page = request.GET.get('page')
         page_size = request.GET.get('page_size')
         notifications, has_next_page, num_pages  = get_objects_paginated(notifications, page, page_size)
-        serializer = NotificationSerializer(notifications, many=True)
+        serializer = NotificationSerializer(notifications, many=True, context={request: request})
         return Response({"status":"success", "error":"", "results":{"data":serializer.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
 
 class AmazonNotificationAddDevice(APIView):
@@ -101,6 +101,8 @@ class AmazonNotificationAddDevice(APIView):
             p_name = settings.AMAZON_SNS_PLATFORM_APNS
         elif platform == 'GCM':
             p_name = settings.AMAZON_SNS_PLATFORM_GCM
+        else:
+            p_name = platform
         try:
             platform = Platform.objects.get(platform=p_name)
         except Platform.DoesNotExist:

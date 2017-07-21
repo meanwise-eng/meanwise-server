@@ -1,6 +1,6 @@
 from django.utils import timezone
 from haystack import indexes
-from userprofile.models import UserProfile
+from userprofile.models import UserProfile, Profession, Skill
 
 class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
 
@@ -8,9 +8,12 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     userprofile_id = indexes.CharField(model_attr="id")
     first_name = indexes.CharField(model_attr="first_name")
     last_name = indexes.CharField(model_attr="last_name")
-    username = indexes.CharField(model_attr='username')
-    skills_text = indexes.MultiValueField()
+    username = indexes.EdgeNgramField()
+    skills_text = indexes.NgramField()
     created_on = indexes.DateTimeField(model_attr='created_on')
+    featured = indexes.BooleanField()
+
+    term = indexes.NgramField()
     #autocomplete = indexes.EdgeNgramField()
 
     #@staticmethod
@@ -27,6 +30,38 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
             created_on__lte=timezone.now()
         )
 
-    def prepare_skills_text(self, obj):
-        return  [skill.text for skill in obj.skills.all()] 
 
+
+    def prepare_username(self, obj):
+        return ' '.join([obj.user.username, obj.first_name, obj.last_name])
+
+    def prepare_skills_text(self, obj):
+        return  ' '.join([skill.lower() for skill in obj.skills_list])
+
+    def prepare_term(self, obj):
+        value = obj.user.username.lower()
+        value += ' ' + ' '.join([skill.lower() for skill in obj.skills_list])
+        value += ' %s %s %s' % (obj.first_name or '', obj.last_name or '', obj.city or '')
+
+        return value
+
+    def prepare_featured(self, obj):
+        return True
+
+class ProfessionIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(model_attr='text', document=True, use_template=False)
+    profession_id = indexes.IntegerField(model_attr='id')
+
+    autocomplete = indexes.EdgeNgramField(model_attr='text')
+
+    def get_model(self):
+        return Profession
+
+class SkillIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(model_attr='text', document=True, use_template=False)
+    skill_id = indexes.IntegerField(model_attr='id')
+
+    autocomplete = indexes.EdgeNgramField(model_attr='text')
+
+    def get_model(self):
+        return Skill

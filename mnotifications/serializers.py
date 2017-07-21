@@ -7,12 +7,12 @@ from userprofile.models import UserProfile, UserFriend
 from post.models import Post, Comment
 
 from userprofile.serializers import UserSerializer, UserFriendSerializer
-from post.serializers import PostSerializer, CommentSerializer
+from post.serializers import NotificationPostSerializer, CommentSerializer
 
 class NotificationSerializer(serializers.ModelSerializer):
     receiver = UserSerializer(read_only=True)
     post_liked_by = UserSerializer(read_only=True)
-    post = PostSerializer(read_only=True)
+    post = NotificationPostSerializer(read_only=True)
     comment = CommentSerializer(read_only=True)
     notification_type = serializers.SerializerMethodField()
     user_friend = UserFriendSerializer(read_only=True)

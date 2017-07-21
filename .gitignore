@@ -6,6 +6,12 @@ whoosh_index/
 geodata/
 squelo_backend/uwsgi.dev.ini
 .DS_STORE
-migrations/
 
+# docker related stuff
+/docker/build/app/code
+/docker/build/appbase/requirements.txt
+/docker/build/appbase/start.sh
+
+# IDEs and editor
 /.idea
+*.sublime-workspace

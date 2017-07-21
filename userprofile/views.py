@@ -4,6 +4,8 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import exceptions
+from django.core.exceptions import PermissionDenied
+from django.db import transaction
 
 import django.contrib.auth.password_validation as validators
 from django.core.mail import EmailMultiAlternatives
@@ -22,6 +24,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
+from drf_haystack.filters import HaystackAutocompleteFilter
 
 from userprofile.models import Profession, Skill, Interest, UserProfile, UserFriend
 from userprofile.serializers import *
@@ -31,7 +34,7 @@ from userprofile.search_indexes import UserProfileIndex
 from common.api_helper import get_objects_paginated
 from common.push_message import *
 
-logger = logging.getLogger('delighter')
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class ProfessionListView(APIView):
     """
@@ -126,7 +129,7 @@ class UserProfileList(APIView):
 
     def get(self, request):
         userprofiles = UserProfile.objects.all()
-        serializer = UserProfileSerializer(userprofiles, many=True)
+        serializer = UserProfileSerializer(userprofiles, many=True, context={'request': request})
         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
 class UserProfileDetail(APIView):
@@ -148,13 +151,17 @@ class UserProfileDetail(APIView):
 
     def get(self, request, user_id):
          userprofile = self.get_object(user_id)
-         serializer = UserProfileSerializer(userprofile)
-         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
+         serializer = UserProfileSerializer(userprofile, context={'request': request, 'user_id': user_id})
+         return Response({"status":"success", "error":"test", "results":serializer.data}, status=status.HTTP_200_OK)
      
     def patch(self, request, user_id):
         data = request.data
         userprofile = self.get_object(user_id)
-        serialized_up = UserProfileSerializer(userprofile, data=data, partial=True)
+
+        if int(user_id) != request.user.id:
+            raise PermissionDenied("You cannot change profile for another user")
+
+        serialized_up = UserProfileUpdateSerializer(userprofile, data=data, partial=True)
         if serialized_up.is_valid():
             up = serialized_up.save()
             #handle username
@@ -165,6 +172,25 @@ class UserProfileDetail(APIView):
                 up.user.save()
             return Response({"status":"success", "error":"", "results":serialized_up.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serialized_up.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+class LoggedInUserProfile(APIView):
+    """
+    Edit a userprofile instance.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_object(self, user_id):
+        try:
+            userprofile = UserProfile.objects.get(user_id=user_id)
+        except UserProfile.DoesNotExist:
+            return Response({"status":"failed", "error":"UserProfile not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+        return userprofile
+
+    def get(self, request):
+         userprofile = request.user.userprofile
+         serializer = UserProfileSerializer(userprofile)
+         return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_200_OK)
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     """
@@ -257,7 +283,7 @@ class FriendsList(APIView):
         page = request.GET.get('page')
         page_size = request.GET.get('page_size')
         user_friends_profiles, has_next_page, num_pages  = get_objects_paginated(user_friends_profiles, page, page_size)
-        serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(id__in=user_friends_profiles), many=True)
+        serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(id__in=user_friends_profiles), many=True, context={'request': request, 'user_id': user_id})
 
         return Response({"status":"success", "error":"", "results":{"data":serialized_friends_list.data, "num_pages":num_pages}}, status=status.HTTP_200_OK)
     
@@ -267,6 +293,10 @@ class FriendsList(APIView):
         
         """
         logger.info("Friendslist - POST [API / views.py /")
+        friend_id = request.data.get('friend_id', None)
+        if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
+            raise PermissionDenied("You can only send friend request as yourself")
+
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -277,7 +307,6 @@ class FriendsList(APIView):
         except UserProfile.DoesNotExist:
             logger.error("friendslist - GET - up not found [api / views.py /")
             return Response({"status":"failed","error":"Userprofile with id does not exist","results":""}, status=status.HTTP_400_BAD_REQUEST)
-        friend_id = request.data.get('friend_id', None)
         friend_status = request.data.get('status', 'pending')
 
         #check if request for self, if so raise error
@@ -303,6 +332,7 @@ class FriendsList(APIView):
             except UserFriend.DoesNotExist:
                 uf = None
                 pass
+
         if friend_status.lower() == "pending":
             if not uf:
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
@@ -385,6 +415,9 @@ class RemoveFriend(APIView):
         
         """
         logger.info("RemoveFriend - POST [API / views.py /")
+
+        if int(user_id) != request.user.id:
+            raise PermissionDenied("You can remove friend for another user")
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -429,6 +462,9 @@ class ChangePasswordView(APIView):
         self.object = self.get_object(user_id)
         serializer = ChangePasswordSerializer(data=request.data)
 
+        if int(user_id) != request.user.id:
+            raise PermissionDenied("You cannot change password for other users")
+
         if serializer.is_valid():
             # Check old password
             if not self.object.check_password(serializer.data.get("old_password")):
@@ -468,13 +504,28 @@ class ForgotPasswordView(APIView):
             user.set_password(password)
             user.save()
             try:
-                subject, from_email, to = 'New password', 'hello@meanwise.com', email
-                text_content = 'New generated password - ' + str(password) + ' .'
-                html_content = '<p>New generated password - ' + str(password) + '.</p>'
+                subject, from_email, to = 'New password', 'no-reply@meanwise.com', email
+                text_content = ("Hey,\n\n"
+                    "Uh oh! Looks like you forgot your password. Here’s a temporary password:\n\n" + \
+                    "%s" % (str(password),) + \
+                    "\n\n"
+                    "Use it to sign in, go to settings, and set your new password. Happy Posting!\n\n"
+                    "Cheers,\n\n"
+                    "Meanwise"
+                )
+                html_content = ("Hey,<br/>\n\n"
+                    "<p>Uh oh! Looks like you forgot your password. Here’s a temporary password:</p><br/>\n\n" + \
+                    "%s" % (str(password),) + \
+                    "<br/><br/>\n\n"
+                    "<p>Use it to sign in, go to settings, and set your new password. Happy Posting!</p><br/>\n\n"
+                    "Cheers,<br/>\n\n"
+                    "Meanwise"
+                )
                 msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
                 msg.attach_alternative(html_content, "text/html")
                 msg.send()
             except Exception as e:
+                logger.error(e)
                 return Response({"status":"failed", "error":"Could not email the new password", "results":""}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"status":"success", "error":"", "results":"Successfully sent email with new password"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
@@ -499,6 +550,41 @@ class ValidateInviteCodeView(APIView):
             limit_exceeded = True
         return Response({"status":"success", "error":"", "results":{"limit_exceeded":limit_exceeded}}, status=status.HTTP_200_OK)
 
+class SetInviteCodeView(APIView):
+    """
+    User can set their Invite code through this API. Once set, it cannot be changed.
+    """
+
+    model = InviteGroup
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic()
+    def put(self, request):
+        user = request.user
+        invite_code = request.data.get('invite_code', None)
+
+        if not invite_code:
+            return Response({"status":"failed", "error":"Invite code not provided", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            invite_group = InviteGroup.objects.get(invite_code=invite_code)
+        except InviteGroup.DoesNotExist:
+            return Response({"status":"failed", "error": "Invite Group not found", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        if user.userprofile.user_type == UserProfile.USERTYPE_INVITED or InviteGroup.users.through.objects.filter(user=user).count() > 0:
+            return Response({"status":"failed", "error": "You are already in an Invite Group", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        if invite_group.count > invite_group.max_invites:
+            return Response({"status":"failed", "error":"Invite Group limit exceeded", "results":""}, status=status.HTTP_400_BAD_REQUEST)
+
+        invite_group.count += 1
+        invite_group.save()
+        invite_group.users.add(user)
+
+        user.userprofile.user_type = UserProfile.USERTYPE_INVITED
+        user.userprofile.save()
+
+        return Response({"status":"success", "error":"", "results":{"message": "You are now in Invite Group %s" % invite_code}}, status=status.HTTP_200_OK) 
 
 class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
@@ -513,4 +599,22 @@ class UserProfileSearchView(HaystackViewSet):
     
     def filter_queryset(self, *args, **kwargs):
         queryset = super(UserProfileSearchView, self).filter_queryset(self.get_queryset())
-        return queryset.order_by('-created_on')
+        return queryset.order_by('-_score')
+
+class ProfessionSearchView(HaystackViewSet):
+    index_models = [Profession]
+    serializer_class = ProfessionSearchSerializer
+    filter_backends = [HaystackAutocompleteFilter]
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super().filter_queryset(self.get_queryset())
+        return queryset.order_by('text')
+
+class SkillSearchView(HaystackViewSet):
+    index_models = [Skill]
+    serializer_class = SkillSearchSerializer
+    filter_backends = [HaystackAutocompleteFilter]
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super().filter_queryset(self.get_queryset())
+        return queryset.order_by('text')

@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import easy_thumbnails.fields
 
 
 class Migration(migrations.Migration):
@@ -27,7 +26,7 @@ class Migration(migrations.Migration):
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('modified_on', models.DateTimeField(auto_now=True)),
                 ('published', models.BooleanField(db_index=True, default=False)),
-                ('cover_photo', easy_thumbnails.fields.ThumbnailerImageField(upload_to='interest_photos')),
+                ('cover_photo', models.ImageField(upload_to='interest_photos')),
                 ('color_code', models.CharField(max_length=7)),
             ],
         ),
@@ -64,8 +63,8 @@ class Migration(migrations.Migration):
                 ('middle_name', models.CharField(blank=True, max_length=128)),
                 ('last_name', models.CharField(blank=True, max_length=128)),
                 ('city', models.CharField(blank=True, max_length=128, null=True)),
-                ('profile_photo', easy_thumbnails.fields.ThumbnailerImageField(blank=True, upload_to='profile_photos')),
-                ('cover_photo', easy_thumbnails.fields.ThumbnailerImageField(blank=True, upload_to='cover_photos')),
+                ('profile_photo', models.ImageField(blank=True, upload_to='profile_photos')),
+                ('cover_photo', models.ImageField(blank=True, upload_to='cover_photos')),
                 ('bio', models.TextField(blank=True, null=True)),
                 ('created_on', models.DateTimeField(auto_now_add=True, db_index=True)),
                 ('last_updated', models.DateTimeField(auto_now=True, db_index=True)),

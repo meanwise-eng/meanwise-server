@@ -2,6 +2,7 @@ from django.http import HttpRequest
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core import exceptions
+import logging
 
 import ast
 
@@ -14,6 +15,7 @@ from django.contrib.auth.models import User
 from userprofile.models import *
 from userprofile.serializers import UserProfileSerializer
 
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class RegisterUserSerializer(serializers.Serializer):
     """
@@ -36,18 +38,12 @@ class RegisterUserSerializer(serializers.Serializer):
     bio = serializers.CharField(max_length=200, required=False)
     profile_story_title = serializers.CharField(max_length=128, required=False)
     profile_story_description = serializers.CharField(max_length=200, required=False)
-    invite_code = serializers.CharField(max_length=128, required=True)
     dob = serializers.DateField(required=False)
 
-    def validate_invite_code(self, value):
-        """
-        Check that the invite code is valid.
-        """
-        try:
-            invite_group = InviteGroup.objects.get(invite_code=value)
-        except InviteGroup.DoesNotExist:
-            raise serializers.ValidationError("Not a valid invite code.")
-        return value
+    skills_list = serializers.ListField()
+    profession_text = serializers.CharField(max_length=123, required=False)
+
+    profile_background_color = serializers.CharField(max_length=20)
 
     def validate_username(self, value):
         """
@@ -115,7 +111,15 @@ class RegisterUserSerializer(serializers.Serializer):
             user_profile.dob = self.validated_data['dob']
         if self.validated_data.get('facebook_token', None):
             user_profile.facebook_token = self.validated_data['facebook_token']
-        user_profile.save()
+        if self.validated_data.get('profile_background_color', None):
+            user_profile.profile_background_color = self.validated_data['profile_background_color']
+
+        try:
+            user_profile.save()
+        except Exception as ex:
+            logger.error(ex)
+            raise
+
         if self.validated_data.get('profession', None):
             try:
                 profession = Profession.objects.get(id=int(self.validated_data['profession']))
@@ -124,36 +128,73 @@ class RegisterUserSerializer(serializers.Serializer):
             except Profession.DoesNotExist:
                 logger.warning("Error adding profession to profile during registration",
                                self.validated_data['profession'])
+        if self.validated_data.get('profession_text', None):
+            try:
+                user_profile.profession_text = self.validated_data['profession_text']
+                profession = Profession.objects.get(text=self.validated_data['profession_text'])
+                user_profile.profession = profession
+                user_profile.save()
+            except Profession.DoesNotExist:
+                pass
+        skills_list_from_skills = list()
         if self.validated_data.get('skills', None):
             #hack to handle llist as string
-            if type(self.validated_data.get('skills')) == type('abc'):
-                self.validated_data['skills'] = list(self.validated_data['skills'])
-            if type(self.validated_data.get('skills')[0]) == type('abc'):
-                self.validated_data['skills'] = ast.literal_eval(self.validated_data['skills'][0])
-            for skill in self.validated_data['skills']:
+            skills = self.validated_data.get('skills')
+            logger.info("Skills: %s of type %s" % (skills, type(skills)))
+            if type(skills) == str or type(skills) == int:
+                skills = list(skills)
+            if type(skills[0]) == str and skills[0].find('(') != -1:
+                skills = ast.literal_eval(skills[0])
+            for skill in skills:
                 try:
                     skill = Skill.objects.get(id=int(skill))
                     user_profile.skills.add(skill)
-                except Profession.DoesNotExist:
+                except Skill.DoesNotExist:
                     logger.warning("Error adding skill to profile during registration", skill)
+
+            skills_list_from_skills = [skill.text for skill in user_profile.skills.all()]
+
+        if self.validated_data.get('skills_list', None):
+            skills_list = self.validated_data.get('skills_list', list())
+            logger.info("Skills list: %s of type %s" % (skills_list, type(skills_list)))
+            
+            if type(skills_list) == str or type(skills_list) == int:
+                skills_list = list(skills_list)
+            if len(skills_list) > 0 and type(skills_list[0]) == str and skills_list[0].find('[') != -1:
+                skills_list = ast.literal_eval(skills_list[0])
+
+            for skill_text in skills_list:
+                if skill_text in skills_list_from_skills:
+                    continue
+
+                try:
+                    skill = Skill.objects.get(text=skill_text)
+                    user_profile.skills.add(skill)
+                except Skill.DoesNotExist:
+                    pass
+            user_profile.skills_list = list(set(skills_list + skills_list_from_skills))
+            #user_profile.skills_list = list(skills_list)
+            user_profile.save()
+
         if self.validated_data.get('interests', None):
             #hack to handle llist as string
-            if type(self.validated_data.get('interests')) == type('abc'):
-                self.validated_data['interests'] = list(self.validated_data['interests'])
-            if type(self.validated_data.get('interests')[0]) == type('abc'):
-                self.validated_data['interests'] = ast.literal_eval(self.validated_data['interests'][0])
-            for interest in self.validated_data['interests']:
+            interest_ids = self.validated_data.get('interests')
+            if type(interest_ids) == str or type(interest_ids) == int:
+                interest_ids = list(interest_ids)
+            if type(interest_ids[0]) == str and interest_ids[0].find('[') != -1:
+                interest_ids = ast.literal_eval(interest_ids[0])
+            for interest_id in interest_ids:
                 try:
-                    interest = Interest.objects.get(id=int(interest))
+                    interest = Interest.objects.get(id=int(interest_id))
                     user_profile.interests.add(interest)
                 except Profession.DoesNotExist:
                     logger.warning("Error adding interest to profile during registration", interest)
 
         #add to invite group count
-        invite_group = InviteGroup.objects.get(invite_code=self.validated_data['invite_code'])
-        invite_group.count += 1
-        invite_group.save()
-        invite_group.users.add(user)
+        #invite_group = InviteGroup.objects.get(invite_code=self.validated_data['invite_code'])
+        #invite_group.count += 1
+        #invite_group.save()
+        #invite_group.users.add(user)
         return user, user_profile, token[0].key
 
 
