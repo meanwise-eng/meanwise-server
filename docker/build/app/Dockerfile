@@ -29,4 +29,5 @@ ENTRYPOINT ["/start.sh"]
 
 VOLUME /usr/share/nginx/html/static
 
-CMD ["/usr/local/bin/gunicorn", "-w", "${APP_WORKERS}", "-b", "0.0.0.0:8000", "meanwise_backend.wsgi"]
+CMD ["/usr/local/bin/gunicorn", "-w", "${APP_WORKERS}", "-b", "0.0.0.0:8000", "-t", "30", "meanwise_backend.wsgi"]
+

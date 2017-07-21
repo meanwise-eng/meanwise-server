@@ -2,6 +2,7 @@ amqp==1.4.9
 anyjson==0.3.3
 Babel==2.3.4
 celery[redis]==4.0
+vine
 contextlib2==0.5.3
 Django==1.11
 django-braces==1.9.0

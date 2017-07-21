@@ -161,10 +161,10 @@ AWS_SECRET_ACCESS_KEY = os.environ.get(
     'AWS_SECRET_ACCESS_KEY', 'aRR+qkRx7tsHzGQA8j1WBRaSmEnsMs8+PPr3N1f0')
 
 # The name of the bucket to store files in.
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', "mw-uploads")
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', None)
 AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH', False)
 AWS_S3_FILE_OVERWRITE = os.environ.get('AWS_S3_FILE_OVERWRITE', False)
-AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', 'dtl635379s21p.cloudfront.net')
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
 
 #AWS_REGION = os.environ.get('AWS_REGION', 'us-west-2')
 #AWS_S3_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME', "mw-uploads")
