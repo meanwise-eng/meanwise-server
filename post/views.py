@@ -240,16 +240,8 @@ class UserHomeFeed(APIView):
             content_type = ContentType.objects.get_for_model(Post)
             tags_subq = Tag.objects.filter(
                 taggit_taggeditem_items__content_type=content_type, post=OuterRef('pk'))
-                topics_subq = topics_subq.filter(
-                    reduce(operator.or_, topic_wheres))
-            else:
-                topics_subq = topics_subq.filter(text='')
-            topics_subq = topics_subq.annotate(
-                count=Count('pk')).values('count')[:1]
-
-            content_type = ContentType.objects.get_for_model(Post)
-            tags_subq = Tag.objects.filter(
-                taggit_taggeditem_items__content_type=content_type, post=OuterRef('pk'))
+            topics_subq = topics_subq.filter(
+                reduce(operator.or_, topic_wheres))
 
             tag_wheres = []
             if len(skills_list) > 0:

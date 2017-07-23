@@ -575,13 +575,6 @@ class ForgotPasswordView(APIView):
                 )
                 msg = EmailMultiAlternatives(
                     subject, text_content, from_email, [to])
-                                "Uh oh! Looks like you forgot your password. Here’s a temporary password:\n\n" +
-                                "%s" % (str(password),) +
-                                "\n\n"
-                                "Use it to sign in, go to settings, and set your new password. Happy Posting!\n\n"
-                                "Cheers,\n\n"
-                                "Meanwise"
-                                )
                 html_content=("Hey,<br/>\n\n"
                                 "<p>Uh oh! Looks like you forgot your password. Here’s a temporary password:</p><br/>\n\n" +
                                 "%s" % (str(password),) +
