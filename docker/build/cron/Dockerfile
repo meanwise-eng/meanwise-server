@@ -4,8 +4,6 @@ ENV APP_WORKERS 1
 
 ADD ./start.sh /start.sh
 
-VOLUME /app/static
-
 ADD awscredentials /root/.aws/credentials
 ADD ./code /app
 
