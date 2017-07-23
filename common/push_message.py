@@ -23,7 +23,12 @@ def send_message_device(device, message_payload):
     """
     message = message_payload['message']
     extra_pload= {'p':message_payload['p'], 'u':message_payload['u'],'t':message_payload['t']}
-
-    message = PushMessage(badge_count=1, context='url_alert', context_id='none',has_new_content=True, message=message, sound="default", extra_payload=extra_pload)
-
-    device.send(message)
+    try:
+        message = PushMessage(badge_count=1, context='url_alert', context_id='none',has_new_content=True, message=message, sound="default")
+    except Exception as e:
+        return 0
+    try:
+        device.send(message, extra_pload={'p':message_payload['p'], 'u':message_payload['u'],'t':message_payload['t']})
+    except Exception as e:
+        return 0
+        
