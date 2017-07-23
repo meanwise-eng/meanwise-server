@@ -1,7 +1,10 @@
+import time
+import logging
 from post.models import TrendingTopicsInterest, Post
 from userprofile.models import Interest
 
 def my_scheduled_job():
+    start_time = time.time()
     #delete old values
     for tt in TrendingTopicsInterest.objects.all():
         tt.delete()
@@ -22,5 +25,12 @@ def my_scheduled_job():
         topics = sorted(topics_rank, key=topics_rank.get, reverse=True)[:10]
         TrendingTopicsInterest.objects.create(interest=interest, topics=topics)
 
-    
-    
+    t = int((time.time() - start_time) * 1000)
+
+    extra = {
+        'time': t,
+        'tags': ['trending-topics']
+    }
+    logger = logging.getLogger('meanwise_backend.%s' % __name__)
+    adapter = logging.LoggerAdapter(logger, extra)
+    adapter.info("Calculated trending topics.")

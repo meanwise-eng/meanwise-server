@@ -25,4 +25,4 @@ EXPOSE 8000
 
 ENTRYPOINT ["/start.sh"]
 
-CMD ["/usr/local/bin/gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "--reload", "meanwise_backend.wsgi"]
+CMD ["cron", "-f"]
