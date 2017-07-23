@@ -2,6 +2,8 @@ FROM meanwise/api-base:1.0.0
 
 ENV APP_WORKERS 1
 
+ADD ./start.sh /start.sh
+
 VOLUME /app/static
 
 ADD awscredentials /root/.aws/credentials
@@ -19,6 +21,8 @@ RUN apt-get update && \
 
 EXPOSE 8000
 
+RUN /usr/bin/python manage.py crontab add
+
 ENTRYPOINT ["/start.sh"]
 
-CMD ["/usr/local/bin/gunicorn", "-w", "${APP_WORKERS}", "-b", "0.0.0.0:8000", "meanwise_backend.wsgi"]
+CMD ["cron", "-f"]
