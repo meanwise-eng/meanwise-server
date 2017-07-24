@@ -28,7 +28,7 @@ ADMINS = ()
 SECRET_KEY = '_ks(exh8ftmi!f_vwma6od!#^$yngksnep2-n(5e6^qql%qcxx'
 
 # Variables from Environment
-ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'production')
 DATABASE = os.environ.get('DATABASE')
 DB_HOST = os.environ.get('DB_HOST', 'postgres')
 DB_PORT = os.environ.get('DB_PORT', '5432')
@@ -83,29 +83,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'storages',
     'health_check',
-    #'subscribe',
-    #'api_v3',
     #'common',
-    #'account_profile',
-    #'hitcount',
-    #'interests',
     #'geography',
-    #'search',
-    #'recommendation',
-    #'jobs',
-    #'pages',
     'mnotifications',
-    #'notifications',
     'djcelery',
-    #'works',
-    #'company',
-    # auth
-    #'allauth',
-    #'allauth.account',
-    #'allauth.socialaccount',
-    #'allauth.socialaccount.providers.facebook',
-    #'rest_auth',
-    #'rest_auth.registration',
     'rest_framework.authtoken',
 
     # payment
@@ -353,6 +334,10 @@ if ELK_LOGSTASH_HOST:
 STATIC_URL = 'http://localhost:8001/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 # got MEDIA_URL from env at the beginning
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
