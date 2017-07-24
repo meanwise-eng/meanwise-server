@@ -1,5 +1,5 @@
 FROM alpine:latest
 
-ADD ./docs /meanwise/docs
+ADD ./docs /usr/share/nginx/html/dev-docs
 
-VOLUME /meanwise/docs
+VOLUME /usr/share/nginx/html/dev-docs
