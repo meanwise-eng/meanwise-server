@@ -17,8 +17,6 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
-EXPOSE 8000
-
 RUN /usr/bin/python manage.py crontab add
 
 ENTRYPOINT ["/start.sh"]

@@ -21,8 +21,6 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 
 WORKDIR /app
 
-EXPOSE 8000
-
 ENTRYPOINT ["/start.sh"]
 
 CMD ["cron", "-f"]
