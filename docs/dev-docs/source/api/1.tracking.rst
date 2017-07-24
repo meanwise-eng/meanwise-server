@@ -1,0 +1,105 @@
+========
+Tracking
+========
+
+The API endpoints presented here helps us to track what the user is doing. This achieves several
+purposes including finding usage patters, providing analytics to users (impressions, etc).
+
+This API provides the following endpoints:
+
+* Seen posts
+
+Seen Posts
+==========
+
+This endpoint will allow the app to submit the events about seen posts.
+
+Request
+-------
+
+.. code-block:: http
+
+   POST api/v1.1/tracking/seen-posts HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Request Payload (JSON)
+----------------------
+
+.. code-block:: javascript
+
+  {
+    "seen_posts": [
+      {
+        "url": "/search/post/?interest_name=arts%2cdesign",
+        "datetime": "2017-07-20T12:34:12.000000Z",
+        "posts": [
+          {
+            "post_id": 23,
+            "no_in_sequencec": 1
+          }
+        ]
+      }
+    ]
+  }
+
++---------------------------------+---------------------------------------------------+--------------+
+| Fieldname                       |                 Description                       |     Type     |
++=================================+===================================================+==============+
+| seen_posts                      | Array of seen post items.                         | array        |
++---------------------------------+---------------------------------------------------+--------------+
+| seen_posts.url                  | The URL for which the user is viewing results of. | string (255) |
++---------------------------------+---------------------------------------------------+--------------+
+| seen_posts.datetime             | The datetime at which the results were retrieved. | datetime     |
++---------------------------------+---------------------------------------------------+--------------+
+| seen_posts.posts                | Array of post items.                              | array        |
++---------------------------------+---------------------------------------------------+--------------+
+| seen_posts.posts.post_id        | The ID of the post that was seen.                 | string (36)  |
++---------------------------------+---------------------------------------------------+--------------+
+| seen_posts.posts.no_in_sequence | Indicates the position of the item in the list.   | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+| seen_posts.posts.page           | The page at which the item is found.              | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 202 Accepted
+  Content-Type: application/json
+  Location: /api/user/771aa35b-3112-47ad-a98d-5e7dd4a01e27
+
+.. code-block:: javascript
+
+  {
+    "success": true,
+    "error": null,
+    "results": {
+      "message": "Data saved succesfully."
+    }
+  }
+
+Error Payload (JSON)
+--------------------
+
+.. code-block:: http
+
+  HTTP/1.1 500 Internal Server Error
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "success": false,
+    "error": {
+      "message": "Error occured on server.",
+      "code": 500,
+      "subCode": 1,
+      "errorTitle": "Error occured on server",
+      "errorMessage": "An unidentified error occured on server. We will be looking into this issue. Please try again later."
+    },
+    "data": null
+  }

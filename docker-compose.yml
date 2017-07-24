@@ -26,6 +26,7 @@ services:
     volumes:
       - media:/usr/share/nginx/html/media
       - static:/usr/share/nginx/html/static
+      - ./docs/dev-docs/build/html:/usr/share/nginx/html/docs
 
   cron:
     build: ./docker/cron/
