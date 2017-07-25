@@ -103,6 +103,7 @@ INSTALLED_APPS = [
     'post',
     'django_crontab',
     'scarface',
+    'analytics',
 ]
 
 if DEBUG:

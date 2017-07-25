@@ -129,6 +129,22 @@ class UserProfile(models.Model):
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
 
+    def save(self, *args, **kwargs):
+
+        if self.cover_photo:
+            im = Image.open(self.cover_photo)
+            output = BytesIO()
+            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
+            self.cover_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            
+        if self.profile_photo:
+            im = Image.open(self.profile_photo)
+            output = BytesIO()
+            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
+            self.profile_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            
+        super(UserProfile, self).save(*args, **kwargs)
+
     user_type = models.IntegerField(default=int(0), null=False)
     profile_background_color = models.CharField(default='#FFFFFF', max_length=20)
 
