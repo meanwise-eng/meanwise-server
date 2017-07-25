@@ -81,4 +81,5 @@ urlpatterns = [
     url(r'^public-feed/$', PublicFeed.as_view(), name="public-feed"),
     url(r'^me/', include('userprofile.me_urls')),
     url(r'^version/', include('appversion.urls')),
+    url(r'^analytics/', include('analytics.urls')),
 ]
