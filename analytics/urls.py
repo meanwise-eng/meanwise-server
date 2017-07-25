@@ -1,6 +1,6 @@
 from django.conf.urls import url
-from .views import PostAnalyticsView
+from .views import PostAnalyticsView, PersonalAnalyticsView
 
 urlpatterns = [
-    url(r'seen-posts/$', PostAnalyticsView.as_view())
+    url(r'', PostAnalyticsView.as_view()),
 ]
