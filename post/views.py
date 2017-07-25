@@ -222,63 +222,39 @@ class UserHomeFeed(APIView):
             home_feed_posts = post_qs.filter(Q(poster__id__in=friends_ids) | Q(
                 interest__id__in=interests_ids) | Q(poster__id=user_id))
 
-            # Sorting by skills
-            skills_list = userprofile.skills_list
-            topics_subq = Topic.objects.filter(post=OuterRef('pk'))
-            topic_wheres = []
-            if len(skills_list) > 0:
-                for skill in skills_list:
-                    topic_wheres.append(Q(text__iexact=skill))
+            # # Sorting by skills
+            # skills_list = userprofile.skills_list
+            # topics_subq = Topic.objects.filter(post=OuterRef('pk'))
+            # topic_wheres = []
+            # if len(skills_list) > 0:
+            #     for skill in skills_list:
+            #         topic_wheres.append(Q(text__iexact=skill))
+            #     topics_subq = topics_subq.filter(reduce(operator.or_, topic_wheres))
+            # else:
+            #     topics_subq = topics_subq.filter(text='')
+            # topics_subq = topics_subq.annotate(count=Count('pk')).values('count')[:1]
 
-                topics_subq = topics_subq.filter(
-                    reduce(operator.or_, topic_wheres))
-            else:
-                topics_subq = topics_subq.filter(text='')
-            topics_subq = topics_subq.annotate(
-                count=Count('pk')).values('count')[:1]
+            # content_type = ContentType.objects.get_for_model(Post)
+            # tags_subq = Tag.objects.filter(taggit_taggeditem_items__content_type=content_type, post=OuterRef('pk'))
+            # tag_wheres = []
+            # if len(skills_list) > 0:
+            #     for skill in skills_list:
+            #         tag_wheres.append(Q(name__iexact=skill))
+            #     tags_subq = tags_subq.filter(reduce(operator.or_, tag_wheres))
+            # else:
+            #     tags_subq = tags_subq.filter(name=Value(''))
+            # tags_subq = tags_subq.annotate(tag_count=Count('pk')).values('tag_count')[:1]
 
-            content_type = ContentType.objects.get_for_model(Post)
-            tags_subq = Tag.objects.filter(
-                taggit_taggeditem_items__content_type=content_type, post=OuterRef('pk'))
-            topics_subq = topics_subq.filter(
-                reduce(operator.or_, topic_wheres))
-
-            tag_wheres = []
-            if len(skills_list) > 0:
-                for skill in skills_list:
-                    tag_wheres.append(Q(name__iexact=skill))
-                tags_subq = tags_subq.filter(reduce(operator.or_, tag_wheres))
-            else:
-                tags_subq = tags_subq.filter(name=Value(''))
-
-            tags_subq = tags_subq.annotate(
-                tag_count=Count('pk')).values('tag_count')[:1]
-
-            interests_whens = [When(interest__id__in=interests_ids, then=1)]
-            home_feed_posts = home_feed_posts.annotate(
-                relevance=Coalesce(Subquery(topics_subq, output_field=IntegerField()), 0) +
-                Coalesce(Subquery(tags_subq, output_field=IntegerField()), 0) +
-                Case(
-                    *interests_whens,
-                    default=0,
-                    output_field=IntegerField()
-                )
-            )
-
-            tags_subq = tags_subq.annotate(
-                tag_count=Count('pk')).values('tag_count')[:1]
-
-            interests_whens = [When(interest__id__in=interests_ids, then=1)]
-            home_feed_posts = home_feed_posts.annotate(
-                relevance=Coalesce(Subquery(topics_subq, output_field=IntegerField()), 0) +
-                Coalesce(Subquery(tags_subq, output_field=IntegerField()), 0) +
-                Case(
-                    *interests_whens,
-                    default=0,
-                    output_field=IntegerField()
-                )
-
-            ).order_by(F('relevance').desc(), '-created_on')
+            # interests_whens = [ When(interest__id__in=interests_ids, then=1) ]
+            # home_feed_posts = home_feed_posts.annotate(
+            #     relevance=Coalesce(Subquery(topics_subq, output_field=IntegerField()), 0) +
+            #         Coalesce(Subquery(tags_subq, output_field=IntegerField()), 0) +
+            #         Case(
+            #             *interests_whens,
+            #             default=0,
+            #             output_field=IntegerField()
+            #         )
+            # ).order_by(F('relevance').desc(), '-created_on')
 
             page = request.GET.get('page')
             page_size = request.GET.get('page_size')
