@@ -6,10 +6,10 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import SeenPostBatchSerializer
+from .serializers import SeenPostBatchSerializer, SeenPostSerializer
 from post.models import Post
 from userprofile.models import UserProfile
-from .models import SeenPostBatch
+from .models import SeenPostBatch, SeenPost
 
 
 class PostAnalyticsView(APIView):
@@ -82,3 +82,24 @@ class PostAnalyticsView(APIView):
             },
             status=status.HTTP_501_NOT_IMPLEMENTED
         )
+
+
+class PersonalAnalyticsView(APIView):
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, user_id):
+        if int(user_id) == request.user.id:
+            posts = SeenPost.objects.filter(poster=int(user_id))
+            print(posts)
+            serializer = SeenPostSerializer(posts, many=True)
+
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": {"posts": serializer.data}
+                },
+                status=status.HTTP_200_OK
+            )
