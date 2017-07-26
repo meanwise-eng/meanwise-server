@@ -1,4 +1,7 @@
+import json
+
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -7,9 +10,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import SeenPostBatchSerializer, SeenPostSerializer
-from post.models import Post
+from post.models import Post, Comment
 from userprofile.models import UserProfile
-from .models import SeenPostBatch, SeenPost
+from .models import SeenPost
 
 
 class PostAnalyticsView(APIView):
@@ -90,16 +93,64 @@ class PersonalAnalyticsView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, user_id):
+
         if int(user_id) == request.user.id:
+            try:
+                UserProfile.objects.get(user__id=user_id)
+
+            except UserProfile.DoesNotExist:
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": {
+                            "message": "Error occured on server.",
+                            "code": 500,
+                            "subCode": 1,
+                            "errorTitle": "Error occured on server",
+                            "errorMessage": "An unidentified error occured on server. We will be looking into this issue. Please try again later."
+                        },
+                        "results": ""
+                    },
+                    status=status.HTTP_501_NOT_IMPLEMENTED
+                )
+
             posts = SeenPost.objects.filter(poster=int(user_id))
-            print(posts)
             serializer = SeenPostSerializer(posts, many=True)
+            data = json.loads(json.dumps(serializer.data))
+
+            for i in range(len(data)):
+                post_id = data[i]["post_id"]
+
+                like_queryset = Post.objects.filter(id=post_id).values("liked_by", likes=Count("liked_by"))
+                likes = (list(like_queryset)[0]["likes"])
+
+                comment_queryset = Comment.objects.filter(post=post_id)
+                comments = len(list(comment_queryset))
+
+                data[i]["no_of_likes"] = likes
+                data[i]["no_of_comments"] = comments
 
             return Response(
                 {
                     "status": "success",
                     "error": "",
-                    "results": {"posts": serializer.data}
+                    "results": {"posts": data}
                 },
                 status=status.HTTP_200_OK
             )
+
+        else:
+            raise PermissionDenied("You cannot view analytics of other users")
+
+        return Response(
+            {
+                "status": "failed",
+                "error": {
+                    "message": "Error occured on server.",
+                    "code": 400,
+                    "errorTitle": "Bad Request",
+                },
+                "results": ""
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
