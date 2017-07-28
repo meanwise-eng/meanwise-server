@@ -174,7 +174,7 @@ class UserProfileDetail(APIView):
                 "You cannot change profile for another user")
 
         serialized_up = UserProfileUpdateSerializer(
-            userprofile, data=data, partial=True)
+            userprofile, data=data, partial=True, context={'request':request})
         if serialized_up.is_valid():
             up = serialized_up.save()
             # handle username

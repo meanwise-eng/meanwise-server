@@ -2,8 +2,6 @@ FROM meanwise/api-base:1.0.0
 
 ENV APP_WORKERS 1
 
-VOLUME /app/static
-
 ADD awscredentials /root/.aws/credentials
 ADD ./code /app
 
@@ -17,8 +15,17 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
+
+RUN ./manage.py collectstatic --noinput && \
+	mkdir -p /usr/share/nginx/html/static && \
+	mv -v /app/static/* /usr/share/nginx/html/static/
+
+
 EXPOSE 8000
 
+ADD ./start.sh /start.sh
 ENTRYPOINT ["/start.sh"]
+
+VOLUME /usr/share/nginx/html/static
 
 CMD ["/usr/local/bin/gunicorn", "-w", "${APP_WORKERS}", "-b", "0.0.0.0:8000", "meanwise_backend.wsgi"]

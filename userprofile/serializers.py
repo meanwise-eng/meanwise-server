@@ -137,21 +137,9 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(reverse('friends-list', args=[obj.user.id]))
 
     def get_friend_count(self, obj):
-        user_id = self.context.get('user_id')
-
-        if not user_id:
-            request = self.context.get('request')
-            if not request or not hasattr(request, 'user'):
-                return 0
-
-            if not request.user.id:
-                return 0
-
-            user_id = request.user.id
-
         try:
             friend_count = UserFriend.objects\
-                .filter(Q(Q(user_id=user_id) | Q(friend_id=obj.user.id)))\
+                .filter(Q(Q(user_id=obj.user.id) | Q(friend_id=obj.user.id)))\
                 .filter(status=UserFriend.STATUS_ACCEPTED)
         except UserFriend.DoesNotExist:
             return 0
