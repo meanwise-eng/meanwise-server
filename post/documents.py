@@ -1,4 +1,7 @@
 from django_elasticsearch_dsl import DocType, Index, fields
+import datetime
+
+from analytics.models import SeenPost
 from .models import Post, Comment
 
 post = Index('mw_posts')
@@ -12,12 +15,15 @@ post.settings(
 class PostDocument(DocType):
 
     interest_id = fields.StringField()
+    interest_name = fields.StringField(index='not_analyzed')
     image_url = fields.StringField()
     video_url = fields.StringField()
     user_id = fields.StringField()
     tags = fields.StringField()
     num_likes = fields.IntegerField()
+    num_recent_likes = fields.IntegerField()
     num_comments = fields.IntegerField()
+    num_recent_comments = fields.IntegerField()
     user_firstname = fields.StringField()
     user_lastname = fields.StringField()
     user_profile_photo = fields.StringField()
@@ -27,6 +33,9 @@ class PostDocument(DocType):
     user_profile_photo_small = fields.StringField()
     video_thumb_url = fields.StringField()
     topics = fields.StringField()
+    num_seen = fields.IntegerField()
+    num_recent_seen = fields.IntegerField()
+    created_on = fields.DateField()
 
     class Meta:
         model = Post
@@ -44,6 +53,9 @@ class PostDocument(DocType):
 
     def prepare_interest_id(self, obj):
         return obj.interest.id
+
+    def prepare_interest_name(self, obj):
+        return obj.interest.name
 
     def prepare_user_firstname(self, obj):
         try:
@@ -104,7 +116,10 @@ class PostDocument(DocType):
             return  None
 
     def prepare_num_likes(self, obj):
-        return obj.liked_by.all().count()
+        return obj.liked_by.filter().count()
+
+    def prepare_num_recent_likes(self, obj):
+        return obj.liked_by.filter().count()
 
     def prepare_topics(self, obj):
         return list(obj.topics.all().values_list('text',flat=True))
@@ -113,7 +128,13 @@ class PostDocument(DocType):
         return list(obj.tags.all().values_list('name',flat=True))
 
     def prepare_num_comments(self, obj):
-        return Comment.objects.filter(post=obj).filter(is_deleted=False).count()
+        return Comment.objects.filter(post=obj).filter(is_deleted=False)\
+            .count()
+
+    def prepare_num_recent_comments(self, obj):
+        return Comment.objects.filter(post=obj).filter(is_deleted=False)\
+            .filter(created_on__gte=(datetime.datetime.now()-datetime.timedelta(weeks=1)))\
+            .count()
 
     def prepare_image_url(self, obj):
         _image = obj.image
@@ -134,3 +155,12 @@ class PostDocument(DocType):
                 return obj.video_thumbnail.url
         else:
             return ""
+
+    def prepare_num_seen(self, obj):
+        return SeenPost.objects.filter(post_id=obj.id)\
+            .count()
+
+    def prepare_num_recent_seen(self, obj):
+        return SeenPost.objects.filter(post_id=obj.id)\
+            .filter(datetime__gte=(datetime.datetime.now()-datetime.timedelta(weeks=1)))\
+            .count()
