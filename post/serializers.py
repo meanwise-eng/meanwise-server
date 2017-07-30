@@ -6,8 +6,34 @@ from taggit_serializer.serializers import TagListSerializerField, TaggitSerializ
 from userprofile.models import UserProfile
 from post.models import Post, Comment, Share, Story
 from post.search_indexes import PostIndex
+from post.documents import PostDocument
 
 from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
+
+class PostDocumentSerializer(DocumentSerializer):
+
+    id = serializers.SerializerMethodField()
+    score = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    tags = serializers.ListField(child=serializers.CharField())
+    topics = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        document = PostDocument
+        fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'num_comments', 'interest_id',
+            'user_firstname', 'user_lastname', 'user_profile_photo', 'user_profile_photo_small',
+            'user_cover_photo', 'user_profession', 'user_profession_text', 'image_url', 'video_url',
+            'video_thumb_url', 'topics']
+
+    def get_id(self, obj):
+        return obj._id
+
+    def get_score(self, obj):
+        return obj._score
+
+    def get_is_liked(self, obj):
+        return 0
 
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()

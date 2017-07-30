@@ -14,12 +14,12 @@ post.settings(
 @post.doc_type
 class PostDocument(DocType):
 
-    interest_id = fields.StringField()
+    interest_id = fields.IntegerField()
     interest_name = fields.StringField(index='not_analyzed')
     image_url = fields.StringField()
     video_url = fields.StringField()
-    user_id = fields.StringField()
-    tags = fields.StringField()
+    user_id = fields.IntegerField()
+    tags = fields.ListField(fields.StringField())
     num_likes = fields.IntegerField()
     num_recent_likes = fields.IntegerField()
     num_comments = fields.IntegerField()
@@ -32,7 +32,7 @@ class PostDocument(DocType):
     user_profession_text = fields.StringField()
     user_profile_photo_small = fields.StringField()
     video_thumb_url = fields.StringField()
-    topics = fields.StringField()
+    topics = fields.ListField(fields.StringField())
     num_seen = fields.IntegerField()
     num_recent_seen = fields.IntegerField()
     created_on = fields.DateField()
@@ -146,7 +146,7 @@ class PostDocument(DocType):
         _video = obj.video
         if _video:
             return _video.url
-        return ""
+        return None
 
     def prepare_video_thumb_url(self, obj):
         #needs to be added
@@ -154,7 +154,7 @@ class PostDocument(DocType):
             if obj.video_thumbnail:
                 return obj.video_thumbnail.url
         else:
-            return ""
+            return None
 
     def prepare_num_seen(self, obj):
         return SeenPost.objects.filter(post_id=obj.id)\

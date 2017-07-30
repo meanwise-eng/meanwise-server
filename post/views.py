@@ -34,14 +34,16 @@ from post.serializers import *
 from userprofile.models import UserFriend, Interest
 from mnotifications.models import Notification
 
+from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
 from common.api_helper import get_objects_paginated
+from post.documents import PostDocument
 
 from common.push_message import *
 
 post_qs = Post.objects.filter(is_deleted=False).filter(
     Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 
 class UserPostList(APIView):
@@ -595,6 +597,34 @@ class TrendingTopicForInterest(APIView):
             return Response({"status": "failed", "error": "Could not find relevant value in TrendingTopicsInterest.", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status": "success", "error": "", "results": tt.topics}, status=status.HTTP_201_CREATED)
 
+class PostExploreView(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        s = PostDocument.search()
+        q = query.Q(
+            'function_score',
+            filter=query.Q('term', interest_name='Fashion & Beauty'),
+            functions=[
+                query.SF('exp', created_on={'origin':'now', 'offset':'1m', 'scale':'5m', 'decay':0.9}, weight=5),
+                query.SF('exp', created_on={'origin':'now', 'offset':'1d', 'scale':'1d', 'decay':0.9}, weight=4),
+                query.SF('field_value_factor', field='num_likes', modifier='log1p', weight=2),
+                query.SF('field_value_factor', field='num_comments', modifier='log1p', weight=3),
+                query.SF('field_value_factor', field='num_seen', modifier='log1p', weight=1),
+                query.SF({'filter':query.Q('match', tags='a f'), 'weight': 3}),
+                query.SF({'filter':query.Q('match', topics='jkl'), 'weight': 3}),
+                query.SF({'filter':query.Q('term', interest_name='Fashion & Beauty'), 'weight': 1}),
+            ],
+            score_mode='sum'
+        )
+        s = s.query(q)
+        s = s[0:30]
+
+        serializer = PostDocumentSerializer(s.execute(), many=True)
+
+        return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_200_OK)
 
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()
