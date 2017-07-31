@@ -42,6 +42,8 @@ class Post(models.Model):
     video_width = models.IntegerField(null=True, blank=True)
     video_thumbnail = models.ImageField(upload_to='post_video_thumbnails', null=True, blank=True)
     resolution = pgJSONField(null=True)
+    geo_location_lat = models.DecimalField(null=True, max_digits=9, decimal_places=6)
+    geo_location_lng = models.DecimalField(null=True, max_digits=9, decimal_places=6)
 
     parent = models.ForeignKey('self', db_index=True, null=True)
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')

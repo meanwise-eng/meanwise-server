@@ -103,6 +103,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
         allow_null=True,
@@ -117,7 +118,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
                       'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on', 'tags', 'topics',
-                      'story', 'story_index', 'is_liked', 'likes_url')
+                      'story', 'story_index', 'is_liked', 'likes_url', 'geo_location_lat', 'geo_location_lng')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -386,11 +387,22 @@ class PostSaveSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     topics = serializers.SerializerMethodField()
     topic_names = serializers.CharField(required=False, max_length=100, allow_blank=True)
+    geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
+    geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
+
     class Meta:
         model = Post
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text',flat=True)
+
+    def validate(self, data):
+        if 'geo_location_lat' in data and 'geo_location_lng' not in data:
+            raise serializers.ValidationError("You cannot submit geo_location_lat without geo_location_lng")
+        if 'geo_location_lng' in data and 'geo_location_lat' not in data:
+            raise serializers.ValidationError("You cannot submit geo_location_lng without geo_location_lat")
+
+        return data
 
 class StorySerializer(serializers.ModelSerializer):
     posts = serializers.SerializerMethodField()
