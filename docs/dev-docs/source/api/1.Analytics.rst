@@ -32,43 +32,49 @@ Request Payload (JSON)
 .. code-block:: javascript
 
   {
-    "url": "http://localhost:8000/admin/analytics/seenpostbatch/add/",
-    "datetime": "2017-07-20T12:39:12Z",
-    "posts": [
-        {
-            "post_id": 1,
-            "user_id": 1,
-            "page_no": 1,
-            "datetime": "2017-07-25T10:20:54.650936Z",
-            "poster": 2,
-            "no_in_sequence": 10,
-            "is_expanded": true
-        }
+    "seen_posts": [
+      {
+          "url": "http://localhost:8000/admin/analytics/seenpostbatch/add/",
+          "datetime": "2017-07-20T12:39:12Z",
+          "posts": [
+              {
+                  "post_id": 1,
+                  "user_id": 1,
+                  "page_no": 1,
+                  "datetime": "2017-07-25T10:20:54.650936Z",
+                  "poster": 2,
+                  "no_in_sequence": 10,
+                  "is_expanded": true
+              }
+          ]
+      }
     ]
   }
 
 +---------------------------------+---------------------------------------------------+--------------+
 | Fieldname                       |                 Description                       |     Type     |
 +=================================+===================================================+==============+
-| url                             | The URL for which the user is viewing results of. | string (255) |
+| seen_posts                      | Array of seen post items.                         | array        |
 +---------------------------------+---------------------------------------------------+--------------+
-| datetime                        | The datetime at which the results were retrieved. | datetime     |
+| seen_posts.url                  | The URL for which the user is viewing results of. | string (255) |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts                           | Array of post items.                              | array        |
+| seen_posts.datetime             | The datetime at which the results were retrieved. | datetime     |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts.post_id                   | The ID of the post that was seen.                 | integer      |
+| seen_posts.post                 | Array of post items.                              | array        |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts.user_id                   | The ID of the user who saw the post.              | integer      |
+| seen_posts.posts.post_id        | The ID of the post that was seen.                 | integer      |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts.poster                    | The ID of the user who posted the post.           | integer      |
+| seen_posts.posts.user_id        | The ID of the user who saw the post.              | integer      |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts.no_in_sequence            | Indicates the position of the item in the list.   | integer      |
+| seen_posts.posts.poster         | The ID of the user who posted the post.           | integer      |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts.page_no                   | The page at which the item is found.              | integer      |
+| seen_posts.posts.no_in_sequence | Indicates the position of the item in the list.   | integer      |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts.is_expanded               | Bool value to know the post was expanded or not.  | boolean      |
+| seen_posts.posts.page_no        | The page at which the item is found.              | integer      |
 +---------------------------------+---------------------------------------------------+--------------+
-| posts.datetime                  | The datetime at which the post was seen.          | integer      |
+| seen_posts.posts.is_expanded    | Bool value to know the post was expanded or not.  | boolean      |
++---------------------------------+---------------------------------------------------+--------------+
+| seen_posts.posts.datetime       | The datetime at which the post was seen.          | integer      |
 +---------------------------------+---------------------------------------------------+--------------+
 
 Response Payload (JSON)
