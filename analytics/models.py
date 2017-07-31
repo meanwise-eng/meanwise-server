@@ -2,7 +2,7 @@ from django.db import models
 
 
 class SeenPostBatch(models.Model):
-    url = models.CharField(max_length=200)
+    url = models.CharField(max_length=255)
     datetime = models.DateTimeField(auto_now_add=False)
 
     def __str__(self):

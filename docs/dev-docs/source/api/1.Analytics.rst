@@ -1,0 +1,207 @@
+=========
+Analytics
+=========
+
+The API endpoints presented here helps us to track what the user is doing. This achieves several
+purposes including finding usage patterns, providing analytics to users (impressions, etc).
+
+This API provides the following endpoints:
+
+* Seen posts
+* User's Analytics
+
+Seen Posts
+==========
+
+This endpoint will allow the app to submit the events about seen posts.
+
+Request
+-------
+
+.. code-block:: http
+
+   POST api/v1.1/analytics/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Request Payload (JSON)
+----------------------
+
+.. code-block:: javascript
+
+  {
+    "url": "http://localhost:8000/admin/analytics/seenpostbatch/add/",
+    "datetime": "2017-07-20T12:39:12Z",
+    "posts": [
+        {
+            "post_id": 1,
+            "user_id": 1,
+            "page_no": 1,
+            "datetime": "2017-07-25T10:20:54.650936Z",
+            "poster": 2,
+            "no_in_sequence": 10,
+            "is_expanded": true
+        }
+    ]
+  }
+
++---------------------------------+---------------------------------------------------+--------------+
+| Fieldname                       |                 Description                       |     Type     |
++=================================+===================================================+==============+
+| url                             | The URL for which the user is viewing results of. | string (255) |
++---------------------------------+---------------------------------------------------+--------------+
+| datetime                        | The datetime at which the results were retrieved. | datetime     |
++---------------------------------+---------------------------------------------------+--------------+
+| posts                           | Array of post items.                              | array        |
++---------------------------------+---------------------------------------------------+--------------+
+| posts.post_id                   | The ID of the post that was seen.                 | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+| posts.user_id                   | The ID of the user who saw the post.              | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+| posts.poster                    | The ID of the user who posted the post.           | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+| posts.no_in_sequence            | Indicates the position of the item in the list.   | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+| posts.page_no                   | The page at which the item is found.              | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+| posts.is_expanded               | Bool value to know the post was expanded or not.  | boolean      |
++---------------------------------+---------------------------------------------------+--------------+
+| posts.datetime                  | The datetime at which the post was seen.          | integer      |
++---------------------------------+---------------------------------------------------+--------------+
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 202 Accepted
+  Content-Type: application/json
+  Location: /api/user/771aa35b-3112-47ad-a98d-5e7dd4a01e27
+
+.. code-block:: javascript
+
+  {
+    "results": "successfully added data",
+    "error": "",
+    "status": "success"
+  }
+
+Error Payload (JSON)
+--------------------
+
+.. code-block:: http
+
+  HTTP/1.1 500 Internal Server Error
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "results": "",
+    "error": {
+        "code": 500,
+        "errorTitle": "Error occured on server",
+        "subCode": 1,
+        "errorMessage": "An unidentified error occured on server. We will be looking into this issue. Please try again later.",
+        "message": "Error occured on server."
+    },
+    "status": "failed"
+  }
+
+
+User Analytics
+==============
+
+This endpoint will allow the user to see his own analytics.
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.1/analytics/user?user=1 HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+URL Parameters
+--------------
+
++---------------------------------+---------------------------------------------------+--------------+
+| Parameter Name                  |                 Description                       |     Type     |
++=================================+===================================================+==============+
+| user                            | The `user id` for which we are displaying data    | User ID value|
++---------------------------------+---------------------------------------------------+--------------+
+| date_from                       | The datetime or date from when user wants to see  |datetime      |
+|                                 | the result.                                       |              |
++---------------------------------+---------------------------------------------------+--------------+
+| date_to                         | The datetime or date from when user wants to see  |datetime      |
+|                                 | the result.                                       |              |
++---------------------------------+---------------------------------------------------+--------------+
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+  Location: /api/user?user=1
+
+.. code-block:: javascript
+
+  {
+    "results": {
+        "posts": [
+            {
+                "id": 1,
+                "user_id": 1,
+                "no_of_comments": 2,
+                "is_expanded": true,
+                "no_in_sequence": 10,
+                "post_id": 1,
+                "page_no": 1,
+                "datetime": "2017-07-25T21:20:07.425304Z",
+                "poster": 1,
+                "no_of_likes": 0
+            },
+            {
+                "id": 3,
+                "user_id": 1,
+                "no_of_comments": 2,
+                "is_expanded": false,
+                "no_in_sequence": 3,
+                "post_id": 1,
+                "page_no": 1,
+                "datetime": "2017-07-26T08:26:48.770733Z",
+                "poster": 1,
+                "no_of_likes": 0
+            }
+        ]
+    },
+    "error": "",
+    "status": "success"
+  }
+
+Error Payload (JSON)
+--------------------
+
+.. code-block:: http
+
+  HTTP/1.1 400 Bad Request
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "results": "",
+    "error": {
+        "code": 400,
+        "errorTitle": "Bad Request",
+        "message": "Error occured on server."
+    },
+    "status": "failed"
+  }

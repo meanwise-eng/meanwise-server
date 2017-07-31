@@ -100,13 +100,13 @@ class PersonalAnalyticsView(APIView):
         date_from = request.GET.get("date_from")
         date_to = request.GET.get("date_to")
 
-        if user_id is not None:
+        if user_id is not None and user_id != '':
             kwargs['poster'] = int(user_id)
 
-            if date_from is not None:
+            if date_from is not None and date_from != '':
                 kwargs['datetime__gte'] = date_from
 
-            if date_to is not None:
+            if date_to is not None and date_to != '':
                 date_to = datetime.strptime(date_to, "%Y-%m-%d")
                 date_to = date_to + timedelta(days=1)
                 kwargs['datetime__lte'] = date_to
