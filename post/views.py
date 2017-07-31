@@ -511,16 +511,7 @@ class PostCommentDetail(APIView):
             )
 
         else:
-            raise PermissionDenied("You cannot delete comment of someelse")
-
-        return Response(
-            {
-                "status": "failed",
-                "error": "Cannot delete this comment",
-                "results": ""
-            },
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            raise PermissionDenied("You cannot delete comment of someone else")
 
 
 class CommentViewSet(viewsets.ModelViewSet):
