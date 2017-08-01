@@ -30,6 +30,7 @@ class Notification(models.Model):
     comment = models.ForeignKey(Comment, blank=True, null=True)
     post_liked_by = models.ForeignKey(User, related_name='post_liked_by', blank=True, null=True)
     post_mentioned_users = models.ForeignKey(User, related_name='post_mentioned_users', blank=True, null=True)
+    c_mentioned_users = models.ForeignKey(User, related_name='c_mentioned_users', blank=True, null=True)
     was_notified = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
