@@ -91,6 +91,26 @@ class UserPostList(APIView):
                         t = Topic.objects.create(text=topic)
                     post.topics.add(t)
 
+            mentioned_users = serializer.validated_data.get('mentioned_users')
+            if len(mentioned_users):
+                for i in range(len(mentioned_users)):
+                    try:
+                        m = User.objects.get(pk=mentioned_users[i].id)
+                        print(m)
+                    except User.DoesNotExist:
+                        pass
+                    post.mentioned_users.add(m)
+
+                    # Add notification
+                    notification = Notification.objects.create(
+                        receiver=m, notification_type='MU', post=post, post_mentioned_users=m)
+                    # send push notification
+                    devices = find_user_devices(mentioned_users[i].id)
+                    message_payload = {'p': str(post.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
+                        m.userprofile.first_name) + " " + str(m.userprofile.last_name) + "has mentioned you in a post")}
+                    for device in devices:
+                        send_message_device(device, message_payload)
+
             if post.parent is not None and post.parent.parent is not None:
                 raise Exception("Parent post should not be a child post.")
 

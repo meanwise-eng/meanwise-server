@@ -42,6 +42,7 @@ class Post(models.Model):
     video_width = models.IntegerField(null=True, blank=True)
     video_thumbnail = models.ImageField(upload_to='post_video_thumbnails', null=True, blank=True)
     resolution = pgJSONField(null=True)
+    mentioned_users = models.ManyToManyField(User, related_name='mentioned_users', blank=True)
 
     parent = models.ForeignKey('self', db_index=True, null=True)
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
