@@ -20,6 +20,8 @@ router.register(r'autocomplete/profession',
                 ProfessionSearchView, base_name="profession-search")
 router.register(r'autocomplete/skill', SkillSearchView,
                 base_name="skill-search")
+router.register(r'autocomplete/user', UserMentionAutoComplete,
+                base_name="user-autocomplete")
 
 urlpatterns = [
     url(r'custom_auth/', include('custom_auth.urls')),
