@@ -110,6 +110,7 @@ class Comment(models.Model):
     commented_by = models.ForeignKey(User)
     comment_text = models.CharField(max_length=200)
     is_deleted = models.BooleanField(default=False)
+    comment_mentioned_users = models.ManyToManyField(User, related_name='comment_mentioned_users', blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
     
