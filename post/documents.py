@@ -28,7 +28,7 @@ class PostDocument(DocType):
     user_lastname = fields.StringField()
     user_profile_photo = fields.StringField()
     user_cover_photo = fields.StringField()
-    user_profession = fields.IntegerField()
+    user_profession_id = fields.IntegerField()
     user_profession_text = fields.StringField()
     user_profile_photo_small = fields.StringField()
     video_thumb_url = fields.StringField()
@@ -98,15 +98,17 @@ class PostDocument(DocType):
             return up.profile_photo_thumbnail.url
         return ""
 
-    def prepare_user_profession(self, obj):
+    def prepare_user_profession_id(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
             return  None
         profession = up.profession
-        data = {}
-        if profession:
-            profession.text
+
+        if not profession:
+            return None
+
+        return profession.id
 
     def prepare_user_profession_text(self, obj):
         try:

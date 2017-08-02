@@ -1,3 +1,6 @@
+import datetime
+import urllib
+import arrow
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.http import Http404
@@ -603,28 +606,128 @@ class PostExploreView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
+        interest_name = request.query_params.get('interest_name', None)
+        topic_texts = request.query_params.get('topic_texts', None)
+        tag_names = request.query_params.get('tag_names', None)
+        after = request.query_params.get('after', None)
+        before = request.query_params.get('before', None)
+        if after:
+            after = datetime.datetime.fromtimestamp(float(after)/1000)
+        if before:
+            before = datetime.datetime.fromtimestamp(float(before)/1000)
+
+        items_per_page = 10
+
+        interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
+        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('id', flat=True)) + \
+            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('id', flat=True))
+        skills_list = request.user.userprofile.skills_list
+
+        functions = []
+        filters = []
+        must = []
+        if interest_name:
+            must.append(query.Q('term', interest_name=interest_name))
+            #functions.append(query.SF({'filter':query.Q('term', interest_name=interest_name), 'weight': 1}))
+        if topic_texts:
+            must.append(query.Q('match', topics=topic_texts))
+            #functions.append(query.SF({'filter':query.Q('match', topics=topic_texts), 'weight': 3}))
+        if tag_names:
+            must.append(query.Q('match', tags=tag_names))
+            #functions.append(query.SF({'filter':query.Q('match', tags=tag_names), 'weight': 3}))
+        if after:
+            filters.append(query.Q({'range': {'created_on':{'gt': after}}}))
+        if before:
+            filters.append(query.Q({'range': {'created_on':{'lt': before}}}))
+
+
+        now = datetime.datetime.now()
+
+        # overall popularity
+        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1m', 'scale': '5m', 'decay': 0.9}, weight=5))
+        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1d', 'scale': '1d', 'decay': 0.9}, weight=4))
+        functions.append(query.SF('field_value_factor', field='num_likes', modifier='log1p', weight=2))
+        functions.append(query.SF('field_value_factor', field='num_comments', modifier='log1p', weight=3))
+        functions.append(query.SF('field_value_factor', field='num_seen', modifier='log1p', weight=1))
+
+        # relevance to user
+        functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
+        functions.append(query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+        functions.append(query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+
         s = PostDocument.search()
-        q = query.Q(
-            'function_score',
-            filter=query.Q('term', interest_name='Fashion & Beauty'),
-            functions=[
-                query.SF('exp', created_on={'origin':'now', 'offset':'1m', 'scale':'5m', 'decay':0.9}, weight=5),
-                query.SF('exp', created_on={'origin':'now', 'offset':'1d', 'scale':'1d', 'decay':0.9}, weight=4),
-                query.SF('field_value_factor', field='num_likes', modifier='log1p', weight=2),
-                query.SF('field_value_factor', field='num_comments', modifier='log1p', weight=3),
-                query.SF('field_value_factor', field='num_seen', modifier='log1p', weight=1),
-                query.SF({'filter':query.Q('match', tags='a f'), 'weight': 3}),
-                query.SF({'filter':query.Q('match', topics='jkl'), 'weight': 3}),
-                query.SF({'filter':query.Q('term', interest_name='Fashion & Beauty'), 'weight': 1}),
-            ],
-            score_mode='sum'
-        )
+        if len(filters) > 0:
+            q = query.Q(
+                'function_score',
+                query=query.Q('bool', must=must, filter=filters),
+                functions=functions,
+                score_mode='sum'
+            )
+        else:
+            q = query.Q(
+                'function_score',
+                functions=functions,
+                score_mode='sum'
+            )
         s = s.query(q)
-        s = s[0:30]
+        s = s[0:items_per_page]
 
-        serializer = PostDocumentSerializer(s.execute(), many=True)
+        results = s.execute()
+        serializer = PostDocumentSerializer(results, many=True, context={'request': request})
 
-        return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_200_OK)
+        query_params = dict(request.query_params)
+
+        def get_biggest_date(date1, date2):
+            if date1 > date2:
+                return date1
+
+            return date2
+
+        def get_smallest_date(date1, date2):
+            if date1 < date2:
+                return date1
+
+            return date2
+
+        if after and results.hits.total > 30:
+            max_created_on = reduce(get_biggest_date, [result.created_on for result in results])
+        elif before and results.hits.total == 0:
+            max_created_on = before
+        else:
+            max_created_on = now
+        next_url_params = query_params.copy()
+        if 'before' in next_url_params: del next_url_params['before']
+        next_url_params.update({'after': str(int(max_created_on.timestamp()*1000))})
+        next_url = request.build_absolute_uri(reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
+
+        if results.hits.total != 0:
+            min_created_on = reduce(get_smallest_date, [result.created_on for result in results])
+        elif not before:
+            min_created_on = now
+        else:
+            min_created_on = None
+
+        if min_created_on:
+            prev_url_params = query_params.copy()
+            if 'after' in prev_url_params: del prev_url_params['after']
+            prev_url_params.update({'before': str(int(min_created_on.timestamp()*1000))})
+            prev_url = request.build_absolute_uri(reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
+        else:
+            prev_url = None
+
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "count": results.hits.total,
+                "next": prev_url,  # in haystack view next will go backwards. Deprecated. New clients should use forward and backward.
+                "previous": next_url,  # in haystack view next will go forwards. Deprecated. New clients should use forward and backward.
+                "forward": next_url,
+                "backward": prev_url,
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
 
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()

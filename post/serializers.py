@@ -1,9 +1,11 @@
+import datetime
 from rest_framework import serializers
 from django.urls import reverse
 
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 
-from userprofile.models import UserProfile
+from django.contrib.auth.models import User
+from userprofile.models import UserProfile, Profession
 from post.models import Post, Comment, Share, Story
 from post.search_indexes import PostIndex
 from post.documents import PostDocument
@@ -18,13 +20,18 @@ class PostDocumentSerializer(DocumentSerializer):
     is_liked = serializers.SerializerMethodField()
     tags = serializers.ListField(child=serializers.CharField())
     topics = serializers.ListField(child=serializers.CharField())
+    user_profession = serializers.SerializerMethodField()
+    created_on = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    likes_url = serializers.SerializerMethodField()
+    resolution = serializers.SerializerMethodField()
 
     class Meta:
         document = PostDocument
         fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'num_comments', 'interest_id',
             'user_firstname', 'user_lastname', 'user_profile_photo', 'user_profile_photo_small',
             'user_cover_photo', 'user_profession', 'user_profession_text', 'image_url', 'video_url',
-            'video_thumb_url', 'topics']
+            'video_thumb_url', 'topics', 'created_on', 'is_liked', 'likes_url', 'resolution']
 
     def get_id(self, obj):
         return obj._id
@@ -34,6 +41,51 @@ class PostDocumentSerializer(DocumentSerializer):
 
     def get_is_liked(self, obj):
         return 0
+
+    def get_user_profession(self, obj):
+        if not obj.user_profession_id:
+            return None
+
+        profession = Profession.objects.get(id=obj.user_profession_id)
+
+        return {
+            'name': profession.text,
+            'id': profession.id
+        }
+
+    def get_created_on(self, obj):
+        return obj.created_on
+
+    def get_is_liked(self, obj):
+        user_id = self.context.get('user_id')
+        if not user_id:
+            request = self.context.get('request')
+            if not request or not hasattr(request, 'user'):
+                return False
+
+            if not request.user.id:
+                return False
+
+            user_id = request.user.id
+
+        liked_ids = list(User.objects.filter(liked_by=obj._id).all().values_list('id', flat=True))
+
+        if user_id not in liked_ids:
+            return False
+
+        return True
+
+    def get_likes_url(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+
+        return request.build_absolute_uri(reverse('post-likes', args=[obj._id]))
+
+    def get_resolution(self, obj):
+        post = Post.objects.get(id=obj._id)
+
+        return post.resolution
 
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()

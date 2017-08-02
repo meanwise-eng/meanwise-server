@@ -13,7 +13,7 @@ router.register(r'post', PostViewSet)
 router.register(r'comment', CommentViewSet)
 router.register(r'share', ShareViewSet)
 
-router.register(r'search/post', PostSearchView, base_name="post-search")
+#router.register(r'search/post', PostSearchView, base_name="post-search")
 router.register(r"search/userprofile", UserProfileSearchView,
                 base_name="userprofile-search")
 router.register(r'autocomplete/profession',
@@ -55,6 +55,7 @@ urlpatterns = [
     url(r'^story/(?P<story_id>[0-9]+)/',
         StoryDetail.as_view(), name='post-story'),
     url(r'^posts/', include('post.urls')),
+    url(r'^search/post/$', PostExploreView.as_view(), name='post-search'),
     url(r'^interests/(?P<interest_id>[0-9]+)/topics/trending/$',
         TrendingTopicForInterest.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/new/$',
