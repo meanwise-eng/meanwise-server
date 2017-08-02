@@ -529,36 +529,29 @@ class PostCommentDetail(APIView):
     def get_object(self, pk):
         try:
             comment = Comment.objects.get(pk=pk)
-            commented_by = Comment.objects.filter(pk=pk).values("commented_by")
-            return ({
-                "comment": comment,
-                "commented_by": (list(commented_by)[0]["commented_by"])
-            })
+            return comment
         except Comment.DoesNotExist:
             raise Http404
 
     def delete(self, request, post_id, comment_id):
         comment = self.get_object(comment_id)
-        commented_by = comment["commented_by"]
-        comment = comment["comment"]
 
         post = Post.objects.filter(id=post_id).values("poster")
         poster = list(post)[0]["poster"]
 
-        if commented_by == request.user.id or poster == request.user.id:
-            comment.is_deleted = True
-            comment.save()
-            return Response(
-                {
-                    "status": "success",
-                    "error": "",
-                    "results": "Succesfully deleted."
-                },
-                status=status.HTTP_202_ACCEPTED
-            )
+        if comment.commented_by.id != request.user.id or poster != request.user.id:
+            raise PermissionDenied("You cannot delete comment of someone else, if you're not the original poster")
 
-        else:
-            raise PermissionDenied("You cannot delete comment of someone else")
+        comment.is_deleted = True
+        comment.save()
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": "Succesfully deleted."
+            },
+            status=status.HTTP_202_ACCEPTED
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
