@@ -56,6 +56,8 @@ HAYSTACK_ES_INDEX_NAME = os.environ.get('HAYSTACK_ES_INDEX_NAME', 'meanwise_prod
 ELK_LOGSTASH_HOST = os.environ.get('ELK_LOGSTASH_HOST', None)
 ELK_LOGSTASH_PORT = os.environ.get('ELK_LOGSTASH_PORT', None)
 
+FILE_UPLOAD_PERMISSIONS = 0o644
+
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
     DEBUG = True
