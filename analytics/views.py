@@ -23,54 +23,65 @@ class PostAnalyticsView(APIView):
 
     def post(self, request):
         data = request.data
-        user_id = data["posts"][0]["user_id"]
-        post_id = data["posts"][0]["post_id"]
 
-        if (request.user.id != user_id):
-            raise PermissionDenied("You cannot see post as other user")
+        if (len(data["seen_posts"])):
 
-        try:
-            UserProfile.objects.get(user__id=user_id)
+            for i in range(len(data["seen_posts"])):
 
-        except UserProfile.DoesNotExist:
-            return Response(
-                {
-                    "status": "failed",
-                    "error": {
-                        "message": "Error occured on server.",
-                        "code": 500,
-                        "subCode": 1,
-                        "errorTitle": "Error occured on server",
-                        "errorMessage": "An unidentified error occured on server. We will be looking into this issue. Please try again later."
+                user_id = data["seen_posts"][i]["posts"][0]["user_id"]
+                post_id = data["seen_posts"][i]["posts"][0]["post_id"]
+
+                if (request.user.id != user_id):
+                    raise PermissionDenied("You cannot see post as other user")
+
+                try:
+                    UserProfile.objects.get(user__id=user_id)
+
+                except UserProfile.DoesNotExist:
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": {
+                                "message": "Error occured on server.",
+                                "code": 500,
+                                "subCode": 1,
+                                "errorTitle": "Error occured on server",
+                                "errorMessage": "An unidentified error occured on server. We will be looking into this issue. Please try again later."
+                            },
+                            "results": ""
+                        },
+                        status=status.HTTP_501_NOT_IMPLEMENTED
+                    )
+
+                try:
+                    Post.objects.get(id=post_id)
+                except Post.DoesNotExist:
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": {
+                                "message": "Error occured on server.",
+                                "code": 500,
+                                "subCode": 1,
+                                "errorTitle": "Error occured on server",
+                                "errorMessage": "An unidentified error occured on server. We will be looking into this issue. Please try again later."
+                            },
+                            "results": ""
+                        },
+                        status=status.HTTP_501_NOT_IMPLEMENTED
+                    )
+
+            serializer = SeenPostBatchSerializer(data=data["seen_posts"], many=True)
+            if serializer.is_valid():
+                post_batch = serializer.save()
+                return Response(
+                    {
+                        "status": "success",
+                        "error": "",
+                        "results": "successfully added data"
                     },
-                    "results": ""
-                },
-                status=status.HTTP_501_NOT_IMPLEMENTED
-            )
-
-        try:
-            Post.objects.get(id=post_id)
-        except Post.DoesNotExist:
-            return Response(
-                {
-                    "status": "failed",
-                    "error": {
-                        "message": "Error occured on server.",
-                        "code": 500,
-                        "subCode": 1,
-                        "errorTitle": "Error occured on server",
-                        "errorMessage": "An unidentified error occured on server. We will be looking into this issue. Please try again later."
-                    },
-                    "results": ""
-                },
-                status=status.HTTP_501_NOT_IMPLEMENTED
-            )
-
-        serializer = SeenPostBatchSerializer(data=data)
-
-        if serializer.is_valid():
-            post_batch = serializer.save()
-            return Response({"status": "success", "error": "", "results": "successfully added data"}, status=status.HTTP_200_OK)
+                    status=status.HTTP_200_OK
+                )
 
         return Response(
             {
