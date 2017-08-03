@@ -371,7 +371,9 @@ class FriendsList(APIView):
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
                 # Add notification
                 notification = Notification.objects.create(
-                    receiver=user, notification_type='FR', user_friend=uf)
+                    receiver=user,
+                    notification_type=Notification.TYPE_FRIEND_REQUEST_REJECTED,
+                    user_friend=uf)
                 # send push notification
                 devices = find_user_devices(user.id)
                 message_payload = {'p': '', 'u': str(user.id),
@@ -413,7 +415,9 @@ class FriendsList(APIView):
                     uf.save()
                     # Add notification
                     notification = Notification.objects.create(
-                        receiver=friend_user, notification_type='FA', user_friend=uf)
+                        receiver=friend_user, 
+                        notification_type=Notification.TYPE_FRIEND_REQUEST_ACCEPTED,
+                        user_friend=uf)
                     # send push notification
                     devices = find_user_devices(friend_user.id)
                     message_payload = {'p': '', 'u': str(friend_user.id), 't': 'a', 'message': (str(
