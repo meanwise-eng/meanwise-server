@@ -101,7 +101,6 @@ class UserPostList(APIView):
                 for i in range(len(mentioned_users)):
                     try:
                         m = User.objects.get(pk=mentioned_users[i].id)
-                        print(m)
                     except User.DoesNotExist:
                         pass
                     post.mentioned_users.add(m)
@@ -490,20 +489,19 @@ class PostCommentList(APIView):
                     logger.info("Sending notification to device: %s" % device)
                     send_message_device(device, message_payload)
 
-                mentioned_users = serializer.validated_data.get('comment_mentioned_users')
-                print(mentioned_users)
+                mentioned_users = serializer.validated_data.get('mentioned_users')
+
                 if len(mentioned_users):
                     for i in range(len(mentioned_users)):
                         try:
                             m = User.objects.get(pk=mentioned_users[i].id)
                         except User.DoesNotExist:
                             pass
-                        comment.comment_mentioned_users.add(m)
+                        comment.mentioned_users.add(m)
 
                         # Add notification
                         notification = Notification.objects.create(
-                            receiver=m, notification_type='MU', comment=comment, c_mentioned_users=m)
-                        print(notification)
+                            receiver=m, notification_type='MU', comment=comment, comment_mentioned_users=m)
                         # send push notification
                         devices = find_user_devices(mentioned_users[i].id)
                         message_payload = {'p': str(comment.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(

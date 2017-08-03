@@ -104,7 +104,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
-    mentioned_users = serializers.SerializerMethodField()
+    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
         allow_null=True,
@@ -248,9 +248,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return ""
 
-    def get_mentioned_users(self, obj):
-        return obj.mentioned_users.all().values_list('id', flat=True)
-
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -270,7 +267,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
-    mentioned_users = serializers.SerializerMethodField()
+    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     queryset = Post.objects.filter(is_deleted=False)
 
     class Meta:
@@ -368,13 +365,6 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         return liked_by
 
-    def get_mentioned_users(self, obj):
-        mentioned_users = []
-        for user in obj.mentioned_users.all():
-            mentioned_users.append(user.id)
-
-        return mentioned_users
-
     def get_image_url(self, obj):
         _image = obj.image
         if _image:
@@ -429,12 +419,12 @@ class CommentSerializer(serializers.ModelSerializer):
     user_profile_photo_small = serializers.SerializerMethodField()
 
     post_id = serializers.SerializerMethodField()
-    comment_mentioned_users = serializers.SerializerMethodField()
+    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Comment
         fields = ('id', 'comment_text', 'user_id', 'user_username', 'user_first_name', 'user_last_name',
-                  'user_profile_photo', 'user_profile_photo_small', 'comment_mentioned_users'
+                  'user_profile_photo', 'user_profile_photo_small', 'mentioned_users'
                   'post_id', 'created_on')
 
     def get_user_id(self, obj):
@@ -471,13 +461,6 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_post_id(self, obj):
         post_id = obj.post.id
         return post_id
-
-    def get_mentioned_users(self, obj):
-        comment_mentioned_users = []
-        for user in obj.comment_mentioned_users.all():
-            comment_mentioned_users.append(user.id)
-
-        return comment_mentioned_users
 
     def get_user_profile_photo(self, obj):
         try:
