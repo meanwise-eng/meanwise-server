@@ -1,3 +1,4 @@
+import json
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.http import Http404
@@ -90,6 +91,28 @@ class UserPostList(APIView):
                     except Topic.DoesNotExist:
                         t = Topic.objects.create(text=topic)
                     post.topics.add(t)
+
+            mentioned_users = serializer.validated_data.get('mentioned_users')
+            if len(mentioned_users):
+                for i in range(len(mentioned_users)):
+                    try:
+                        m = User.objects.get(pk=mentioned_users[i].id)
+                    except User.DoesNotExist:
+                        pass
+                    post.mentioned_users.add(m)
+
+                    # Add notification
+                    notification = Notification.objects.create(
+                        receiver=m,
+                        notification_type=Notification.TYPE_UNKNOWN,
+                        post=post,
+                        post_mentioned_users=json.dumps(m.id))
+                    # send push notification
+                    devices = find_user_devices(mentioned_users[i].id)
+                    message_payload = {'p': str(post.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
+                        m.userprofile.first_name) + " " + str(m.userprofile.last_name) + "has mentioned you in a post")}
+                    for device in devices:
+                        send_message_device(device, message_payload)
 
             if post.parent is not None and post.parent.parent is not None:
                 raise Exception("Parent post should not be a child post.")
@@ -329,7 +352,9 @@ class UserPostLike(APIView):
         post.liked_by.add(user)
         # Add notification
         notification = Notification.objects.create(
-            receiver=post.poster, notification_type='LP', post=post, post_liked_by=user)
+            receiver=post.poster,
+            notification_type=Notification.TYPE_LIKED_POST,
+            post=post, post_liked_by=user)
         # send push notification
         devices = find_user_devices(post.poster.id)
         message_payload = {'p': str(post.id), 'u': str(post.poster.id), 't': 'l', 'message': (str(
@@ -454,7 +479,10 @@ class PostCommentList(APIView):
                 logger.info("Comment saved")
                 # Add notification
                 notification = Notification.objects.create(
-                    receiver=comment.post.poster, notification_type='CP', post=comment.post, comment=comment)
+                    receiver=comment.post.poster,
+                    notification_type=Notification.TYPE_COMMENTED_POST,
+                    post=comment.post,
+                    comment=comment)
                 # send push notification
                 devices = find_user_devices(comment.post.poster.id)
                 message_payload = {'p': str(comment.post.id), 'u': str(comment.post.poster.id),
@@ -464,6 +492,31 @@ class PostCommentList(APIView):
                 for device in devices:
                     logger.info("Sending notification to device: %s" % device)
                     send_message_device(device, message_payload)
+
+                mentioned_users = serializer.validated_data.get(
+                    'mentioned_users')
+
+                if len(mentioned_users):
+                    for i in range(len(mentioned_users)):
+                        try:
+                            m = User.objects.get(pk=mentioned_users[i].id)
+                        except User.DoesNotExist:
+                            pass
+                        comment.mentioned_users.add(m)
+
+                        # Add notification
+                        notification = Notification.objects.create(
+                            receiver=m,
+                            notification_type=Notification.TYPE_UNKNOWN,
+                            comment=comment,
+                            comment_mentioned_users=json.dumps(m.id))
+                        # send push notification
+                        devices = find_user_devices(mentioned_users[i].id)
+                        message_payload = {'p': str(comment.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
+                            m.userprofile.first_name) + " " + str(m.userprofile.last_name) + "has mentioned you in a comment")}
+                        for device in devices:
+                            send_message_device(device, message_payload)
+
                 return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_201_CREATED)
             except Exception as ex:
                 logger.error(ex)
@@ -482,36 +535,30 @@ class PostCommentDetail(APIView):
     def get_object(self, pk):
         try:
             comment = Comment.objects.get(pk=pk)
-            commented_by = Comment.objects.filter(pk=pk).values("commented_by")
-            return ({
-                "comment": comment,
-                "commented_by": (list(commented_by)[0]["commented_by"])
-            })
+            return comment
         except Comment.DoesNotExist:
             raise Http404
 
     def delete(self, request, post_id, comment_id):
         comment = self.get_object(comment_id)
-        commented_by = comment["commented_by"]
-        comment = comment["comment"]
 
         post = Post.objects.filter(id=post_id).values("poster")
         poster = list(post)[0]["poster"]
 
-        if commented_by == request.user.id or poster == request.user.id:
-            comment.is_deleted = True
-            comment.save()
-            return Response(
-                {
-                    "status": "success",
-                    "error": "",
-                    "results": "Succesfully deleted."
-                },
-                status=status.HTTP_202_ACCEPTED
-            )
+        if comment.commented_by.id != request.user.id or poster != request.user.id:
+            raise PermissionDenied(
+                "You cannot delete comment of someone else, if you're not the original poster")
 
-        else:
-            raise PermissionDenied("You cannot delete comment of someone else")
+        comment.is_deleted = True
+        comment.save()
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": "Succesfully deleted."
+            },
+            status=status.HTTP_202_ACCEPTED
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
