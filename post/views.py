@@ -1,3 +1,4 @@
+import json
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.http import Http404
@@ -102,7 +103,10 @@ class UserPostList(APIView):
 
                     # Add notification
                     notification = Notification.objects.create(
-                        receiver=m, notification_type='MU', post=post, post_mentioned_users=m)
+                        receiver=m,
+                        notification_type=Notification.TYPE_UNKNOWN,
+                        post=post,
+                        post_mentioned_users=json.dumps(m.id))
                     # send push notification
                     devices = find_user_devices(mentioned_users[i].id)
                     message_payload = {'p': str(post.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
@@ -348,7 +352,9 @@ class UserPostLike(APIView):
         post.liked_by.add(user)
         # Add notification
         notification = Notification.objects.create(
-            receiver=post.poster, notification_type='LP', post=post, post_liked_by=user)
+            receiver=post.poster,
+            notification_type=Notification.TYPE_LIKED_POST,
+            post=post, post_liked_by=user)
         # send push notification
         devices = find_user_devices(post.poster.id)
         message_payload = {'p': str(post.id), 'u': str(post.poster.id), 't': 'l', 'message': (str(
@@ -473,7 +479,10 @@ class PostCommentList(APIView):
                 logger.info("Comment saved")
                 # Add notification
                 notification = Notification.objects.create(
-                    receiver=comment.post.poster, notification_type='CP', post=comment.post, comment=comment)
+                    receiver=comment.post.poster,
+                    notification_type=Notification.TYPE_COMMENTED_POST,
+                    post=comment.post,
+                    comment=comment)
                 # send push notification
                 devices = find_user_devices(comment.post.poster.id)
                 message_payload = {'p': str(comment.post.id), 'u': str(comment.post.poster.id),
@@ -484,7 +493,8 @@ class PostCommentList(APIView):
                     logger.info("Sending notification to device: %s" % device)
                     send_message_device(device, message_payload)
 
-                mentioned_users = serializer.validated_data.get('mentioned_users')
+                mentioned_users = serializer.validated_data.get(
+                    'mentioned_users')
 
                 if len(mentioned_users):
                     for i in range(len(mentioned_users)):
@@ -496,7 +506,10 @@ class PostCommentList(APIView):
 
                         # Add notification
                         notification = Notification.objects.create(
-                            receiver=m, notification_type='MU', comment=comment, comment_mentioned_users=m)
+                            receiver=m,
+                            notification_type=Notification.TYPE_UNKNOWN,
+                            comment=comment,
+                            comment_mentioned_users=json.dumps(m.id))
                         # send push notification
                         devices = find_user_devices(mentioned_users[i].id)
                         message_payload = {'p': str(comment.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
@@ -533,7 +546,8 @@ class PostCommentDetail(APIView):
         poster = list(post)[0]["poster"]
 
         if comment.commented_by.id != request.user.id or poster != request.user.id:
-            raise PermissionDenied("You cannot delete comment of someone else, if you're not the original poster")
+            raise PermissionDenied(
+                "You cannot delete comment of someone else, if you're not the original poster")
 
         comment.is_deleted = True
         comment.save()
