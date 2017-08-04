@@ -112,7 +112,8 @@ class UserPostList(APIView):
                         notification_type=Notification.TYPE_UNKNOWN,
                         data={
                             'post_mentioned_users': m.id,
-                            'mentioned_by': user_id
+                            'mentioned_by': int(user_id),
+                            'post_id': post.id
                         },
                         post=post)
                     # send push notification
@@ -518,8 +519,9 @@ class PostCommentList(APIView):
                             notification_type=Notification.TYPE_UNKNOWN,
                             comment=comment,
                             data={
-                            'comment_mentioned_users': m.id,
-                            'mentioned_by': comment.commented_by.id
+                                'comment_mentioned_users': m.id,
+                                'mentioned_by': comment.commented_by.id,
+                                'comment_id': comment.id
                             })
                         # send push notification
                         devices = find_user_devices(mentioned_users[i].id)
