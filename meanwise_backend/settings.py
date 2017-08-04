@@ -106,6 +106,7 @@ INSTALLED_APPS = [
     'django_crontab',
     'scarface',
     'analytics',
+    'django_elasticsearch_dsl',
 ]
 
 if DEBUG:
@@ -445,6 +446,13 @@ HAYSTACK_CONNECTIONS = {}
 
 HAYSTACK_CONNECTIONS['default'] = HS_CONNECTIONS[SEARCH_ENGINE]
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+#django-elasticsearch-dsl
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': HAYSTACK_ES_URL
+    }
+}
 
 # Reset password url
 RESET_PASSWORD_URL = SITE_URL + '/reset_password/'
