@@ -1,0 +1,214 @@
+====
+Post
+====
+
+Post Search
+===========
+
+The post search API is used by the explore screen.
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.1/search/post/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Also available at `apiv1.1/post/explore/`.
+
+Query Parameters
+----------------
+
+..  list-table::
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+    * - interest_name
+      - The name of the interest to filter by.
+    * - tag_names
+      - A tag name that you want to filter by.
+    * - topic_texts
+      - A topic text that you want to filter by.
+    * - after
+      - A timestamp added by forward pagination url. Tells the server to get results after this time.
+    * - before
+      - A timestamp added by backward pagination url. Tells the server to get results before this time.
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "backward": "http://localhost:8000/api/v4/posts/explore/?interest_name=%5B%27Fashion+%26+Beauty%27%5D&before=1498592941868",
+    "forward": "http://localhost:8000/api/v4/posts/explore/?interest_name=%5B%27Fashion+%26+Beauty%27%5D&after=1501847983555",
+    "count": 90,
+    "error": "",
+    "previous": "http://localhost:8000/api/v4/posts/explore/?interest_name=%5B%27Fashion+%26+Beauty%27%5D&after=1501847983555",
+    "next": "http://localhost:8000/api/v4/posts/explore/?interest_name=%5B%27Fashion+%26+Beauty%27%5D&before=1498592941868",
+    "status": "success",
+    "results": [
+      {
+        "tags": [
+          "music",
+          "flute"
+        ],
+        "user_id": 38,
+        "num_likes": 0,
+        "num_comments": 0,
+        "interest_id": 2,
+        "user_firstname": "John",
+        "user_lastname": "Doe",
+        "user_profile_photo": "http://localhost:8001/media/profile_photos/2017-04-26.jpg",
+        "user_profile_photo_small": "http://localhost:8001/media/profile_photo_thumbs/2017-04-26-19.jpg",
+        "user_cover_photo": "http://localhost:8001/media/cover_photos/2017-04-26-191519.jpg",
+        "user_profession": {
+          "name": "Musician",
+          "id": 8
+        },
+        "user_profession_text": "Musician",
+        "image_url": "",
+        "video_url": "http://localhost:8001/media/post_videos/VID_20170721_15.mp4",
+        "video_thumb_url": "http://localhost:8001/media/post_video_thumbnails/VID_20170721_15.jpg",
+        "topics": [
+          "legendofzelda"
+        ],
+        "created_on": "2017-08-02T07:28:33.096Z",
+        "is_liked": false,
+        "likes_url": "http://localhost:8000/api/v4/posts/94/likes/",
+        "resolution": null,
+        "score": 3.5292764,
+        "id": "94"
+      }
+    ]
+  }
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - next
+      - Url to go to the next result set before this. Used for backwards compatibility. Use backwards instead.
+      - url
+    * - previous
+      - Url to go to the next result set after this. Used for backwards compatibility. Use forwards instead.
+      - url
+    * - count
+      - The number of items total before this result. Can be used to check if result is
+        empty for forward navigation.
+      - integer
+    * - results
+      - Array of results according to the searched fields.
+      - array
+    * - results.id
+      - The ID of the Post.
+      - integer
+    * - results.user_id
+      - The ID of the user who posted the Post.
+      - integer
+    * - num_likes
+      - The number of likes that this post has received.
+      - integer
+    * - num_comments
+      - The number of comments that this post has received.
+      - integer
+    * - interest_id
+      - The ID of the interest that this post belongs to.
+      - integer
+    * - user_firstname
+      - The user's first name.
+      - string
+    * - user_lastname
+      - The user's last name.
+      - string
+    * - results.user_profile_photo
+      - URL of the user's profile photo.
+      - url
+    * - results.user_profile_photo_thumbnail
+      - URL of the user's profile photo's thumbnail.
+      - url
+    * - results.user_cover_photo
+      - URL of the user's cover photo.
+      - url
+    * - results.user_profession
+      - Object representing some information about user's profession.
+      - object
+    * - results.user_profession.name
+      - Description of the user's profession.
+      - string
+    * - results.user_profession.id
+      - ID of the user's profession.
+      - integer
+    * - results.user_profession_text
+      - Description of the user's profession.
+      - string
+    * - image_url
+      - Post image's URL.
+      - url
+    * - video_url
+      - Post video's URL.
+      - url
+    * - video_thumb_url
+      - Post video's thumbnail URL.
+      - url
+    * - topics
+      - An array of topic texts.
+      - array(string)
+    * - created_on
+      - The time at which the post was created.
+      - datetime (ISO 8601)
+    * - is_liked
+      - Boolean indicated if the post is liked by the currently logged in user.
+      - bool
+    * - likes_url
+      - URL to get the users who liked the post.
+      - url
+    * - resolution
+      - Object representing the resolution of the image or video.
+      - object
+    * - resolution.width
+      - The width of the video/image.
+      - integer
+    * - resolution.height
+      - The height of the video/image.
+      - integer
+    * - score
+      - The score for the post as calculated by elasticsearch, indicated the relevance of the result.
+      - float
+    * - tags
+      - An array of tag names.
+      - array(string)
+
+Pagination
+----------
+
+This API uses time based pagination. When you make a request to the URL without pagination parameters, it will return
+the result based on current time, and include fields `forward` and `backward` for going forward and backward in time in
+relation to the current result.
+
+If the user scrolls down, make a request to the backwards url to get results from the past.
+If the user scrolls up (pull to refresh), make a request to the forwards url to get results from the future (relative
+to the time of the request).
+
+Client should maintain the latest `forward` and `backward` url. When the user goes forwards, update the `foward`
+url. When the client goes backwards, update the `backward` url. Do not update `forward` url when user goes backwards,
+and don't update `backward` url when user goes forwards.
+
+Long polling
+------------
+
+You can keep calling the `forward` url at short intervals (eg. 5 sec) to see if there is any new content. If there are
+any results, you can inform the user of new content (similar to facebook or twitter). While doing the polling, keep 
+updating the `forward` url with the new url, even if the results were empty.

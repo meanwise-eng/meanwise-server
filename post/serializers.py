@@ -84,6 +84,7 @@ class PostDocumentSerializer(DocumentSerializer):
 
         return post.resolution
 
+
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
@@ -103,6 +104,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -111,14 +113,14 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         view_name='post-story'
     )
 
-    queryset=Post.objects.filter(is_deleted=False)
-    
+    queryset = Post.objects.filter(is_deleted=False)
+
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
-                      'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
-                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on', 'tags', 'topics',
-                      'story', 'story_index', 'is_liked', 'likes_url', 'geo_location_lat', 'geo_location_lng')
+                  'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
+                  'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on', 'tags', 'topics',
+                  'story', 'story_index', 'is_liked', 'likes_url', 'mentioned_users', 'geo_location_lat', 'geo_location_lng')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -131,21 +133,21 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         return up.first_name
 
     def get_user_lastname(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         return up.last_name
 
     def get_user_profile_photo(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo:
             return up.profile_photo.url
         return ""
@@ -154,16 +156,16 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.cover_photo:
             return up.cover_photo.url
         return ""
-    
+
     def get_user_profile_photo_small(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo_thumbnail:
             return up.profile_photo_thumbnail.url
         return ""
@@ -172,14 +174,14 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         profession = up.profession
         data = {}
         if profession:
             data = {
                 'name': profession.text,
                 'id': profession.id,
-                }
+            }
         return data
 
     def get_user_profession_text(self, obj):
@@ -187,7 +189,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             up = obj.poster.userprofile
             return up.profession_text
         except UserProfile.DoesNotExist:
-            return  None
+            return None
 
     def get_num_likes(self, obj):
         return obj.liked_by.all().count()
@@ -219,10 +221,10 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return request.build_absolute_uri(reverse('post-likes', args=[obj.id]))
 
     def get_topics(self, obj):
-        return obj.topics.all().values_list('text',flat=True)
+        return obj.topics.all().values_list('text', flat=True)
 
     def get_tags(self, obj):
-        return obj.tags.all().values_list('name',flat=True)
+        return obj.tags.all().values_list('name', flat=True)
 
     def get_num_comments(self, obj):
         return Comment.objects.filter(post=obj).filter(is_deleted=False).count()
@@ -240,7 +242,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return ""
 
     def get_video_thumb_url(self, obj):
-        #needs to be added
+        # needs to be added
         if obj.video:
             if obj.video_thumbnail:
                 return obj.video_thumbnail.url
@@ -266,14 +268,15 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
-    queryset=Post.objects.filter(is_deleted=False)
-    
+    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    queryset = Post.objects.filter(is_deleted=False)
+
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
-                      'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
-                      'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
-                      'story_index')
+                  'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
+                  'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
+                  'story_index', 'mentioned_users')
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -286,21 +289,21 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         return up.first_name
 
     def get_user_lastname(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         return up.last_name
 
     def get_user_profile_photo(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo:
             return up.profile_photo.url
         return ""
@@ -309,16 +312,16 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.cover_photo:
             return up.cover_photo.url
         return ""
-    
+
     def get_user_profile_photo_small(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo_thumbnail:
             return up.profile_photo_thumbnail.url
         return ""
@@ -327,14 +330,14 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         profession = up.profession
         data = {}
         if profession:
             data = {
                 'name': profession.text,
                 'id': profession.id,
-                }
+            }
         return data
 
     def get_user_profession_text(self, obj):
@@ -342,16 +345,16 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
             up = obj.poster.userprofile
             return up.profession_text
         except UserProfile.DoesNotExist:
-            return  None
+            return None
 
     def get_num_likes(self, obj):
         return obj.liked_by.all().count()
 
     def get_topics(self, obj):
-        return obj.topics.all().values_list('text',flat=True)
+        return obj.topics.all().values_list('text', flat=True)
 
     def get_tags(self, obj):
-        return obj.tags.all().values_list('name',flat=True)
+        return obj.tags.all().values_list('name', flat=True)
 
     def get_num_comments(self, obj):
         return Comment.objects.filter(post=obj).filter(is_deleted=False).count()
@@ -376,17 +379,19 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return ""
 
     def get_video_thumb_url(self, obj):
-        #needs to be added
+        # needs to be added
         if obj.video:
             if obj.video_thumbnail:
                 return obj.video_thumbnail.url
         else:
             return ""
 
+
 class PostSaveSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     topics = serializers.SerializerMethodField()
-    topic_names = serializers.CharField(required=False, max_length=100, allow_blank=True)
+    topic_names = serializers.CharField(
+        required=False, max_length=100, allow_blank=True)
     geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
 
@@ -394,7 +399,8 @@ class PostSaveSerializer(serializers.ModelSerializer):
         model = Post
 
     def get_topics(self, obj):
-        return obj.topics.all().values_list('text',flat=True)
+        return obj.topics.all().values_list('text', flat=True)
+
 
     def validate(self, data):
         if 'geo_location_lat' in data and 'geo_location_lng' not in data:
@@ -406,12 +412,14 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
 class StorySerializer(serializers.ModelSerializer):
     posts = serializers.SerializerMethodField()
+
     class Meta:
         model = Story
         fields = ('id', 'main_post', 'posts')
 
     def get_posts(self, obj):
         return PostSerializer(obj.posts.filter(is_deleted=False), many=True, context=self.context).data
+
 
 class CommentSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
@@ -420,15 +428,15 @@ class CommentSerializer(serializers.ModelSerializer):
     user_last_name = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
     user_profile_photo_small = serializers.SerializerMethodField()
-    
-    
+
     post_id = serializers.SerializerMethodField()
-    
+    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Comment
         fields = ('id', 'comment_text', 'user_id', 'user_username', 'user_first_name', 'user_last_name',
-                      'user_profile_photo', 'user_profile_photo_small',
-                      'post_id', 'created_on')
+                  'user_profile_photo', 'user_profile_photo_small', 'mentioned_users'
+                  'post_id', 'created_on')
 
     def get_user_id(self, obj):
         user_id = obj.commented_by.id
@@ -469,32 +477,35 @@ class CommentSerializer(serializers.ModelSerializer):
         try:
             up = obj.commented_by.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo:
             return up.profile_photo.url
-        return  ""
+        return ""
 
     def get_user_profile_photo_small(self, obj):
         try:
             up = obj.commented_by.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo_thumbnail:
             return up.profile_photo_thumbnail.url
-        return  ""
+        return ""
 
-        
+
 class CommentSaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
+
 
 class ShareSerializer(serializers.ModelSerializer):
     class Meta:
         model = Share
 
+
 class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
     class Meta(PostSerializer.Meta):
-        search_fields = ("text", "interest_name", "post_text", "created_on", "post_id", "topic_texts", "tag_names")
+        search_fields = ("text", "interest_name", "post_text",
+                         "created_on", "post_id", "topic_texts", "tag_names")
         field_aliases = {}
         exclude = tuple()
 

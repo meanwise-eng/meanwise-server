@@ -2,6 +2,7 @@ from django.utils import timezone
 from haystack import indexes
 from userprofile.models import UserProfile, Profession, Skill
 
+
 class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
 
     text = indexes.CharField(document=True, use_template=False)
@@ -14,10 +15,10 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     featured = indexes.BooleanField()
 
     term = indexes.NgramField()
-    #autocomplete = indexes.EdgeNgramField()
+    # autocomplete = indexes.EdgeNgramField()
 
-    #@staticmethod
-    #def prepare_autocomplete(obj):
+    # @staticmethod
+    # def prepare_autocomplete(obj):
     #    return " ".join((
     #        obj.address, obj.city, obj.zip_code
     #    ))
@@ -30,26 +31,27 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
             created_on__lte=timezone.now()
         )
 
-
-
     def prepare_username(self, obj):
         return ' '.join([obj.user.username, obj.first_name, obj.last_name])
 
     def prepare_skills_text(self, obj):
-        return  ' '.join([skill.lower() for skill in obj.skills_list])
+        return ' '.join([skill.lower() for skill in obj.skills_list])
 
     def prepare_term(self, obj):
         value = obj.user.username.lower()
         value += ' ' + ' '.join([skill.lower() for skill in obj.skills_list])
-        value += ' %s %s %s' % (obj.first_name or '', obj.last_name or '', obj.city or '')
+        value += ' %s %s %s' % (obj.first_name or '',
+                                obj.last_name or '', obj.city or '')
 
         return value
 
     def prepare_featured(self, obj):
         return True
 
+
 class ProfessionIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.CharField(model_attr='text', document=True, use_template=False)
+    text = indexes.CharField(
+        model_attr='text', document=True, use_template=False)
     profession_id = indexes.IntegerField(model_attr='id')
 
     autocomplete = indexes.EdgeNgramField(model_attr='text')
@@ -57,8 +59,10 @@ class ProfessionIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return Profession
 
+
 class SkillIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.CharField(model_attr='text', document=True, use_template=False)
+    text = indexes.CharField(
+        model_attr='text', document=True, use_template=False)
     skill_id = indexes.IntegerField(model_attr='id')
 
     autocomplete = indexes.EdgeNgramField(model_attr='text')

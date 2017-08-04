@@ -50,8 +50,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Meanwise backend'
-copyright = '2017, Amjad Mohamed'
-author = 'Amjad Mohamed'
+copyright = '2017, Meanwise Inc'
+author = 'Amjad Mohamed, Punit Grover'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -174,7 +174,7 @@ class UserProfileDetail(APIView):
                 "You cannot change profile for another user")
 
         serialized_up = UserProfileUpdateSerializer(
-            userprofile, data=data, partial=True, context={'request':request})
+            userprofile, data=data, partial=True, context={'request': request})
         if serialized_up.is_valid():
             up = serialized_up.save()
             # handle username
@@ -371,7 +371,9 @@ class FriendsList(APIView):
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
                 # Add notification
                 notification = Notification.objects.create(
-                    receiver=user, notification_type='FR', user_friend=uf)
+                    receiver=user,
+                    notification_type=Notification.TYPE_FRIEND_REQUEST_REJECTED,
+                    user_friend=uf)
                 # send push notification
                 devices = find_user_devices(user.id)
                 message_payload = {'p': '', 'u': str(user.id),
@@ -413,7 +415,9 @@ class FriendsList(APIView):
                     uf.save()
                     # Add notification
                     notification = Notification.objects.create(
-                        receiver=friend_user, notification_type='FA', user_friend=uf)
+                        receiver=friend_user, 
+                        notification_type=Notification.TYPE_FRIEND_REQUEST_ACCEPTED,
+                        user_friend=uf)
                     # send push notification
                     devices = find_user_devices(friend_user.id)
                     message_payload = {'p': '', 'u': str(friend_user.id), 't': 'a', 'message': (str(
@@ -558,24 +562,14 @@ class ForgotPasswordView(APIView):
             try:
                 subject, from_email, to = 'New password', 'no-reply@meanwise.com', email
                 text_content = ("Hey,\n\n"
-                    "Uh oh! Looks like you forgot your password. Here’s a temporary password:\n\n" +
-                    "%s" % (str(password),) +
-                    "\n\n"
-                    "Use it to sign in, go to settings, and set your new password. Happy Posting!\n\n"
-                    "Cheers,\n\n"
-                    "Meanwise"
-                )
+                                "Uh oh! Looks like you forgot your password. Here’s a temporary password:\n\n" +
+                                "%s" % (str(password),) +
+                                "\n\n"
+                                "Use it to sign in, go to settings, and set your new password. Happy Posting!\n\n"
+                                "Cheers,\n\n"
+                                "Meanwise"
+                                )
                 html_content = ("Hey,<br/>\n\n"
-                    "<p>Uh oh! Looks like you forgot your password. Here’s a temporary password:</p><br/>\n\n" +
-                    "%s" % (str(password),) +
-                    "<br/><br/>\n\n"
-                    "<p>Use it to sign in, go to settings, and set your new password. Happy Posting!</p><br/>\n\n"
-                    "Cheers,<br/>\n\n"
-                    "Meanwise"
-                )
-                msg = EmailMultiAlternatives(
-                    subject, text_content, from_email, [to])
-                html_content=("Hey,<br/>\n\n"
                                 "<p>Uh oh! Looks like you forgot your password. Here’s a temporary password:</p><br/>\n\n" +
                                 "%s" % (str(password),) +
                                 "<br/><br/>\n\n"
@@ -583,36 +577,46 @@ class ForgotPasswordView(APIView):
                                 "Cheers,<br/>\n\n"
                                 "Meanwise"
                                 )
-                msg=EmailMultiAlternatives(
+                msg = EmailMultiAlternatives(
+                    subject, text_content, from_email, [to])
+                html_content = ("Hey,<br/>\n\n"
+                                "<p>Uh oh! Looks like you forgot your password. Here’s a temporary password:</p><br/>\n\n" +
+                                "%s" % (str(password),) +
+                                "<br/><br/>\n\n"
+                                "<p>Use it to sign in, go to settings, and set your new password. Happy Posting!</p><br/>\n\n"
+                                "Cheers,<br/>\n\n"
+                                "Meanwise"
+                                )
+                msg = EmailMultiAlternatives(
                     subject, text_content, from_email, [to])
                 msg.attach_alternative(html_content, "text/html")
                 msg.send()
             except Exception as e:
                 logger.error(e)
-                return Response({"status": "failed", "error": "Could not email the new password", "results": ""}, status = status.HTTP_400_BAD_REQUEST)
-            return Response({"status": "success", "error": "", "results": "Successfully sent email with new password"}, status = status.HTTP_400_BAD_REQUEST)
-        return Response({"status": "failed", "error": serializer.errors, "results": ""}, status = status.HTTP_400_BAD_REQUEST)
+                return Response({"status": "failed", "error": "Could not email the new password", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "success", "error": "", "results": "Successfully sent email with new password"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"status": "failed", "error": serializer.errors, "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ValidateInviteCodeView(APIView):
     """
     An endpoint to validate invite code.
     """
-    model=InviteGroup
-    permission_classes=(AllowAny,)
+    model = InviteGroup
+    permission_classes = (AllowAny,)
 
     def post(self, request):
-        invite_code=request.data.get('invite_code', '')
+        invite_code = request.data.get('invite_code', '')
         if not invite_code:
-            return Response({"status": "failed", "error": "Invite code not provided", "results": ""}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "failed", "error": "Invite code not provided", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            invite_group = InviteGroup.objects.get(invite_code = invite_code)
+            invite_group = InviteGroup.objects.get(invite_code=invite_code)
         except InviteGroup.DoesNotExist:
-            return Response({"status": "failed", "error": "Invite Group not found", "results": ""}, status = status.HTTP_400_BAD_REQUEST)
-        limit_exceeded=False
+            return Response({"status": "failed", "error": "Invite Group not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+        limit_exceeded = False
         if invite_group.count > invite_group.max_invites:
-            limit_exceeded=True
-        return Response({"status": "success", "error": "", "results": {"limit_exceeded": limit_exceeded}}, status = status.HTTP_200_OK)
+            limit_exceeded = True
+        return Response({"status": "success", "error": "", "results": {"limit_exceeded": limit_exceeded}}, status=status.HTTP_200_OK)
 
 
 class SetInviteCodeView(APIView):
@@ -620,42 +624,42 @@ class SetInviteCodeView(APIView):
     User can set their Invite code through this API. Once set, it cannot be changed.
     """
 
-    model=InviteGroup
-    permission_classes=(IsAuthenticated,)
+    model = InviteGroup
+    permission_classes = (IsAuthenticated,)
 
     @transaction.atomic()
     def put(self, request):
-        user=request.user
-        invite_code=request.data.get('invite_code', None)
+        user = request.user
+        invite_code = request.data.get('invite_code', None)
 
         if not invite_code:
-            return Response({"status": "failed", "error": "Invite code not provided", "results": ""}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "failed", "error": "Invite code not provided", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            invite_group = InviteGroup.objects.get(invite_code = invite_code)
+            invite_group = InviteGroup.objects.get(invite_code=invite_code)
         except InviteGroup.DoesNotExist:
-            return Response({"status": "failed", "error": "Invite Group not found", "results": ""}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "failed", "error": "Invite Group not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
-        if user.userprofile.user_type == UserProfile.USERTYPE_INVITED or InviteGroup.users.through.objects.filter(user = user).count() > 0:
-            return Response({"status": "failed", "error": "You are already in an Invite Group", "results": ""}, status = status.HTTP_400_BAD_REQUEST)
+        if user.userprofile.user_type == UserProfile.USERTYPE_INVITED or InviteGroup.users.through.objects.filter(user=user).count() > 0:
+            return Response({"status": "failed", "error": "You are already in an Invite Group", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
         if invite_group.count > invite_group.max_invites:
-            return Response({"status": "failed", "error": "Invite Group limit exceeded", "results": ""}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "failed", "error": "Invite Group limit exceeded", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
         invite_group.count += 1
         invite_group.save()
         invite_group.users.add(user)
 
-        user.userprofile.user_type=UserProfile.USERTYPE_INVITED
+        user.userprofile.user_type = UserProfile.USERTYPE_INVITED
         user.userprofile.save()
 
-        return Response({"status": "success", "error": "", "results": {"message": "You are now in Invite Group %s" % invite_code}}, status = status.HTTP_200_OK)
+        return Response({"status": "success", "error": "", "results": {"message": "You are now in Invite Group %s" % invite_code}}, status=status.HTTP_200_OK)
 
 
 class UserProfileHSSerializer(HaystackSerializer):
     class Meta:
-        index_classes=[UserProfileIndex]
-        fields=[
+        index_classes = [UserProfileIndex]
+        fields = [
             "text", "id", "first_name", "last_name", "username", "skills_text"
         ]
 
@@ -663,6 +667,7 @@ class UserProfileHSSerializer(HaystackSerializer):
 class UserProfileSearchView(HaystackViewSet):
     index_models = [UserProfile]
     serializer_class = UserProfileSearchSerializer
+    filter_backends = [HaystackAutocompleteFilter]
 
     def filter_queryset(self, *args, **kwargs):
         queryset = super(UserProfileSearchView, self).filter_queryset(
@@ -671,20 +676,32 @@ class UserProfileSearchView(HaystackViewSet):
 
 
 class ProfessionSearchView(HaystackViewSet):
-    index_models=[Profession]
-    serializer_class=ProfessionSearchSerializer
-    filter_backends=[HaystackAutocompleteFilter]
+    index_models = [Profession]
+    serializer_class = ProfessionSearchSerializer
+    filter_backends = [HaystackAutocompleteFilter]
 
     def filter_queryset(self, *args, **kwargs):
-        queryset=super().filter_queryset(self.get_queryset())
+        queryset = super().filter_queryset(self.get_queryset())
         return queryset.order_by('text')
 
 
 class SkillSearchView(HaystackViewSet):
-    index_models=[Skill]
-    serializer_class=SkillSearchSerializer
-    filter_backends=[HaystackAutocompleteFilter]
+    index_models = [Skill]
+    serializer_class = SkillSearchSerializer
+    filter_backends = [HaystackAutocompleteFilter]
 
     def filter_queryset(self, *args, **kwargs):
-        queryset=super().filter_queryset(self.get_queryset())
+        queryset = super().filter_queryset(self.get_queryset())
         return queryset.order_by('text')
+
+
+class UserMentionAutoComplete(HaystackViewSet):
+    index_models = [UserProfile]
+    serializer_class = UserMentionSerializer
+    filter_backends = [HaystackAutocompleteFilter]
+
+    def filter_queryset(self, *args, **kwargs):
+        queryset = super(UserMentionAutoComplete, self).filter_queryset(
+            self.get_queryset())
+
+        return queryset.order_by('id')
