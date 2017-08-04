@@ -616,7 +616,7 @@ class PostExploreView(APIView):
         if before:
             before = datetime.datetime.fromtimestamp(float(before)/1000)
 
-        items_per_page = 10
+        items_per_page = 30
 
         interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
         friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('id', flat=True)) + \
