@@ -118,10 +118,10 @@ class PostDocument(DocType):
             return  None
 
     def prepare_num_likes(self, obj):
-        return obj.liked_by.filter().count()
+        return obj.liked_by.count()
 
     def prepare_num_recent_likes(self, obj):
-        return obj.liked_by.filter().count()
+        return obj.liked_by.count()
 
     def prepare_topics(self, obj):
         return list(obj.topics.all().values_list('text',flat=True))

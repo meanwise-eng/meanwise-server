@@ -39,9 +39,6 @@ class PostDocumentSerializer(DocumentSerializer):
     def get_score(self, obj):
         return obj._score
 
-    def get_is_liked(self, obj):
-        return 0
-
     def get_user_profession(self, obj):
         if not obj.user_profession_id:
             return None
