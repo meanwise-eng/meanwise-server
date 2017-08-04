@@ -17,13 +17,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='notification',
-            name='comment_mentioned_users',
-            field=django.contrib.postgres.fields.jsonb.JSONField(default={}),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='notification',
-            name='post_mentioned_users',
+            name='data',
             field=django.contrib.postgres.fields.jsonb.JSONField(default={}),
             preserve_default=False,
         ),

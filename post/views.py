@@ -110,12 +110,15 @@ class UserPostList(APIView):
                     notification = Notification.objects.create(
                         receiver=m,
                         notification_type=Notification.TYPE_UNKNOWN,
-                        post=post,
-                        post_mentioned_users=json.dumps(m.id))
+                        data={
+                            'post_mentioned_users': m.id,
+                            'mentioned_by': user_id
+                        },
+                        post=post)
                     # send push notification
                     devices = find_user_devices(mentioned_users[i].id)
                     message_payload = {'p': str(post.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
-                        m.userprofile.first_name) + " " + str(m.userprofile.last_name) + "has mentioned you in a post")}
+                        user.userprofile.first_name) + " " + str(user.userprofile.last_name) + "has mentioned you in a post")}
                     for device in devices:
                         send_message_device(device, message_payload)
 
@@ -514,11 +517,18 @@ class PostCommentList(APIView):
                             receiver=m,
                             notification_type=Notification.TYPE_UNKNOWN,
                             comment=comment,
-                            comment_mentioned_users=json.dumps(m.id))
+                            data={
+                            'comment_mentioned_users': m.id,
+                            'mentioned_by': comment.commented_by.id
+                            })
                         # send push notification
                         devices = find_user_devices(mentioned_users[i].id)
-                        message_payload = {'p': str(comment.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
-                            m.userprofile.first_name) + " " + str(m.userprofile.last_name) + "has mentioned you in a comment")}
+                        message_payload = {
+                            'p': str(comment.id),
+                            'u': str(comment.commented_by.id),
+                            't': 'l',
+                            'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + "has mentioned you in a comment")
+                        }
                         for device in devices:
                             send_message_device(device, message_payload)
 
@@ -550,7 +560,7 @@ class PostCommentDetail(APIView):
         post = Post.objects.filter(id=post_id).values("poster")
         poster = list(post)[0]["poster"]
 
-        if comment.commented_by.id != request.user.id or poster != request.user.id:
+        if comment.commented_by.id != request.user.id and poster != request.user.id:
             raise PermissionDenied(
                 "You cannot delete comment of someone else, if you're not the original poster")
 
