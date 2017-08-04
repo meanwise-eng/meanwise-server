@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo "Specify the version:"
+printf "Specify the version: "
 read VERSION
 
-echo "Specify label (eg. latest) tag:"
+printf "Specify label (eg. latest) tag: "
 read TAG
 
 if [ $VERSION != "" ]; then
