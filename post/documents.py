@@ -36,6 +36,7 @@ class PostDocument(DocType):
     num_seen = fields.IntegerField()
     num_recent_seen = fields.IntegerField()
     created_on = fields.DateField()
+    geo_location = fields.GeoPointField()
 
     class Meta:
         model = Post
@@ -166,3 +167,11 @@ class PostDocument(DocType):
         return SeenPost.objects.filter(post_id=obj.id)\
             .filter(datetime__gte=(datetime.datetime.now()-datetime.timedelta(weeks=1)))\
             .count()
+
+    def prepare_geo_location(self, obj):
+        if not obj.geo_location_lat:
+            return None
+        return {
+            'lat': float(obj.geo_location_lat),
+            'lon': float(obj.geo_location_lng)
+        }

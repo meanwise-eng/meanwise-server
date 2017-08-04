@@ -668,6 +668,7 @@ class PostExploreView(APIView):
         interest_name = request.query_params.get('interest_name', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
+        geo_location = request.query_params.get('geo_location', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
         if after:
@@ -694,6 +695,9 @@ class PostExploreView(APIView):
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
             #functions.append(query.SF({'filter':query.Q('match', tags=tag_names), 'weight': 3}))
+        if geo_location:
+            functions.append(query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
+            functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(','), 'scale': '1km', 'decay': 0.9}, weight=1))
         if after:
             filters.append(query.Q({'range': {'created_on':{'gt': after}}}))
         if before:
@@ -703,8 +707,8 @@ class PostExploreView(APIView):
         now = datetime.datetime.now()
 
         # overall popularity
-        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1m', 'scale': '5m', 'decay': 0.9}, weight=5))
-        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1d', 'scale': '1d', 'decay': 0.9}, weight=4))
+        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1m', 'scale': '5m', 'decay': 0.9}, weight=20))
+        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1d', 'scale': '1d', 'decay': 0.9}, weight=10))
         functions.append(query.SF('field_value_factor', field='num_likes', modifier='log1p', weight=2))
         functions.append(query.SF('field_value_factor', field='num_comments', modifier='log1p', weight=3))
         functions.append(query.SF('field_value_factor', field='num_seen', modifier='log1p', weight=1))
