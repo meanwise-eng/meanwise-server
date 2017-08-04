@@ -106,7 +106,7 @@ class UserPostList(APIView):
                         receiver=m,
                         notification_type=Notification.TYPE_UNKNOWN,
                         data={
-                            'post_mentioned_users': m.id,
+                            'post_mentioned_user': m.id,
                             'mentioned_by': int(user_id),
                             'post_id': post.id
                         },
@@ -514,7 +514,7 @@ class PostCommentList(APIView):
                             notification_type=Notification.TYPE_UNKNOWN,
                             comment=comment,
                             data={
-                                'comment_mentioned_users': m.id,
+                                'comment_mentioned_user': m.id,
                                 'mentioned_by': comment.commented_by.id,
                                 'comment_id': comment.id
                             })
