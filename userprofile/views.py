@@ -1,3 +1,5 @@
+import math
+
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.text import slugify
@@ -112,19 +114,30 @@ class InterestListView(APIView):
 
     def get(self, request):
         interests = Interest.objects.all()
-        paginator = Paginator(interests, settings.REST_FRAMEWORK['PAGE_SIZE'])
-        page = request.GET.get('page', 1)
 
-        try:
-            interests = paginator.page(page)
-        except PageNotAnInteger:
-            interests = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of
-            # results.
-            interests = paginator.page(paginator.num_pages)
+        if not request.user.is_anonymous:
+            def sort_by_relevance(interest):
+                try:
+                    relevance = UserInterestRelevance.objects.get(
+                        interest=interest, user=request.user)
+                except UserInterestRelevance.DoesNotExist:
+                    return 0
+                return math.log1p(relevance.old_views + relevance.weekly_views)
+
+            interests = sorted(interests, key=sort_by_relevance, reverse=True)
+
         serializer = InterestSerializer(interests, many=True)
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data, 'num_pages': interests.paginator.num_pages}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serializer.data,
+                    'num_pages': 1
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class UserProfileList(APIView):

@@ -2,6 +2,7 @@ import json
 import datetime
 import urllib
 import arrow
+import math
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.http import Http404
@@ -35,7 +36,7 @@ from post.permissions import IsOwnerOrReadOnly
 
 from post.models import *
 from post.serializers import *
-from userprofile.models import UserFriend, Interest
+from userprofile.models import UserFriend, Interest, UserInterestRelevance
 from mnotifications.models import Notification
 
 from elasticsearch_dsl import query
@@ -687,6 +688,7 @@ class PostExploreView(APIView):
         filters = []
         must = []
         if interest_name:
+            self.update_interest_relevance(interest_name, request.user)
             must.append(query.Q('term', interest_name=interest_name))
             #functions.append(query.SF({'filter':query.Q('term', interest_name=interest_name), 'weight': 1}))
         if topic_texts:
@@ -791,6 +793,35 @@ class PostExploreView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+    def update_interest_relevance(self, interest_name, user):
+        try:
+            interest = Interest.objects.get(name=interest_name)
+        except Interest.DoesNotExist:
+            return
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        try:
+            relevance = UserInterestRelevance.objects.get(interest=interest, user=user)
+        except UserInterestRelevance.DoesNotExist:
+            relevance = UserInterestRelevance.objects.create(
+                interest=interest,
+                user=user,
+                last_reset=now,
+                weekly_views=0,
+                old_views=0,
+            )
+
+        if relevance.last_reset < (now - datetime.timedelta(weeks=1)):
+            decay = 0.5
+            relevance.last_reset = now
+            relevance.old_views = int(relevance.old_views * decay) + relevance.weekly_views
+            relevance.weekly_views = 0
+
+        relevance.weekly_views += 1
+
+        relevance.save()
+
 
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()
