@@ -690,13 +690,10 @@ class PostExploreView(APIView):
         if interest_name:
             self.update_interest_relevance(interest_name, request.user)
             must.append(query.Q('term', interest_name=interest_name))
-            #functions.append(query.SF({'filter':query.Q('term', interest_name=interest_name), 'weight': 1}))
         if topic_texts:
             must.append(query.Q('match', topics=topic_texts))
-            #functions.append(query.SF({'filter':query.Q('match', topics=topic_texts), 'weight': 3}))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
-            #functions.append(query.SF({'filter':query.Q('match', tags=tag_names), 'weight': 3}))
         if geo_location:
             functions.append(query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
             functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(','), 'scale': '1km', 'decay': 0.9}, weight=1))
@@ -717,8 +714,16 @@ class PostExploreView(APIView):
 
         # relevance to user
         functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
-        functions.append(query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
         functions.append(query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+        functions.append(query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+
+        interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
+        for relevance in interests_relevance:
+            r = math.log1p(relevance.old_views + relevance.weekly_views)
+            functions.append(query.SF({
+                'filter': query.Q('term', interest_id=relevance.interest_id),
+                'weight': r
+            }))
 
         s = PostDocument.search()
         if len(filters) > 0:
