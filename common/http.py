@@ -15,7 +15,7 @@ class FormErrorJsonResponse(Response):
         for key in errors:
             messages += errors[key]
         messages = messages[:2]
-        data = {'message': key.title() +': ' + ' And '.join(messages)}
+        data = {'message': key.title() + ': ' + ' And '.join(messages)}
         logger.error('%s' % str(data))
         super(FormErrorJsonResponse, self).__init__(data, status=status, **kwargs)
 
@@ -32,7 +32,10 @@ class JsonErrorResponse(Response):
 class JsonResponse(Response):
     def __init__(self, data, message='', error_message='', encoder=DjangoJSONEncoder, safe=True, **kwargs):
         response = {}
-        if data: response['data'] = data
-        if message: response['message'] = unicode(message)
-        if error_message: response['error'] = {'message': error_message}
+        if data:
+            response['data'] = data
+        if message:
+            response['message'] = unicode(message)
+        if error_message:
+            response['error'] = {'message': error_message}
         super(JsonResponse, self).__init__(response, **kwargs)

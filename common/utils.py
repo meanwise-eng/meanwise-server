@@ -30,7 +30,7 @@ def slugify(text, ok=None, **kwargs):
 
 
 def timestamp(time):
-    epoch = timezone.datetime(1970,1,1)
+    epoch = timezone.datetime(1970, 1, 1)
     epoch = timezone.make_aware(epoch, timezone.get_current_timezone())
     return int((time - epoch).total_seconds())
 

@@ -110,11 +110,12 @@ class FilterQueryBuilder(BaseQueryBuilder):
             negation_keyword = constants.DRF_HAYSTACK_NEGATION_KEYWORD
             if len(param_parts) > 1 and param_parts[1] == negation_keyword:
                 excluding_term = True
-                param = param.replace("__%s" % negation_keyword, "")  # haystack wouldn't understand our negation
+                # haystack wouldn't understand our negation
+                param = param.replace("__%s" % negation_keyword, "")
 
             if self.view.serializer_class:
-                #hack to use model serializer
-                #if self.view.serializer_class.Meta.field_aliases:
+                # hack to use model serializer
+                # if self.view.serializer_class.Meta.field_aliases:
                 fields = getattr(self.view.serializer_class.Meta, 'fields', tuple())
                 exclude = getattr(self.view.serializer_class.Meta, 'exclude', tuple())
                 search_fields = getattr(self.view.serializer_class.Meta, 'search_fields', tuple())
@@ -136,7 +137,7 @@ class FilterQueryBuilder(BaseQueryBuilder):
             field_queries = []
             for token in self.tokenize(value, self.view.lookup_sep):
                 field_queries.append(self.view.query_object((param, token)))
-            
+
             field_queries = [fq for fq in field_queries if fq]
             if len(field_queries) > 0:
                 term = six.moves.reduce(operator.or_, field_queries)
@@ -187,7 +188,8 @@ class FacetQueryBuilder(BaseQueryBuilder):
             if field not in fields or field in exclude:
                 continue
 
-            field_options = merge_dict(field_options, {field: self.parse_field_options(self.view.lookup_sep, *options)})
+            field_options = merge_dict(
+                field_options, {field: self.parse_field_options(self.view.lookup_sep, *options)})
 
         valid_gap = ("year", "month", "day", "hour", "minute", "second")
         for field, options in field_options.items():
@@ -198,7 +200,8 @@ class FacetQueryBuilder(BaseQueryBuilder):
                                      "and 'gap_by' to be set.")
 
                 if not options["gap_by"] in valid_gap:
-                    raise ValueError("The 'gap_by' parameter must be one of %s." % ", ".join(valid_gap))
+                    raise ValueError("The 'gap_by' parameter must be one of %s." %
+                                     ", ".join(valid_gap))
 
                 options.setdefault("gap_amount", 1)
                 date_facets[field] = field_options[field]
@@ -284,7 +287,8 @@ class SpatialQueryBuilder(BaseQueryBuilder):
 
         applicable_filters = None
 
-        filters = dict((k, filters[k]) for k in chain(self.D.UNITS.keys(), ["from"]) if k in filters)
+        filters = dict((k, filters[k])
+                       for k in chain(self.D.UNITS.keys(), ["from"]) if k in filters)
         distance = dict((k, v) for k, v in filters.items() if k in self.D.UNITS.keys())
 
         try:

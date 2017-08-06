@@ -16,10 +16,10 @@ from scarface.models import Device
 NOTIFICATION_TYPES = (
     ('FA', 'FriendRequestAccepted'),
     ('FR', 'FriendRequestReceived'),
-    ('LP',  'LikedPost'),
+    ('LP', 'LikedPost'),
     ('CP', 'CommentedPost'),
     ('UK', 'Unknown'),
-    )
+)
 
 
 class Notification(models.Model):
@@ -41,11 +41,12 @@ class Notification(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "Notification id: " + str(self.id)  + " for: " + str(self.receiver) + " type: " + str(self.notification_type)
+        return "Notification id: " + str(self.id) + " for: " + str(self.receiver) + " type: " + str(self.notification_type)
+
 
 class ASNSDevice(models.Model):
     user = models.ForeignKey(User)
     device = models.ForeignKey(Device)
 
     def __str__(self):
-        return "ASNS Device id: " + str(self.id)  + " user: " + str(self.user) + " device: " + str(self.device.device_id)
+        return "ASNS Device id: " + str(self.id) + " user: " + str(self.user) + " device: " + str(self.device.device_id)

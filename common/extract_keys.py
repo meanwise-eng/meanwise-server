@@ -15,27 +15,27 @@ regex = re.compile(
 
 class Command(BaseCommand):
     help = 'Extracts the private key and ssl certificate from an APNS p12 file'
-    
+
     def add_arguments(self, parser):
         parser.add_argument('-f', '--file',
-                                action='store',
-                                dest='file',
-                                type=str,
-                                help='The APNS .p12 file')
+                            action='store',
+                            dest='file',
+                            type=str,
+                            help='The APNS .p12 file')
         parser.add_argument('-p', '--password',
-                                action='store',
-                                dest='password',
-                                type=str,
-                                help='The associated password',
-                             )
+                            action='store',
+                            dest='password',
+                            type=str,
+                            help='The associated password',
+                            )
         parser.add_argument('-e', '--encoding',
-                                action='store',
-                                dest='encoding',
-                                type=str,
-                                help='The used encoding',
-                                default='utf-8'
-                                )
-        
+                            action='store',
+                            dest='encoding',
+                            type=str,
+                            help='The used encoding',
+                            default='utf-8'
+                            )
+
     def handle(self, *args, **options):
         file_name = options['file']
         password = options['password']
@@ -45,7 +45,8 @@ class Command(BaseCommand):
 
         if not os.path.isfile(file_name):
             raise CommandError(u'File "%s" does not exist'.format(file_name))
-        arguments = "openssl pkcs12 -nodes -in {file} -passin pass:\"{pw}\"".format(file=file_name, pw=password)
+        arguments = "openssl pkcs12 -nodes -in {file} -passin pass:\"{pw}\"".format(
+            file=file_name, pw=password)
         result = subprocess.check_output(arguments, shell=True).decode(encoding=encoding)
         groups = re.search(regex, result).groupdict()
         cert_string = groups["cert"].replace("\n", "\\n")

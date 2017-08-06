@@ -15,13 +15,13 @@ from django.conf import settings  # noqa
 
 class Celery(celery.Celery):
 
-        def on_configure(self):
-            if not settings.DEBUG:
-                client = raven.Client(settings.RAVEN_CONFIG['dsn'])
-                # register a custom filter to filter out duplicate logs
-                register_logger_signal(client)
-                # hook into the Celery error handler
-                register_signal(client)
+    def on_configure(self):
+        if not settings.DEBUG:
+            client = raven.Client(settings.RAVEN_CONFIG['dsn'])
+            # register a custom filter to filter out duplicate logs
+            register_logger_signal(client)
+            # hook into the Celery error handler
+            register_signal(client)
 
 
 app = Celery('meanwise_backend')

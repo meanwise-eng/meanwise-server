@@ -6,11 +6,14 @@ from post.models import *
 class PostAdmin(admin.ModelAdmin):
     pass
 
+
 class CommentAdmin(admin.ModelAdmin):
     pass
 
+
 class ShareAdmin(admin.ModelAdmin):
     pass
+
 
 class TopicAdmin(admin.ModelAdmin):
     pass

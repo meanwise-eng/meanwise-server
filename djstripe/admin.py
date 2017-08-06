@@ -191,8 +191,6 @@ admin.site.register(
 )
 
 
-
-
 def customer_has_card(obj):
     """ Returns True if the customer has a card attached to its account."""
     return obj.customer.card_fingerprint != ""
@@ -283,5 +281,6 @@ class PlanAdmin(admin.ModelAdmin):
                 'trial_period_days'])
 
         return readonly_fields
+
 
 admin.site.register(Plan, PlanAdmin)

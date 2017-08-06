@@ -27,7 +27,10 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan, convert_tstamp
+from .stripe_objects import (StripeEvent, StripeTransfer,
+                             StripeCustomer, StripeInvoice,
+                             StripeCharge, StripePlan, convert_tstamp
+                             )
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +64,8 @@ class EventProcessingException(TimeStampedModel):
         )
 
     def __str__(self):
-        return "<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event)
+        return "<{message}, pk={pk}, Event={event}>".format(message=self.message,
+                                                            pk=self.pk, event=self.event)
 
 
 class Event(StripeEvent):
@@ -169,7 +173,8 @@ class TransferChargeFee(TimeStampedModel):
 
 
 class Customer(StripeCustomer):
-    subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
+    subscriber = models.OneToOneField(
+        getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
 
     objects = CustomerManager()
@@ -222,20 +227,27 @@ class Customer(StripeCustomer):
             """
             if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
                 at_period_end = False
-            stripe_subscription = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
+            stripe_subscription = self.stripe_customer.cancel_subscription(
+                at_period_end=at_period_end)
         except stripe.InvalidRequestError as exc:
-            raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
+            raise SubscriptionCancellationFailure(
+                "Customer's information is not current with Stripe.\n{}".format(str(exc)))
 
         current_subscription.status = stripe_subscription.status
         current_subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
-        current_subscription.current_period_end = convert_tstamp(stripe_subscription, "current_period_end")
-        current_subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at") or timezone.now()
+        current_subscription.current_period_end = convert_tstamp(
+            stripe_subscription, "current_period_end")
+        current_subscription.canceled_at = convert_tstamp(
+            stripe_subscription, "canceled_at") or timezone.now()
         current_subscription.save()
         cancelled.send(sender=self, stripe_response=stripe_subscription)
         return current_subscription
 
     def cancel(self, at_period_end=True):
-        warnings.warn("Deprecated - Use ``cancel_subscription`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
+        warnings.warn(
+            "Deprecated - Use ``cancel_subscription`` instead. This method will be removed in dj-stripe 1.0.",
+            DeprecationWarning
+        )
         return self.cancel_subscription(at_period_end=at_period_end)
 
     @classmethod
@@ -314,17 +326,20 @@ class Customer(StripeCustomer):
         if stripe_subscription:
             if current_subscription:
                 logger.debug('Updating subscription')
-                current_subscription.plan = djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id)
+                current_subscription.plan = djstripe_settings.plan_from_stripe_id(
+                    stripe_subscription.plan.id)
                 current_subscription.current_period_start = convert_tstamp(
                     stripe_subscription.current_period_start
                 )
                 current_subscription.current_period_end = convert_tstamp(
                     stripe_subscription.current_period_end
                 )
-                current_subscription.amount = (stripe_subscription.plan.amount / decimal.Decimal("100"))
+                current_subscription.amount = (
+                    stripe_subscription.plan.amount / decimal.Decimal("100"))
                 current_subscription.status = stripe_subscription.status
                 current_subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
-                current_subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at")
+                current_subscription.canceled_at = convert_tstamp(
+                    stripe_subscription, "canceled_at")
                 current_subscription.start = convert_tstamp(stripe_subscription.start)
                 current_subscription.quantity = stripe_subscription.quantity
                 current_subscription.save()
@@ -364,7 +379,8 @@ class Customer(StripeCustomer):
             return current_subscription
         elif current_subscription and current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
             # Stripe says customer has no subscription but we think they have one.
-            # This could happen if subscription is cancelled from Stripe Dashboard and webhook fails
+            # This could happen if subscription is cancelled from Stripe Dashboard and
+            # webhook fails
             logger.debug('Cancelling subscription for %s' % self)
             current_subscription.status = CurrentSubscription.STATUS_CANCELLED
             current_subscription.save()
@@ -419,7 +435,8 @@ class Customer(StripeCustomer):
         if send_receipt is None:
             send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
 
-        charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
+        charge_id = super(Customer, self).charge(
+            amount, currency, description, send_receipt, **kwargs)
         recorded_charge = self.record_charge(charge_id)
         if send_receipt:
             recorded_charge.send_receipt()
@@ -655,7 +672,8 @@ class Charge(StripeCharge):
             if invoice:
                 charge.invoice = invoice
         except Invoice.DoesNotExist:
-            logger.warning("No invoice {0} found for charge {1}".format(data.get('invoice'), data.get('id')))
+            logger.warning("No invoice {0} found for charge {1}".format(
+                data.get('invoice'), data.get('id')))
 
         charge.save()
         return charge

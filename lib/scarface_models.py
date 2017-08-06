@@ -241,7 +241,8 @@ class Device(SNSCRUDMixin, models.Model):
                 'Failed to deregister device.({0})'.format(success)
             )
         self.arn = None
-        if save: self.save()
+        if save:
+            self.save()
         return success
 
     @DefaultConnection
@@ -397,7 +398,8 @@ class Platform(SNSCRUDMixin, models.Model):
                 'Failded to deregister Platform.({0})'.format(success)
             )
         self.arn = None
-        if save: self.save()
+        if save:
+            self.save()
         return success
 
     @DefaultConnection
@@ -489,7 +491,8 @@ class Topic(SNSCRUDMixin, models.Model):
             )
 
         self.arn = None
-        if save: self.save()
+        if save:
+            self.save()
 
         return success
 
@@ -661,5 +664,6 @@ class Subscription(SNSCRUDMixin, models.Model):
                 'Failed to unsubscribe Device from Topic.({0})'.format(success)
             )
         self.arn = None
-        if save: self.save()
+        if save:
+            self.save()
         return success

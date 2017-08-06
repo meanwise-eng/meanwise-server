@@ -21,5 +21,6 @@ class CityAdmin(admin.ModelAdmin):
     list_display_links = ('city',)
     prepopulated_fields = {'slug': ('description',)}
 
+
 admin.site.register(Location, LocationAdmin)
 admin.site.register(City, CityAdmin)

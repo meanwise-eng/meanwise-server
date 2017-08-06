@@ -172,26 +172,35 @@ class StripeTransfer(StripeObject):
 
     stripe_api_name = "Transfer"
 
-    amount = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
+    # Stripe = cents, djstripe = dollars
+    amount = models.DecimalField(decimal_places=2, max_digits=7)
     status = models.CharField(max_length=25)
     date = models.DateTimeField()
     description = models.TextField(null=True, blank=True)
 
     # The following fields are nested in the "summary" object
     adjustment_count = models.IntegerField()
-    adjustment_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    adjustment_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
+    # Stripe = cents, djstripe = dollars
+    adjustment_fees = models.DecimalField(decimal_places=2, max_digits=7)
+    # Stripe = cents, djstripe = dollars
+    adjustment_gross = models.DecimalField(decimal_places=2, max_digits=7)
     charge_count = models.IntegerField()
-    charge_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    charge_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
+    # Stripe = cents, djstripe = dollars
+    charge_fees = models.DecimalField(decimal_places=2, max_digits=7)
+    # Stripe = cents, djstripe = dollars
+    charge_gross = models.DecimalField(decimal_places=2, max_digits=7)
     collected_fee_count = models.IntegerField()
-    collected_fee_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
+    collected_fee_gross = models.DecimalField(
+        decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
     net = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
     refund_count = models.IntegerField()
-    refund_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    refund_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
+    # Stripe = cents, djstripe = dollars
+    refund_fees = models.DecimalField(decimal_places=2, max_digits=7)
+    # Stripe = cents, djstripe = dollars
+    refund_gross = models.DecimalField(decimal_places=2, max_digits=7)
     validation_count = models.IntegerField()
-    validation_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
+    # Stripe = cents, djstripe = dollars
+    validation_fees = models.DecimalField(decimal_places=2, max_digits=7)
 
     objects = TransferManager()
 

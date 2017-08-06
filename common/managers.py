@@ -14,9 +14,9 @@ class LikeableManagerMixin(object):
         '''
         from .models import Like
         like, created = Like.objects.get_or_create(
-                    content_type=ContentType.objects.get_for_model(instance),
-                    object_id=instance.id,
-                    profile=profile)
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+            profile=profile)
 
     def unlike(self, instance, profile):
         '''
@@ -24,7 +24,7 @@ class LikeableManagerMixin(object):
         '''
         from .models import Like
         Like.objects.filter(
-                    content_type=ContentType.objects.get_for_model(instance),
-                    object_id=instance.id,
-                    profile=profile
-                ).delete()
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+            profile=profile
+        ).delete()

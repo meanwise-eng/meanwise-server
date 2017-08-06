@@ -3,6 +3,7 @@ from django.db.models import Q
 from haystack import indexes
 from post.models import Post
 
+
 class PostIndex(indexes.SearchIndex, indexes.Indexable):
 
     text = indexes.CharField(document=True, use_template=False)
@@ -11,14 +12,14 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
     interest_name = indexes.MultiValueField()
     interest_slug = indexes.MultiValueField()
     created_on = indexes.DateTimeField(model_attr='created_on')
-    tag_names =  indexes.MultiValueField()
-    topic_texts =  indexes.MultiValueField()
-    #interest = 
+    tag_names = indexes.MultiValueField()
+    topic_texts = indexes.MultiValueField()
+    # interest =
 
-    #autocomplete = indexes.EdgeNgramField()
+    # autocomplete = indexes.EdgeNgramField()
 
-    #@staticmethod
-    #def prepare_autocomplete(obj):
+    # @staticmethod
+    # def prepare_autocomplete(obj):
     #    return " ".join((
     #        obj.address, obj.city, obj.zip_code
     #    ))
@@ -64,5 +65,4 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.story:
             return [tag.name.lower() for p in obj.story.posts.filter(is_deleted=False) for tag in p.tags.all()]
         else:
-            return  [tag.name.lower() for tag in obj.tags.all()]
-
+            return [tag.name.lower() for tag in obj.tags.all()]

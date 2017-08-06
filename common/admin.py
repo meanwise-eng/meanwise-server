@@ -17,5 +17,6 @@ class CommentAdmin(admin.ModelAdmin):
     ordering = ('-created_on',)
     list_display_links = ('__unicode__',)
 
+
 admin.site.register(Like, LikeAdmin)
 admin.site.register(Comment, CommentAdmin)

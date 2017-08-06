@@ -39,7 +39,7 @@ class ModelEnumMeta(type):
                 enumValue = attrs[attr]
                 if not isinstance(enumValue, EnumValue):
                     raise ValueError("Error in %s.%s Enum values are expected to be instances of the EnumValue class" %
-                            (cls.__name__, attr))
+                                     (cls.__name__, attr))
                 enumValue.name = attr
                 enumValues[attr] = enumValue
                 setattr(cls, attr, enumValue.value)

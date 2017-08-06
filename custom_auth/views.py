@@ -16,6 +16,7 @@ from custom_auth.serializers import *
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
+
 class RegisterUserView(APIView):
     """
     Handle Registering of user for both normal django flow and facebook flow.
@@ -35,14 +36,15 @@ class RegisterUserView(APIView):
             response_user_data['auth_token'] = auth_token
             response_user_data['user'] = user.id
             response_user_data['userprofile'] = user_profile.id
-            response_data = {'status':'success', 'error':'', 'results':response_user_data}
+            response_data = {'status': 'success', 'error': '', 'results': response_user_data}
             logger.info("RegisterUserView - POST - Finished ")
-            
+
             return Response(response_data, status=status.HTTP_201_CREATED)
 
-        logger.error("RegisterUserView - POST - Invalid Serializer - " + str(reg_user_serializer.errors))
-        
-        return Response({'status':'failed','error':reg_user_serializer.errors, 'data':''},
+        logger.error("RegisterUserView - POST - Invalid Serializer - " +
+                     str(reg_user_serializer.errors))
+
+        return Response({'status': 'failed', 'error': reg_user_serializer.errors, 'data': ''},
                         status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -68,7 +70,15 @@ def verify_user(request):
     else:
         response_data['exists'] = 'false'
 
-    return Response({'status':'success', 'error':'', 'results':response_data}, status=status.HTTP_202_ACCEPTED)
+    return Response(
+        {
+            'status': 'success',
+            'error': '',
+            'results': response_data
+        },
+        status=status.HTTP_202_ACCEPTED
+    )
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -92,7 +102,15 @@ def verify_username(request):
     else:
         response_data['exists'] = 'false'
 
-    return Response({'status':'success', 'error':'', 'results':response_data}, status=status.HTTP_202_ACCEPTED)
+    return Response(
+        {
+            'status': 'success',
+            'error': '',
+            'results': response_data
+        },
+        status=status.HTTP_202_ACCEPTED
+    )
+
 
 class FetchToken(APIView):
     permission_classes = (AllowAny,)
@@ -107,29 +125,81 @@ class FetchToken(APIView):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                return Response({"status":"failed", "error":"User with email does not exist", "results":""}, status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "User with email does not exist",
+                        "results": ""
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
 
             if password:
-                #check password
+                # check password
                 isvalid = user.check_password(password)
                 if not isvalid:
-                    return Response({"status":"failed", "error":"User password did not match", "results":""}, status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "User password did not match",
+                            "results": ""
+                        },
+                        status.HTTP_400_BAD_REQUEST
+                    )
+
             elif facebook_token:
                 try:
                     up = UserProfile.objects.get(user=user)
                 except UserProfile.DoesNotExist:
-                    return Response({"status":"failed", "error":"UserProfile for user not found", "results":""}, status.HTTP_400_BAD_REQUEST)
-                if facebook_token !=  up.facebook_token:
-                    return Response({"status":"failed", "error":"User fb token did not match", "results":""}, status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "UserProfile for user not found",
+                            "results": ""
+                        },
+                        status.HTTP_400_BAD_REQUEST
+                    )
+
+                if facebook_token != up.facebook_token:
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "User fb token did not match",
+                            "results": ""
+                        },
+                        status.HTTP_400_BAD_REQUEST
+                    )
+
             try:
                 token = Token.objects.get(user=user)
             except Token.DoesNotExist:
-                return Response({"status":"failed", "error":"Token for User with email does not exist", "results":""}, status.HTTP_400_BAD_REQUEST)
-            data = {"token":token.key, "user_id":user.id}
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Token for User with email does not exist",
+                        "results": ""
+                    },
+                    status.HTTP_400_BAD_REQUEST
+                )
 
-            return Response({"status":"success", "error":"", "result":data} ,  status.HTTP_200_OK)
-                                    
+            data = {"token": token.key, "user_id": user.id}
+
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "result": data
+                },
+                status.HTTP_200_OK
+            )
+
         except Exception as e:
             logger.error("Fetch Token - POST - Exception: " + e.message + " [API / views.py /")
-            return Response({"status":"failed", "error":str(e), "results":""}, status.HTTP_400_BAD_REQUEST)
-
+            return Response(
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "results": ""
+                },
+                status.HTTP_400_BAD_REQUEST
+            )

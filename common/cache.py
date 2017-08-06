@@ -14,18 +14,29 @@ class SerializerCacheManager(models.Manager):
         '''
         if not instance:
             key_pattern = '%s:%s:%s*' % (getattr(settings, 'CACHE_KEY_PREFIX', ''),
-                instance._meta.app_label, instance._meta.model_name)
+                                         instance._meta.app_label, instance._meta.model_name)
         elif not serializer_class:
             key_pattern = '%s:%s:%s:%s*' % (getattr(settings, 'CACHE_KEY_PREFIX', ''),
-                instance._meta.app_label, instance._meta.model_name, instance.pk)
+                                            instance._meta.app_label,
+                                            instance._meta.model_name,
+                                            instance.pk
+                                            )
         else:
             key_pattern = '%s:%s:%s:%s:%s' % (getattr(settings, 'CACHE_KEY_PREFIX', ''),
-                instance._meta.app_label, instance._meta.model_name, instance.pk, serializer_class.__name__)
+                                              instance._meta.app_label,
+                                              instance._meta.model_name,
+                                              instance.pk,
+                                              serializer_class.__name__
+                                              )
         redis.delete(key_pattern)
 
     def get_cache_key(self, instance, serializer_class):
         return '%s:%s:%s:%s:%s' % (getattr(settings, 'CACHE_KEY_PREFIX'),
-                instance._meta.app_label, instance._meta.model_name, instance.pk, serializer_class.__name__)
+                                   instance._meta.app_label,
+                                   instance._meta.model_name,
+                                   instance.pk,
+                                   serializer_class.__name__
+                                   )
 
     def serialized(self, instance, serializer_class, many=False, force_fetch=False):
         '''

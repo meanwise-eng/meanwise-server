@@ -12,7 +12,10 @@ from .settings import subscriber_request_callback
 
 
 def user_passes_pay_test(test_func, pay_page="djstripe:subscribe"):
-    warnings.warn("Deprecated - Use ``subscriber_passes_pay_test`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
+    warnings.warn(
+        "Deprecated - Use ``subscriber_passes_pay_test`` instead. This method will be removed in dj-stripe 1.0.",
+        DeprecationWarning
+    )
 
     return subscriber_passes_pay_test(test_func=test_func, pay_page=pay_page)
 

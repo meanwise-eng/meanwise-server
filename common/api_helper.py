@@ -1,4 +1,3 @@
-from rest_framework import serializers
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -21,8 +20,9 @@ def get_objects_paginated(objects, page, page_size=settings.REST_FRAMEWORK['PAGE
         has_next_page = objects.has_next()
     except EmptyPage:
         objects = []
-        #paginator.page(paginator.num_pages)
+        # paginator.page(paginator.num_pages)
     return objects, has_next_page, num_pages
+
 
 def get_objects_paginated_offset(objects, offset=0, limit=settings.REST_FRAMEWORK['PAGE_SIZE']):
     """
@@ -30,7 +30,7 @@ def get_objects_paginated_offset(objects, offset=0, limit=settings.REST_FRAMEWOR
 
     """
     paginator = Paginator(objects, limit)
-    page = int((int(offset) - 1)/int(limit)) + 1
+    page = int((int(offset) - 1) / int(limit)) + 1
     try:
         objects = paginator.page(page)
     except PageNotAnInteger:

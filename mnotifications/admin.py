@@ -16,8 +16,8 @@ class NotificationAdmin(admin.ModelAdmin):
 
 class ASNSPushAdmin(AdminViews):
     admin_views = (
-                    ('add_topic', 'add_topic'),
-        )
+        ('add_topic', 'add_topic'),
+    )
 
     def add_topic(self, request):
         message = ""
@@ -25,13 +25,13 @@ class ASNSPushAdmin(AdminViews):
             message = request.GET.get('message', "")
             form = AddTopicForm()
         else:
-            form = AddTopicForm(request.POST) # Bind data from request.POST into a PostForm
+            form = AddTopicForm(request.POST)  # Bind data from request.POST into a PostForm
             if form.is_valid():
                 topic = form.cleaned_data['topic']
                 return HttpResponseRedirect("?message=successfully added topic")
- 
+
         return render(request, 'add_topic.html', {
-            'form': form, "message":message,
+            'form': form, "message": message,
         })
 
 

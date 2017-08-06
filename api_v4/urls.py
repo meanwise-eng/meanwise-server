@@ -13,7 +13,7 @@ router.register(r'post', PostViewSet)
 router.register(r'comment', CommentViewSet)
 router.register(r'share', ShareViewSet)
 
-#router.register(r'search/post', PostSearchView, base_name="post-search")
+# router.register(r'search/post', PostSearchView, base_name="post-search")
 router.register(r"search/userprofile", UserProfileSearchView,
                 base_name="userprofile-search")
 router.register(r'autocomplete/profession',

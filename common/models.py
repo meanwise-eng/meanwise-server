@@ -78,9 +78,8 @@ class LikeableModel(models.Model):
 
 
 class CommentLikeableModel(models.Model):
-    comments= GenericRelation('common.Comment')
-    likes   = GenericRelation('common.Like')
-
+    comments = GenericRelation('common.Comment')
+    likes = GenericRelation('common.Like')
 
     class Meta:
         abstract = True
@@ -90,7 +89,6 @@ class CommentLikeableModel(models.Model):
         if not hasattr(self, '_likes_count'):
             self._likes_count = self.likes.count()
         return self._likes_count
-
 
     @property
     def comments_count(self):
@@ -108,14 +106,18 @@ def post_like_save(sender, instance, created, **kwargs):
     else:
         is_private = False
     if created:
-        create_activity(instance.profile, verb=VerbType.LIKED, target=instance.instance, is_private=is_private)
+        create_activity(instance.profile, verb=VerbType.LIKED,
+                        target=instance.instance, is_private=is_private)
+
 
 def post_like_delete(sender, instance, **kwargs):
     if instance.profile == instance.instance.profile:
         is_private = True
     else:
         is_private = False
-    delete_activity(instance.profile, verb=VerbType.LIKED, target=instance.instance, is_private=is_private)
+    delete_activity(instance.profile, verb=VerbType.LIKED,
+                    target=instance.instance, is_private=is_private)
+
 
 def post_comment_save(sender, instance, created, **kwargs):
     if instance.profile == instance.instance.profile:
@@ -123,14 +125,17 @@ def post_comment_save(sender, instance, created, **kwargs):
     else:
         is_private = False
     if created:
-        create_activity(instance.profile, verb=VerbType.COMMENTED, target=instance.instance, action_object=instance, is_private=is_private)
+        create_activity(instance.profile, verb=VerbType.COMMENTED,
+                        target=instance.instance, action_object=instance, is_private=is_private)
+
 
 def post_comment_delete(sender, instance, **kwargs):
     if instance.profile == instance.instance.profile:
         is_private = True
     else:
         is_private = False
-    delete_activity(instance.profile, verb=VerbType.COMMENTED, target=instance.instance, action_object=instance, is_private=is_private)
+    delete_activity(instance.profile, verb=VerbType.COMMENTED,
+                    target=instance.instance, action_object=instance, is_private=is_private)
 
 
 post_save.connect(post_like_save, sender=Like)

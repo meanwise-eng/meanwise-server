@@ -62,15 +62,39 @@ class ProfessionListView(APIView):
             # results.
             professions = paginator.page(paginator.num_pages)
         serializer = ProfessionSerializer(professions, many=True)
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data, 'num_pages': professions.paginator.num_pages}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serializer.data,
+                    'num_pages': professions.paginator.num_pages
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
     def post(self, request):
         serializer = ProfessionSerializer(data=request.data)
         if serializer.is_valid():
             profession = serializer.save()
-            return Response({"status": "success", "error": "", "results": "successfully added skill"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": "successfully added skill"
+                },
+                status=status.HTTP_200_OK
+            )
 
-        return Response({"status": "failed", "error": serializer.errors, "results": "Failed to add skill"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "status": "failed",
+                "error": serializer.errors,
+                "results": "Failed to add skill"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class SkillListView(APIView):
@@ -94,15 +118,39 @@ class SkillListView(APIView):
             # results.
             skills = paginator.page(paginator.num_pages)
         serializer = SkillSerializer(skills, many=True)
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data, 'num_pages': skills.paginator.num_pages}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serializer.data,
+                    'num_pages': skills.paginator.num_pages
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
     def post(self, request):
         serializer = SkillSerializer(data=request.data)
         if serializer.is_valid():
             skill = serializer.save()
-            return Response({"status": "success", "error": "", "results": "successfully added profession"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": "successfully added profession"
+                },
+                status=status.HTTP_200_OK
+            )
 
-        return Response({"status": "failed", "error": serializer.errors, "results": "Failed to add profession"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "status": "failed",
+                "error": serializer.errors,
+                "results": "Failed to add profession"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class InterestListView(APIView):
@@ -152,7 +200,14 @@ class UserProfileList(APIView):
 
         serializer = UserProfileSerializer(
             userprofiles, many=True, context={'request': request})
-        return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class UserProfileDetail(APIView):
@@ -167,16 +222,39 @@ class UserProfileDetail(APIView):
             user = User.objects.get(id=user_id)
             userprofile = UserProfile.objects.get(user=user)
         except User.DoesNotExist:
-            return Response({"status": "failed", "error": "User not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "User not found",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         except UserProfile.DoesNotExist:
-            return Response({"status": "failed", "error": "UserProfile not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "UserProfile not found",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         return userprofile
 
     def get(self, request, user_id):
         userprofile = self.get_object(user_id)
         serializer = UserProfileSerializer(
             userprofile, context={'request': request, 'user_id': user_id})
-        return Response({"status": "success", "error": "test", "results": serializer.data}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "test",
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
 
     def patch(self, request, user_id):
         data = request.data
@@ -197,8 +275,23 @@ class UserProfileDetail(APIView):
                     'user_username')
                 up.user.username = user_username
                 up.user.save()
-            return Response({"status": "success", "error": "", "results": serialized_up.data}, status=status.HTTP_201_CREATED)
-        return Response({"status": "failed", "error": serialized_up.errors, "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": serialized_up.data
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            {
+                "status": "failed",
+                "error": serialized_up.errors,
+                "results": ""
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class LoggedInUserProfile(APIView):
@@ -212,13 +305,27 @@ class LoggedInUserProfile(APIView):
         try:
             userprofile = UserProfile.objects.get(user_id=user_id)
         except UserProfile.DoesNotExist:
-            return Response({"status": "failed", "error": "UserProfile not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "UserProfile not found",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         return userprofile
 
     def get(self, request):
         userprofile = request.user.userprofile
         serializer = UserProfileSerializer(userprofile)
-        return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -254,7 +361,13 @@ class RequestInterest(APIView):
                 return Response({"error": sstr(e)}, status.HTTP_400_BAD_REQUEST)
             if not already_exists:
                 if interest.published:
-                    return Response({"message": "Interest with name already published"}, status.HTTP_200_OK)
+                    return Response(
+                        {
+                            "message": "Interest with name already published"
+                        },
+                        status.HTTP_200_OK
+                    )
+
                 else:
                     interest.vote_count += 1
                     interest.save()
@@ -289,12 +402,27 @@ class FriendsList(APIView):
         except User.DoesNotExist:
             logger.error(
                 "Friendslist - GET - User not found [api / views.py /")
-            return Response({"status": "failed", "error": "User with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "User with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         try:
             up = UserProfile.objects.get(user=user)
         except UserProfile.DoesNotExist:
             logger.error("friendslist - GET - up not found [api / views.py /")
-            return Response({"status": "failed", "error": "Userprofile with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Userprofile with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         f_status = request.query_params.get('status', 'AC')
         if f_status.lower() == 'pending':
             user_friends = UserFriend.objects.filter(
@@ -326,9 +454,20 @@ class FriendsList(APIView):
         user_friends_profiles, has_next_page, num_pages = get_objects_paginated(
             user_friends_profiles, page, page_size)
         serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(
-            id__in=user_friends_profiles), many=True, context={'request': request, 'user_id': user_id})
+            id__in=user_friends_profiles),
+            many=True, context={'request': request, 'user_id': user_id})
 
-        return Response({"status": "success", "error": "", "results": {"data": serialized_friends_list.data, "num_pages": num_pages}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serialized_friends_list.data,
+                    "num_pages": num_pages
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
     def post(self, request, user_id):
         """
@@ -346,18 +485,40 @@ class FriendsList(APIView):
         except User.DoesNotExist:
             logger.error(
                 "Friendslist - GET - User not found [api / views.py /")
-            return Response({"status": "failed", "error": "User with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "User with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             up = UserProfile.objects.get(user=user)
         except UserProfile.DoesNotExist:
             logger.error("friendslist - GET - up not found [api / views.py /")
-            return Response({"status": "failed", "error": "Userprofile with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Userprofile with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         friend_status = request.data.get('status', 'pending')
 
         # check if request for self, if so raise error
         if friend_id:
             if int(friend_id) == int(user_id):
-                return Response({"status": "failed", "error": "Can't send friend request for self", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Can't send friend request for self",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         try:
             friend_user = User.objects.get(id=int(friend_id))
@@ -368,7 +529,14 @@ class FriendsList(APIView):
         if not friend_user:
             logger.error(
                 "Friendslist - POST - friend User not found [api / views.py /")
-            return Response({"status": "failed", "error": "friend User with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "friend User with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # check if record already exists, if already rejected, ignore
         try:
             uf = UserFriend.objects.get(user=user, friend=friend_user)
@@ -389,80 +557,196 @@ class FriendsList(APIView):
                     user_friend=uf)
                 # send push notification
                 devices = find_user_devices(user.id)
-                message_payload = {'p': '', 'u': str(user.id),
-                                   't': 'r', 'message': (str(friend_user.userprofile.first_name) + " " + str(friend_user.userprofile.last_name) + " sent friend request.")}
+                message_payload = {
+                    'p': '',
+                    'u': str(user.id),
+                    't': 'r',
+                    'message': (
+                        str(friend_user.userprofile.first_name) + " " +
+                        str(friend_user.userprofile.last_name) + " sent friend request."
+                    )
+                }
+
                 for device in devices:
                     send_message_device(device, message_payload)
                 logger.info("Friendslist - POST - Finished [API / views.py /")
-                return Response({"status": "success", "error": "", "results": "successfully added friend request"}, status=status.HTTP_201_CREATED)
+                return Response(
+                    {
+                        "status": "success",
+                        "error": "",
+                        "results": "successfully added friend request"
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+
             else:
                 if uf.status.lower() == 're':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "failed", "error": "Already rejected.", "results": ""}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "Already rejected.",
+                            "results": ""
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
                 elif uf.status.lower() == 'ac':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "success", "error": "", "results": "Already accepted"}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Already accepted"
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
                 elif uf.status.lower() == 'pe':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "success", "error": "", "results": "Request already pending"}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Request already pending"
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
 
         elif friend_status.lower() == 'accepted':
             if not uf:
                 logger.error(
                     "Friendslist - POST - Userfriend not found [api / views.py /")
-                return Response({"status": "failed", "error": "UserFriend record with ids does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "UserFriend record with ids does not exist",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             else:
                 if uf.status.lower() == 're':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "failed", "error": "Already rejected.", "results": ""}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "Already rejected.",
+                            "results": ""
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
                 elif uf.status.lower() == 'ac':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "success", "error": "", "results": "Already accepted"}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Already accepted"
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
                 elif uf.status.lower() == 'pe':
                     uf.status = 'AC'
                     uf.save()
                     # Add notification
                     notification = Notification.objects.create(
-                        receiver=friend_user, 
+                        receiver=friend_user,
                         notification_type=Notification.TYPE_FRIEND_REQUEST_ACCEPTED,
                         user_friend=uf)
                     # send push notification
                     devices = find_user_devices(friend_user.id)
-                    message_payload = {'p': '', 'u': str(friend_user.id), 't': 'a', 'message': (str(
-                        user.userprofile.first_name) + " " + str(user.userprofile.last_name) + " accepted friend request.")}
+                    message_payload = {
+                        'p': '',
+                        'u': str(friend_user.id),
+                        't': 'a',
+                        'message': (
+                            str(user.userprofile.first_name) + " " +
+                            str(user.userprofile.last_name) + " accepted friend request."
+                        )
+                    }
                     for device in devices:
                         send_message_device(device, message_payload)
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "success", "error": "", "results": "Successfully accepted."}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Successfully accepted."
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
         elif friend_status.lower() == 'rejected':
             if not uf:
                 logger.error(
                     "Friendslist - POST - Userfriend not found [api / views.py /")
-                return Response({"status": "failed", "error": "UserFriend record with ids does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "UserFriend record with ids does not exist",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             else:
                 if uf.status.lower() == 're':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "failed", "error": "Already rejected.", "results": ""}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "Already rejected.",
+                            "results": ""
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
                 elif uf.status.lower() == 'ac':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "success", "error": "", "results": "Already accepted"}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Already accepted"
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
                 elif uf.status.lower() == 'pe':
                     uf.status = 'RE'
                     uf.save()
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
-                    return Response({"status": "success", "error": "", "results": "Successfully rejected."}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Successfully rejected."
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
 
         logger.info("Friendslist - POST - Finished [API / views.py /")
-        return Response({"status": "failed", "error": "Unknown", "results": "Could not update status."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "status": "failed",
+                "error": "Unknown",
+                "results": "Could not update status."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class RemoveFriend(APIView):
@@ -487,12 +771,28 @@ class RemoveFriend(APIView):
         except User.DoesNotExist:
             logger.error(
                 "RemoveFriend - Post - User not found [api / views.py /")
-            return Response({"status": "failed", "error": "User with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "User with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             up = UserFriend.objects.filter(user=user)
         except UserProfile.DoesNotExist:
             logger.error("Removefriend - GET - up not found [api / views.py /")
-            return Response({"status": "failed", "error": "Userprofile with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Userprofile with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         friend_id = request.data.get('friend_id', None)
 
         try:
@@ -500,12 +800,26 @@ class RemoveFriend(APIView):
         except User.DoesNotExist:
             logger.error(
                 "Removefriend - POST - friend User not found [api / views.py /")
-            return Response({"status": "failed", "error": "friend User with id does not exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "friend User with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         up.filter(friend=friend_user).delete()
 
         logger.info("Friendslist - POST - Finished [API / views.py /")
-        return Response({"status": "success", "error": "", "results": "successfully removed friend"}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": "successfully removed friend"
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 
 class ChangePasswordView(APIView):
@@ -521,7 +835,14 @@ class ChangePasswordView(APIView):
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            return Response({"status": "failed", "error": "User not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "User not found",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         return user
 
     def post(self, request, user_id):
@@ -535,7 +856,15 @@ class ChangePasswordView(APIView):
         if serializer.is_valid():
             # Check old password
             if not self.object.check_password(serializer.data.get("old_password")):
-                return Response({"status": "failed", "error": "Wrong old password", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Wrong old password",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             # check new password
             errors = dict()
             try:
@@ -544,11 +873,26 @@ class ChangePasswordView(APIView):
             except exceptions.ValidationError as e:
                 errors['password'] = list(e.messages)
             if errors:
-                return Response({"status": "failed", "error": errors, "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": errors,
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             # set_password also hashes the password that the user will get
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
-            return Response({"status": "success", "error": "", "results": "successfully changes password"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": "successfully changes password"
+                },
+                status=status.HTTP_200_OK
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -567,7 +911,15 @@ class ForgotPasswordView(APIView):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                return Response({"status": "failed", "error": "User not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "User not found",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             # set_password also hashes the password that the user will get
             password = User.objects.make_random_password()
             user.set_password(password)
@@ -606,9 +958,32 @@ class ForgotPasswordView(APIView):
                 msg.send()
             except Exception as e:
                 logger.error(e)
-                return Response({"status": "failed", "error": "Could not email the new password", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"status": "success", "error": "", "results": "Successfully sent email with new password"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"status": "failed", "error": serializer.errors, "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Could not email the new password",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": "Successfully sent email with new password"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {
+                "status": "failed",
+                "error": serializer.errors,
+                "results": ""
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ValidateInviteCodeView(APIView):
@@ -621,15 +996,39 @@ class ValidateInviteCodeView(APIView):
     def post(self, request):
         invite_code = request.data.get('invite_code', '')
         if not invite_code:
-            return Response({"status": "failed", "error": "Invite code not provided", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Invite code not provided",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         try:
             invite_group = InviteGroup.objects.get(invite_code=invite_code)
         except InviteGroup.DoesNotExist:
-            return Response({"status": "failed", "error": "Invite Group not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Invite Group not found",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         limit_exceeded = False
         if invite_group.count > invite_group.max_invites:
             limit_exceeded = True
-        return Response({"status": "success", "error": "", "results": {"limit_exceeded": limit_exceeded}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "limit_exceeded": limit_exceeded
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class SetInviteCodeView(APIView):
@@ -646,18 +1045,46 @@ class SetInviteCodeView(APIView):
         invite_code = request.data.get('invite_code', None)
 
         if not invite_code:
-            return Response({"status": "failed", "error": "Invite code not provided", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Invite code not provided",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             invite_group = InviteGroup.objects.get(invite_code=invite_code)
         except InviteGroup.DoesNotExist:
-            return Response({"status": "failed", "error": "Invite Group not found", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Invite Group not found",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if user.userprofile.user_type == UserProfile.USERTYPE_INVITED or InviteGroup.users.through.objects.filter(user=user).count() > 0:
-            return Response({"status": "failed", "error": "You are already in an Invite Group", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "You are already in an Invite Group",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if invite_group.count > invite_group.max_invites:
-            return Response({"status": "failed", "error": "Invite Group limit exceeded", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Invite Group limit exceeded",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         invite_group.count += 1
         invite_group.save()
@@ -666,7 +1093,16 @@ class SetInviteCodeView(APIView):
         user.userprofile.user_type = UserProfile.USERTYPE_INVITED
         user.userprofile.save()
 
-        return Response({"status": "success", "error": "", "results": {"message": "You are now in Invite Group %s" % invite_code}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "message": "You are now in Invite Group %s" % invite_code
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class UserProfileHSSerializer(HaystackSerializer):

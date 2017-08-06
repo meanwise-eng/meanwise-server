@@ -7,6 +7,7 @@ class DefaultResource(DjangoResource):
     This class will providing methods for returning response for both authenticated user
     and un authenticated user.
     '''
+
     def is_authenticated(self):
         return True  # Allow every request
 

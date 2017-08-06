@@ -20,13 +20,15 @@ from io import BytesIO
 
 from userprofile.models import Interest
 
+
 class Topic(models.Model):
     text = models.CharField(max_length=128, unique=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
-        return "Topic id: " + str(self.id)  + " text: " + str(self.text)
+        return "Topic id: " + str(self.id) + " text: " + str(self.text)
+
 
 class Post(models.Model):
     interest = models.ForeignKey(Interest, db_index=True)
@@ -56,7 +58,7 @@ class Post(models.Model):
     OWNER_FIELD = 'poster'
 
     def __str__(self):
-        return "Post id: " + str(self.id)  + " poster: " + str(self.poster)
+        return "Post id: " + str(self.id) + " poster: " + str(self.poster)
 
     def save(self, *args, **kwargs):
         if self.video:
@@ -64,10 +66,12 @@ class Post(models.Model):
                 super(Post, self).save(*args, **kwargs)
                 try:
                     clip = VideoFileClip(self.video.path)
-                    thumbnail_path = os.path.join(os.path.dirname(self.video.path), os.path.splitext(os.path.basename(self.video.name))[0]) + ".jpg"
-                    clip.save_frame(thumbnail_path , t=1.00)
+                    thumbnail_path = os.path.join(os.path.dirname(self.video.path), os.path.splitext(
+                        os.path.basename(self.video.name))[0]) + ".jpg"
+                    clip.save_frame(thumbnail_path, t=1.00)
                     _file = File(open(thumbnail_path, "rb"))
-                    self.video_thumbnail.save((os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+                    self.video_thumbnail.save(
+                        (os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
 
                     self.resolution = {
                         'height': self.video_thumbnail.height,
@@ -81,13 +85,14 @@ class Post(models.Model):
             im = Image.open(self.image)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.image = InMemoryUploadedFile(output, 'ImageField', self.image.name, 'image/jpeg', sys.getsizeof(output), None)
+            self.image = InMemoryUploadedFile(
+                output, 'ImageField', self.image.name, 'image/jpeg', sys.getsizeof(output), None)
 
             self.resolution = {
                 'height': self.image.height,
                 'width': self.image.width
             }
-            
+
         super(Post, self).save(*args, **kwargs)
 
     def num_likes(self):
@@ -97,8 +102,9 @@ class Post(models.Model):
         return self.comment_set.all().distinct().count()
 
     def rank_post_value(self):
-        value = self.num_likes()  + self.num_comments()
+        value = self.num_likes() + self.num_comments()
         return value
+
 
 class Story(models.Model):
     main_post = models.ForeignKey(Post, db_index=True, related_name='+')
@@ -107,18 +113,21 @@ class Story(models.Model):
     def __str__(self):
         return "Story id: " + str(self.id) + " main post: " + str(self.main_post)
 
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, db_index=True)
     commented_by = models.ForeignKey(User)
     comment_text = models.CharField(max_length=200)
     is_deleted = models.BooleanField(default=False)
-    mentioned_users = models.ManyToManyField(User, related_name='comment_mentioned_users', blank=True)
+    mentioned_users = models.ManyToManyField(
+        User, related_name='comment_mentioned_users', blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
-        return "Comment id: " + str(self.id)  + " post: " + str(self.post)
-  
+        return "Comment id: " + str(self.id) + " post: " + str(self.post)
+
+
 class Share(models.Model):
     post = models.OneToOneField(Post, db_index=True)
     message = models.CharField(max_length=128)
@@ -126,17 +135,16 @@ class Share(models.Model):
     recepients = models.ManyToManyField(User, related_name='recepients')
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
-        return "Share id: " + str(self.id)  + " post: " + str(self.post)
+        return "Share id: " + str(self.id) + " post: " + str(self.post)
+
 
 class TrendingTopicsInterest(models.Model):
     interest = models.ForeignKey(Interest)
     topics = JSONField()
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
-        return "Interest name: " + str(self.interest.name)  + " topics: " + str(self.topics)
-
-
+        return "Interest name: " + str(self.interest.name) + " topics: " + str(self.topics)

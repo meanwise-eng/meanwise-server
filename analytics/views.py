@@ -149,7 +149,8 @@ class PersonalAnalyticsView(APIView):
                 for i in range(len(data)):
                     post_id = data[i]["post_id"]
 
-                    like_queryset = Post.objects.filter(id=post_id).values("liked_by", likes=Count("liked_by"))
+                    like_queryset = Post.objects.filter(id=post_id).values("liked_by",
+                                                                           likes=Count("liked_by"))
                     likes = (list(like_queryset)[0]["likes"])
 
                     comment_queryset = Comment.objects.filter(post=post_id)

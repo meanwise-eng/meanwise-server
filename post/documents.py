@@ -11,6 +11,7 @@ post.settings(
     number_of_replicas=0
 )
 
+
 @post.doc_type
 class PostDocument(DocType):
 
@@ -62,21 +63,21 @@ class PostDocument(DocType):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         return up.first_name
 
     def prepare_user_lastname(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         return up.last_name
 
     def prepare_user_profile_photo(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo:
             return up.profile_photo.url
         return ""
@@ -85,16 +86,16 @@ class PostDocument(DocType):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.cover_photo:
             return up.cover_photo.url
         return ""
-    
+
     def prepare_user_profile_photo_small(self, obj):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  ""
+            return ""
         if up.profile_photo_thumbnail:
             return up.profile_photo_thumbnail.url
         return ""
@@ -103,7 +104,7 @@ class PostDocument(DocType):
         try:
             up = obj.poster.userprofile
         except UserProfile.DoesNotExist:
-            return  None
+            return None
         profession = up.profession
 
         if not profession:
@@ -116,7 +117,7 @@ class PostDocument(DocType):
             up = obj.poster.userprofile
             return up.profession_text
         except UserProfile.DoesNotExist:
-            return  None
+            return None
 
     def prepare_num_likes(self, obj):
         return obj.liked_by.count()
@@ -125,10 +126,10 @@ class PostDocument(DocType):
         return obj.liked_by.count()
 
     def prepare_topics(self, obj):
-        return list(obj.topics.all().values_list('text',flat=True))
+        return list(obj.topics.all().values_list('text', flat=True))
 
     def prepare_tags(self, obj):
-        return list(obj.tags.all().values_list('name',flat=True))
+        return list(obj.tags.all().values_list('name', flat=True))
 
     def prepare_num_comments(self, obj):
         return Comment.objects.filter(post=obj).filter(is_deleted=False)\
@@ -136,7 +137,7 @@ class PostDocument(DocType):
 
     def prepare_num_recent_comments(self, obj):
         return Comment.objects.filter(post=obj).filter(is_deleted=False)\
-            .filter(created_on__gte=(datetime.datetime.now()-datetime.timedelta(weeks=1)))\
+            .filter(created_on__gte=(datetime.datetime.now() - datetime.timedelta(weeks=1)))\
             .count()
 
     def prepare_image_url(self, obj):
@@ -152,7 +153,7 @@ class PostDocument(DocType):
         return None
 
     def prepare_video_thumb_url(self, obj):
-        #needs to be added
+        # needs to be added
         if obj.video:
             if obj.video_thumbnail:
                 return obj.video_thumbnail.url
@@ -165,7 +166,7 @@ class PostDocument(DocType):
 
     def prepare_num_recent_seen(self, obj):
         return SeenPost.objects.filter(post_id=obj.id)\
-            .filter(datetime__gte=(datetime.datetime.now()-datetime.timedelta(weeks=1)))\
+            .filter(datetime__gte=(datetime.datetime.now() - datetime.timedelta(weeks=1)))\
             .count()
 
     def prepare_geo_location(self, obj):

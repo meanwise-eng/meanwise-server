@@ -6,7 +6,8 @@ from copy import deepcopy
 from django.conf import settings
 from six import with_metaclass
 
-from scarface.settings import SCARFACE_DEFAULT_PLATFORM_STRATEGIES, SCARFACE_DEFAULT_MESSAGE_TRIM_LENGTH
+from scarface.settings import (SCARFACE_DEFAULT_PLATFORM_STRATEGIES,
+                               SCARFACE_DEFAULT_MESSAGE_TRIM_LENGTH)
 
 
 def get_strategies():
@@ -52,7 +53,7 @@ class PlatformStrategy(with_metaclass(ABCMeta)):
         return {self.platform.platform: json.dumps(data)}
 
     def format_push(self, badgeCount, context, context_id, has_new_content, message,
-            sound, extra_pload):
+                    sound, extra_pload):
         if message:
             message = self.trim_message(message)
 
@@ -67,7 +68,7 @@ class PlatformStrategy(with_metaclass(ABCMeta)):
         if extra_pload:
             for pload in extra_pload.keys():
                 payload[pload] = extra_pload[pload]
-                
+
         if message and len(message) > 0:
             payload['aps']['alert'] = message
 

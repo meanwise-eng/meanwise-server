@@ -18,7 +18,8 @@ ANONYMOUS_USER_ERROR_MSG = (
 
 
 def user_has_active_subscription(user):
-    warnings.warn("Deprecated - Use ``subscriber_has_active_subscription`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
+    warnings.warn(
+        "Deprecated - Use ``subscriber_has_active_subscription`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
     return subscriber_has_active_subscription(user)
 
 

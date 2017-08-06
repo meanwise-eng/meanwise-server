@@ -67,7 +67,17 @@ class UserPostList(APIView):
             posts, page, page_size)
         serializer = PostSerializer(
             posts, many=True, context={'request': request})
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data, "num_pages": num_pages}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serializer.data,
+                    "num_pages": num_pages
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
     @transaction.atomic()
     def post(self, request, user_id):
@@ -119,8 +129,15 @@ class UserPostList(APIView):
                         post=post)
                     # send push notification
                     devices = find_user_devices(mentioned_users[i].id)
-                    message_payload = {'p': str(post.id), 'u': str(mentioned_users[i].id), 't': 'l', 'message': (str(
-                        user.userprofile.first_name) + " " + str(user.userprofile.last_name) + "has mentioned you in a post")}
+                    message_payload = {
+                        'p': str(post.id),
+                        'u': str(mentioned_users[i].id),
+                        't': 'l',
+                        'message': (str(
+                            user.userprofile.first_name) + " " + str(user.userprofile.last_name) + "has mentioned you in a post"
+                        )
+                    }
+
                     for device in devices:
                         send_message_device(device, message_payload)
 
@@ -146,8 +163,22 @@ class UserPostList(APIView):
             for t in ts:
                 post.tags.add(t)
 
-            return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({"status": "failed", "error": serializer.errors, "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": serializer.data
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            {
+                "status": "failed",
+                "error": serializer.errors,
+                "results": ""
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class UserPostDetail(APIView):
@@ -174,7 +205,14 @@ class UserPostDetail(APIView):
             post.story.save()
 
         post.save()
-        return Response({"status": "success", "error": "", "results": "Succesfully deleted."}, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": "Succesfully deleted."
+            },
+            status=status.HTTP_202_ACCEPTED
+        )
 
 
 class UserFriendsPostList(APIView):
@@ -191,9 +229,23 @@ class UserFriendsPostList(APIView):
             posts = post_qs.filter(Q(story__isnull=True) | Q(story_index=1))
             serializer = PostSerializer(
                 posts, many=True, context={'request': request})
-            return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
         except Exception as e:
-            return Response({"status": "failed", "error": str(e), "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class UserInterestsPostList(APIView):
@@ -208,14 +260,35 @@ class UserInterestsPostList(APIView):
             try:
                 userprofile = UserProfile.objects.get(user__id=user_id)
             except UserProfile.DoesNotExist:
-                return Response({"status": "failed", "error": "Error fetching userprofile/interests for user.", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Error fetching userprofile/interests for user.",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             interests_ids = userprofile.interests.all().values_list('id', flat=True)
             posts = post_qs.filter(interest__id__in=interests_ids)
             serializer = PostSerializer(
                 posts, many=True, context={'request': request})
-            return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
         except Exception as e:
-            return Response({"status": "failed", "error": str(e), "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class StoryDetail(APIView):
@@ -232,7 +305,14 @@ class StoryDetail(APIView):
     def get(self, request, story_id, format=None):
         story = self.get_object(story_id)
         serializer = StorySerializer(story, context={'request': request})
-        return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class UserHomeFeed(APIView):
@@ -250,7 +330,15 @@ class UserHomeFeed(APIView):
             try:
                 userprofile = UserProfile.objects.get(user__id=user_id)
             except UserProfile.DoesNotExist:
-                return Response({"status": "failed", "error": "Error fetching userprofile/interests for user.", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Error fetching userprofile/interests for user.",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             interests_ids = userprofile.interests.all().values_list('id', flat=True)
             home_feed_posts = post_qs.filter(Q(poster__id__in=friends_ids) | Q(
                 interest__id__in=interests_ids) | Q(poster__id=user_id))
@@ -298,13 +386,38 @@ class UserHomeFeed(APIView):
             }
             serializer = PostSerializer(
                 home_feed_posts, many=True, context=serializer_context)
-            return Response({"status": "success", "error": "", "results": {"data": serializer.data, "num_pages": num_pages}}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": {
+                        "data": serializer.data,
+                        "num_pages": num_pages
+                    }
+                },
+                status=status.HTTP_200_OK
+            )
+
         except Exception as e:
             logger.exception(e)
 
-            return Response({"status": "failed", "error": str(e), "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-            return Response({"status": "failed", "error": str(e), "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PublicFeed(APIView):
@@ -313,7 +426,16 @@ class PublicFeed(APIView):
         posts = post_qs.all()[:20]
         serializer = PostSerializer(
             posts, many=True, context={'request': request})
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serializer.data
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -367,11 +489,26 @@ class UserPostLike(APIView):
             post=post, post_liked_by=user)
         # send push notification
         devices = find_user_devices(post.poster.id)
-        message_payload = {'p': str(post.id), 'u': str(post.poster.id), 't': 'l', 'message': (str(
-            user.userprofile.first_name) + " " + str(user.userprofile.last_name) + " liked your post")}
+        message_payload = {
+            'p': str(post.id),
+            'u': str(post.poster.id),
+            't': 'l',
+            'message': (
+                str(user.userprofile.first_name) + " " +
+                str(user.userprofile.last_name) + " liked your post"
+            )
+        }
+
         for device in devices:
             send_message_device(device, message_payload)
-        return Response({"status": "success", "error": "", "results": "Succesfully liked."}, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": "Succesfully liked."
+            },
+            status=status.HTTP_202_ACCEPTED
+        )
 
 
 class UserPostUnLike(APIView):
@@ -396,9 +533,23 @@ class UserPostUnLike(APIView):
 
         if user in post.liked_by.all():
             post.liked_by.remove(user)
-            return Response({"status": "success", "error": "", "results": "Succesfully unliked."}, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": "Succesfully unliked."
+                },
+                status=status.HTTP_202_ACCEPTED
+            )
         else:
-            return Response({"status": "failed", "error": "User not in liked list", "results": ""}, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "User not in liked list",
+                    "results": ""
+                },
+                status=status.HTTP_202_ACCEPTED
+            )
 
 
 class PostLikes(APIView):
@@ -425,34 +576,17 @@ class PostLikes(APIView):
 
         serializer = UserProfileSerializer(
             liked_by, many=True, context={'request': request})
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data, "num_pages": num_pages}}, status=status.HTTP_200_OK)
-
-
-class PostLikes(APIView):
-
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get_post(self, post_id):
-        try:
-            return Post.objects.get(pk=post_id)
-        except Post.DoesNotExist:
-            raise Http404
-
-    def get(self, request, post_id):
-        post = self.get_post(post_id)
-
-        page = request.GET.get('page')
-        page_size = request.GET.get('page_size')
-
-        liked_by_query = UserProfile.objects.filter(
-            user__in=post.liked_by.all()).order_by('username').all()
-        liked_by, has_next_page, num_pages = get_objects_paginated(
-            liked_by_query, page, page_size)
-
-        serializer = UserProfileSerializer(
-            liked_by, many=True, context={'request': request})
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data, "num_pages": num_pages}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serializer.data,
+                    "num_pages": num_pages
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class PostCommentList(APIView):
@@ -470,7 +604,17 @@ class PostCommentList(APIView):
         comments, has_next_page, num_pages = get_objects_paginated(
             comments, page, page_size)
         serializer = CommentSerializer(comments, many=True)
-        return Response({"status": "success", "error": "", "results": {"data": serializer.data, "num_pages": num_pages}}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": serializer.data,
+                    "num_pages": num_pages
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
     @transaction.atomic
     def post(self, request, post_id):
@@ -495,8 +639,15 @@ class PostCommentList(APIView):
                     comment=comment)
                 # send push notification
                 devices = find_user_devices(comment.post.poster.id)
-                message_payload = {'p': str(comment.post.id), 'u': str(comment.post.poster.id),
-                                   't': 'c', 'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + " commented on your post")}
+                message_payload = {
+                    'p': str(comment.post.id),
+                    'u': str(comment.post.poster.id),
+                    't': 'c',
+                    'message': (
+                        str(comment.commented_by.userprofile.first_name) + " " +
+                        str(comment.commented_by.userprofile.last_name) + " commented on your post"
+                    )
+                }
 
                 logger.info("No of devices to send: %s" % len(devices))
                 for device in devices:
@@ -530,16 +681,41 @@ class PostCommentList(APIView):
                             'p': str(comment.id),
                             'u': str(comment.commented_by.id),
                             't': 'l',
-                            'message': (str(comment.commented_by.userprofile.first_name) + " " + str(comment.commented_by.userprofile.last_name) + "has mentioned you in a comment")
+                            'message': (
+                                str(comment.commented_by.userprofile.first_name) + " " +
+                                str(comment.commented_by.userprofile.last_name) +
+                                "has mentioned you in a comment"
+                            )
                         }
                         for device in devices:
                             send_message_device(device, message_payload)
 
-                return Response({"status": "success", "error": "", "results": serializer.data}, status=status.HTTP_201_CREATED)
+                return Response(
+                    {
+                        "status": "success",
+                        "error": "",
+                        "results": serializer.data
+                    },
+                    status=status.HTTP_201_CREATED
+                )
             except Exception as ex:
                 logger.error(ex)
-                return Response({"status": "failed", "error": "Error saving comment.", "results": ""}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({"status": "failed", "error": serializer.errors, "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Error saving comment.",
+                        "results": ""
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        return Response(
+            {
+                "status": "failed",
+                "error": serializer.errors,
+                "results": ""
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class PostCommentDetail(APIView):
@@ -621,7 +797,14 @@ class AutocompleteTag(APIView):
         except MultiValueDictKeyError:
             pass
 
-        return Response({"status": "success", "error": "", "results": tags}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": tags
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 
 class AutocompleteTopic(APIView):
@@ -639,7 +822,14 @@ class AutocompleteTopic(APIView):
         except MultiValueDictKeyError:
             pass
 
-        return Response({"status": "success", "error": "", "results": topics}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": topics
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 
 class TrendingTopicForInterest(APIView):
@@ -653,12 +843,35 @@ class TrendingTopicForInterest(APIView):
         try:
             interest = Interest.objects.get(id=interest_id)
         except Interest.DoesNotExist:
-            return Response({"status": "failed", "error": "Interest with given id does not Exist", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Interest with given id does not Exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         try:
             tt = TrendingTopicsInterest.objects.get(interest=interest)
         except TrendingTopicsInterest.DoesNotExist:
-            return Response({"status": "failed", "error": "Could not find relevant value in TrendingTopicsInterest.", "results": ""}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"status": "success", "error": "", "results": tt.topics}, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Could not find relevant value in TrendingTopicsInterest.",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": tt.topics
+            },
+            status=status.HTTP_201_CREATED
+        )
+
 
 class PostExploreView(APIView):
 
@@ -673,9 +886,9 @@ class PostExploreView(APIView):
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
         if after:
-            after = datetime.datetime.fromtimestamp(float(after)/1000)
+            after = datetime.datetime.fromtimestamp(float(after) / 1000)
         if before:
-            before = datetime.datetime.fromtimestamp(float(before)/1000)
+            before = datetime.datetime.fromtimestamp(float(before) / 1000)
 
         items_per_page = 30
 
@@ -695,27 +908,35 @@ class PostExploreView(APIView):
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
         if geo_location:
-            functions.append(query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
-            functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(','), 'scale': '1km', 'decay': 0.9}, weight=1))
+            functions.append(
+                query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
+            functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
+                ','), 'scale': '1km', 'decay': 0.9}, weight=1))
         if after:
-            filters.append(query.Q({'range': {'created_on':{'gt': after}}}))
+            filters.append(query.Q({'range': {'created_on': {'gt': after}}}))
         if before:
-            filters.append(query.Q({'range': {'created_on':{'lt': before}}}))
-
+            filters.append(query.Q({'range': {'created_on': {'lt': before}}}))
 
         now = datetime.datetime.now()
 
         # overall popularity
-        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1m', 'scale': '5m', 'decay': 0.9}, weight=20))
-        functions.append(query.SF('exp', created_on={'origin': now, 'offset': '1d', 'scale': '1d', 'decay': 0.9}, weight=10))
-        functions.append(query.SF('field_value_factor', field='num_likes', modifier='log1p', weight=2))
-        functions.append(query.SF('field_value_factor', field='num_comments', modifier='log1p', weight=3))
-        functions.append(query.SF('field_value_factor', field='num_seen', modifier='log1p', weight=1))
+        functions.append(query.SF('exp', created_on={
+                         'origin': now, 'offset': '1m', 'scale': '5m', 'decay': 0.9}, weight=20))
+        functions.append(query.SF('exp', created_on={
+                         'origin': now, 'offset': '1d', 'scale': '1d', 'decay': 0.9}, weight=10))
+        functions.append(query.SF('field_value_factor',
+                                  field='num_likes', modifier='log1p', weight=2))
+        functions.append(query.SF('field_value_factor',
+                                  field='num_comments', modifier='log1p', weight=3))
+        functions.append(query.SF('field_value_factor',
+                                  field='num_seen', modifier='log1p', weight=1))
 
         # relevance to user
         functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
-        functions.append(query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
-        functions.append(query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+        functions.append(
+            query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+        functions.append(
+            query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
 
         interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
         for relevance in interests_relevance:
@@ -766,9 +987,11 @@ class PostExploreView(APIView):
         else:
             max_created_on = now
         next_url_params = query_params.copy()
-        if 'before' in next_url_params: del next_url_params['before']
-        next_url_params.update({'after': str(int(max_created_on.timestamp()*1000))})
-        next_url = request.build_absolute_uri(reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
+        if 'before' in next_url_params:
+            del next_url_params['before']
+        next_url_params.update({'after': str(int(max_created_on.timestamp() * 1000))})
+        next_url = request.build_absolute_uri(
+            reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
 
         if results.hits.total != 0:
             min_created_on = reduce(get_smallest_date, [result.created_on for result in results])
@@ -779,9 +1002,11 @@ class PostExploreView(APIView):
 
         if min_created_on:
             prev_url_params = query_params.copy()
-            if 'after' in prev_url_params: del prev_url_params['after']
-            prev_url_params.update({'before': str(int(min_created_on.timestamp()*1000))})
-            prev_url = request.build_absolute_uri(reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
+            if 'after' in prev_url_params:
+                del prev_url_params['after']
+            prev_url_params.update({'before': str(int(min_created_on.timestamp() * 1000))})
+            prev_url = request.build_absolute_uri(
+                reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
         else:
             prev_url = None
 
@@ -790,8 +1015,12 @@ class PostExploreView(APIView):
                 "status": "success",
                 "error": "",
                 "count": results.hits.total,
-                "next": prev_url,  # in haystack view next will go backwards. Deprecated. New clients should use forward and backward.
-                "previous": next_url,  # in haystack view next will go forwards. Deprecated. New clients should use forward and backward.
+                # in haystack view next will go backwards. Deprecated. New clients should
+                # use forward and backward.
+                "next": prev_url,
+                # in haystack view next will go forwards. Deprecated. New clients should
+                # use forward and backward.
+                "previous": next_url,
                 "forward": next_url,
                 "backward": prev_url,
                 "results": serializer.data

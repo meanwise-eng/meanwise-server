@@ -13,6 +13,7 @@ from post.documents import PostDocument
 from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
+
 class PostDocumentSerializer(DocumentSerializer):
 
     id = serializers.SerializerMethodField()
@@ -28,10 +29,11 @@ class PostDocumentSerializer(DocumentSerializer):
 
     class Meta:
         document = PostDocument
-        fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'num_comments', 'interest_id',
-            'user_firstname', 'user_lastname', 'user_profile_photo', 'user_profile_photo_small',
-            'user_cover_photo', 'user_profession', 'user_profession_text', 'image_url', 'video_url',
-            'video_thumb_url', 'topics', 'created_on', 'is_liked', 'likes_url', 'resolution']
+        fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'num_comments',
+                  'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
+                  'user_profile_photo_small', 'user_cover_photo', 'user_profession',
+                  'user_profession_text', 'image_url', 'video_url', 'video_thumb_url',
+                  'topics', 'created_on', 'is_liked', 'likes_url', 'resolution']
 
     def get_id(self, obj):
         return obj._id
@@ -117,10 +119,13 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
-                  'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
-                  'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on', 'tags', 'topics',
-                  'story', 'story_index', 'is_liked', 'likes_url', 'mentioned_users', 'geo_location_lat', 'geo_location_lng')
+        fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
+                  'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
+                  'user_profile_photo_small', 'user_profession', 'user_profession_text',
+                  'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
+                  'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
+                  'mentioned_users', 'geo_location_lat', 'geo_location_lng'
+                  )
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -273,10 +278,12 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
-                  'user_profile_photo', 'user_cover_photo', 'user_profile_photo_small', 'user_profession', 'user_profession_text',
-                  'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by', 'created_on', 'tags', 'topics',
-                  'story_index', 'mentioned_users')
+        fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
+                  'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
+                  'user_profile_photo_small', 'user_profession', 'user_profession_text',
+                  'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
+                  'created_on', 'tags', 'topics', 'story_index', 'mentioned_users'
+                  )
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
@@ -401,14 +408,16 @@ class PostSaveSerializer(serializers.ModelSerializer):
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)
 
-
     def validate(self, data):
         if 'geo_location_lat' in data and 'geo_location_lng' not in data:
-            raise serializers.ValidationError("You cannot submit geo_location_lat without geo_location_lng")
+            raise serializers.ValidationError(
+                "You cannot submit geo_location_lat without geo_location_lng")
         if 'geo_location_lng' in data and 'geo_location_lat' not in data:
-            raise serializers.ValidationError("You cannot submit geo_location_lng without geo_location_lat")
+            raise serializers.ValidationError(
+                "You cannot submit geo_location_lng without geo_location_lat")
 
         return data
+
 
 class StorySerializer(serializers.ModelSerializer):
     posts = serializers.SerializerMethodField()
@@ -418,7 +427,8 @@ class StorySerializer(serializers.ModelSerializer):
         fields = ('id', 'main_post', 'posts')
 
     def get_posts(self, obj):
-        return PostSerializer(obj.posts.filter(is_deleted=False), many=True, context=self.context).data
+        return PostSerializer(
+            obj.posts.filter(is_deleted=False), many=True, context=self.context).data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -434,9 +444,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'comment_text', 'user_id', 'user_username', 'user_first_name', 'user_last_name',
-                  'user_profile_photo', 'user_profile_photo_small', 'mentioned_users'
-                  'post_id', 'created_on')
+        fields = ('id', 'comment_text', 'user_id', 'user_username', 'user_first_name',
+                  'user_last_name', 'user_profile_photo', 'user_profile_photo_small',
+                  'mentioned_users', 'post_id', 'created_on'
+                  )
 
     def get_user_id(self, obj):
         user_id = obj.commented_by.id

@@ -1,5 +1,6 @@
 import logging
 
+
 class GelfFilter(logging.Filter):
     def __init__(self):
         pass

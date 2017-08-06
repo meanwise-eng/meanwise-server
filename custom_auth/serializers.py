@@ -17,6 +17,7 @@ from userprofile.serializers import UserProfileSerializer
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
+
 class RegisterUserSerializer(serializers.Serializer):
     """
     Handle user registration.
@@ -64,9 +65,9 @@ class RegisterUserSerializer(serializers.Serializer):
         except User.DoesNotExist:
             return value
         raise serializers.ValidationError("User with email already exists.")
-    
+
     def save(self):
-        #check
+        # check
         username = self.validated_data['username']
         email = self.validated_data['email']
         password = self.validated_data.get('password', None)
@@ -106,7 +107,8 @@ class RegisterUserSerializer(serializers.Serializer):
         if self.validated_data.get('profile_story_title', None):
             user_profile.profile_story_title = self.validated_data['profile_story_title']
         if self.validated_data.get('profile_story_description', None):
-            user_profile.profile_story_description = self.validated_data['profile_story_description']
+            user_profile.profile_story_description = self.validated_data[
+                'profile_story_description']
         if self.validated_data.get('dob', None):
             user_profile.dob = self.validated_data['dob']
         if self.validated_data.get('facebook_token', None):
@@ -138,7 +140,7 @@ class RegisterUserSerializer(serializers.Serializer):
                 pass
         skills_list_from_skills = list()
         if self.validated_data.get('skills', None):
-            #hack to handle llist as string
+            # hack to handle llist as string
             skills = self.validated_data.get('skills')
             logger.info("Skills: %s of type %s" % (skills, type(skills)))
             if type(skills) == str or type(skills) == int:
@@ -157,7 +159,7 @@ class RegisterUserSerializer(serializers.Serializer):
         if self.validated_data.get('skills_list', None):
             skills_list = self.validated_data.get('skills_list', list())
             logger.info("Skills list: %s of type %s" % (skills_list, type(skills_list)))
-            
+
             if type(skills_list) == str or type(skills_list) == int:
                 skills_list = list(skills_list)
             if len(skills_list) > 0 and type(skills_list[0]) == str and skills_list[0].find('[') != -1:
@@ -177,7 +179,7 @@ class RegisterUserSerializer(serializers.Serializer):
             user_profile.save()
 
         if self.validated_data.get('interests', None):
-            #hack to handle llist as string
+            # hack to handle llist as string
             interest_ids = self.validated_data.get('interests')
             if type(interest_ids) == str or type(interest_ids) == int:
                 interest_ids = list(interest_ids)
@@ -188,13 +190,14 @@ class RegisterUserSerializer(serializers.Serializer):
                     interest = Interest.objects.get(id=int(interest_id))
                     user_profile.interests.add(interest)
                 except Profession.DoesNotExist:
-                    logger.warning("Error adding interest to profile during registration", interest)
+                    logger.warning(
+                        "Error adding interest to profile during registration", interest)
 
-        #add to invite group count
+        # add to invite group count
         #invite_group = InviteGroup.objects.get(invite_code=self.validated_data['invite_code'])
         #invite_group.count += 1
-        #invite_group.save()
-        #invite_group.users.add(user)
+        # invite_group.save()
+        # invite_group.users.add(user)
         return user, user_profile, token[0].key
 
 
@@ -233,7 +236,8 @@ class RegisterFacebookUserSerializer(RegisterUserSerializer):
                 user_profile.profession = profession
                 user_profile.save()
             except Profession.DoesNotExist:
-                logger.warning("Error adding profession to profile during registration", self.validated_data['profession'])
+                logger.warning("Error adding profession to profile during registration",
+                               self.validated_data['profession'])
         if self.validated_data.get('skills', None):
             for skill in self.validated_data['skills']:
                 try:
@@ -247,5 +251,6 @@ class RegisterFacebookUserSerializer(RegisterUserSerializer):
                     interest = Interest.objects.get(id=int(interest))
                     user_profile.interests.add(interest)
                 except Profession.DoesNotExist:
-                    logger.warning("Error adding interest to profile during registration", interest)
+                    logger.warning(
+                        "Error adding interest to profile during registration", interest)
         return user, user_profile, token[0].key

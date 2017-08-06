@@ -219,7 +219,7 @@ class CancelSubscriptionView(StripeView):
                     return Response({'success': True}, status=status.HTTP_202_ACCEPTED)
             else:
                 messages.info(self.request, "Your subscription status is now '{status}' until '{period_end}'".format(
-                status=subscription.status, period_end=subscription.current_period_end)
+                    status=subscription.status, period_end=subscription.current_period_end)
                 )
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except stripe.StripeError as e:
@@ -256,7 +256,8 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 if PRORATION_POLICY_FOR_UPGRADES:
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
-                    selected_plan = [plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name][0]  # TODO: refactor
+                    selected_plan = [plan for plan in PLAN_LIST if plan[
+                        "plan"] == selected_plan_name][0]  # TODO: refactor
                     selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
                     # Is it an upgrade?

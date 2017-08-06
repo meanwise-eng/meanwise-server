@@ -82,7 +82,10 @@ class Interest(models.Model):
             im = Image.open(self.cover_photo)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.cover_photo = InMemoryUploadedFile(output, 'models.ImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            self.cover_photo = InMemoryUploadedFile(
+                output, 'models.ImageField', self.cover_photo.name,
+                'image/jpeg', sys.getsizeof(output), None
+            )
 
         super(Interest, self).save(*args, **kwargs)
 
@@ -96,12 +99,14 @@ class Interest(models.Model):
         else:
             return ''
 
+
 class UserInterestRelevance(models.Model):
     interest = models.ForeignKey(Interest)
     user = models.ForeignKey(User)
     weekly_views = models.IntegerField()
     old_views = models.IntegerField()
     last_reset = models.DateTimeField()
+
 
 class UserProfile(models.Model):
 
@@ -135,22 +140,6 @@ class UserProfile(models.Model):
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
 
-    def save(self, *args, **kwargs):
-
-        if self.cover_photo:
-            im = Image.open(self.cover_photo)
-            output = BytesIO()
-            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.cover_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
-            
-        if self.profile_photo:
-            im = Image.open(self.profile_photo)
-            output = BytesIO()
-            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.profile_photo = InMemoryUploadedFile(output, 'ThumbnailerImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(output), None)
-            
-        super(UserProfile, self).save(*args, **kwargs)
-
     user_type = models.IntegerField(default=int(0), null=False)
     profile_background_color = models.CharField(default='#FFFFFF', max_length=20)
 
@@ -160,31 +149,46 @@ class UserProfile(models.Model):
             im = Image.open(self.cover_photo)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.cover_photo = InMemoryUploadedFile(output, 'models.ImageField', self.cover_photo.name, 'image/jpeg', sys.getsizeof(output), None)
-            
+            self.cover_photo = InMemoryUploadedFile(
+                output, 'models.ImageField',
+                self.cover_photo.name, 'image/jpeg',
+                sys.getsizeof(output), None
+            )
+
         if self.profile_photo:
             im = Image.open(self.profile_photo)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.profile_photo = InMemoryUploadedFile(output, 'models.ImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(output), None)
+            self.profile_photo = InMemoryUploadedFile(
+                output, 'models.ImageField',
+                self.profile_photo.name, 'image/jpeg',
+                sys.getsizeof(output), None
+            )
 
             thumbnail_size = (48, 48)
             thumbnail_output = BytesIO()
             im.thumbnail(thumbnail_size)
             im.save(thumbnail_output, format='JPEG', quality=100, optimize=True)
-            self.profile_photo_thumbnail = InMemoryUploadedFile(thumbnail_output, 'models.ImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(thumbnail_output), None)
-            
+            self.profile_photo_thumbnail = InMemoryUploadedFile(
+                thumbnail_output, 'models.ImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(thumbnail_output), None)
+
         super(UserProfile, self).save(*args, **kwargs)
 
     def __str__(self):
-        return 'user profile id %s - %s %s %s' % (str(self.id), self.first_name, self.last_name, self.username)
+        return 'user profile id %s - %s %s %s' % (str(self.id),
+                                                  self.first_name,
+                                                  self.last_name,
+                                                  self.username
+                                                  )
+
 
 FRIEND_STATUS = (
     ('PE', 'Pending'),
     ('AC', 'Accepted'),
     ('RE', 'Rejected'),
-    )
-    
+)
+
+
 class UserFriend(models.Model):
 
     STATUS_PENDING = 'PE'
@@ -196,6 +200,7 @@ class UserFriend(models.Model):
     status = models.CharField(max_length=2, choices=FRIEND_STATUS, default="PE")
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(auto_now=True, db_index=True)
+
     class Meta:
         unique_together = ("user", "friend")
 
@@ -212,5 +217,3 @@ class InviteGroup(models.Model):
 
     def __str__(self):
         return 'invite group id %s - %s  count (%s)' % (str(self.id), self.name, self.count)
-
-

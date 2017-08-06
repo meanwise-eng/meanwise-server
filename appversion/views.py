@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.http import Http404
 
 from rest_framework.views import APIView
@@ -9,6 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 
 from .models import Version, UserVersion
 from .serializers import VersionSerializer
+
 
 class VersionView(APIView):
 
@@ -21,7 +21,7 @@ class VersionView(APIView):
         except Version.DoesNotExist:
             raise Http404
 
-        response = {"status":"success", "error":"", "results":""}
+        response = {"status": "success", "error": "", "results": ""}
         responseStatus = status.HTTP_200_OK
 
         if version.status == Version.STATUS_INACTIVE:
@@ -44,7 +44,7 @@ class VersionView(APIView):
         if request.user.id:
             try:
                 user_version = UserVersion.objects.get(user_id=request.user.id)
-                
+
                 if user_version.version.version_string != version.version_string:
                     user_version.version = version
                     user_version.save()
@@ -56,7 +56,8 @@ class VersionView(APIView):
                 pass
 
         try:
-            latest_version = Version.objects.filter(status=Version.STATUS_PUBLISHED).latest('version_sort')
+            latest_version = Version.objects.filter(
+                status=Version.STATUS_PUBLISHED).latest('version_sort')
             response['results']['latest_version'] = VersionSerializer(latest_version).data
         except Version.DoesNotExist:
             pass

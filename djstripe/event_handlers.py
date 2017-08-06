@@ -69,7 +69,8 @@ def invoice_webhook_handler(event, event_data, event_type, event_subtype):
     if event_subtype in ["payment_failed", "payment_succeeded", "created"]:
         invoice_data = event_data["object"]
         stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
-        Invoice.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
+        Invoice.sync_from_stripe_data(
+            stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
 
 
 # ---------------------------
