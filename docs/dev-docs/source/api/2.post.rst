@@ -88,7 +88,10 @@ Response Payload (JSON)
         "likes_url": "http://localhost:8000/api/v4/posts/94/likes/",
         "resolution": null,
         "score": 3.5292764,
-        "id": "94"
+        "id": "94",
+        "mentioned_users": [91, 102],
+        "geo_location_lat": 28.704059,
+        "geo_location_lng": 77.102490
       }
     ]
   }
@@ -190,6 +193,15 @@ Response Payload (JSON)
     * - tags
       - An array of tag names.
       - array(string)
+    * - mentioned_users
+      - An array of `user_id` who are mentioned in the post.
+      - array(values)
+    * - geo_location_lat
+      - Geo location latitude.
+      - Decimal value
+    * - geo_location_lng
+      - Geo location longitude.
+      - Decimal value
 
 Pagination
 ----------
