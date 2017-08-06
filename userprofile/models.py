@@ -96,6 +96,12 @@ class Interest(models.Model):
         else:
             return ''
 
+class UserInterestRelevance(models.Model):
+    interest = models.ForeignKey(Interest)
+    user = models.ForeignKey(User)
+    weekly_views = models.IntegerField()
+    old_views = models.IntegerField()
+    last_reset = models.DateTimeField()
 
 class UserProfile(models.Model):
 
