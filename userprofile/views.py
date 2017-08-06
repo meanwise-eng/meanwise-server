@@ -337,7 +337,7 @@ class FriendsList(APIView):
             if not uf:
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
                 #Add notification
-                notification = Notification.objects.create(receiver=user, notification_type='FR',  user_friend=uf)
+                notification = Notification.objects.create(receiver=friend_user, notification_type='FR',  user_friend=uf)
                 #send push notification
                 devices = find_user_devices(user.id)
                 message_payload = {'p':'','u':str(user.id),
