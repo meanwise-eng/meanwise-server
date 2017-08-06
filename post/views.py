@@ -2,6 +2,7 @@ import json
 import datetime
 import urllib
 import arrow
+import math
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.http import Http404
@@ -35,7 +36,7 @@ from post.permissions import IsOwnerOrReadOnly
 
 from post.models import *
 from post.serializers import *
-from userprofile.models import UserFriend, Interest
+from userprofile.models import UserFriend, Interest, UserInterestRelevance
 from mnotifications.models import Notification
 
 from elasticsearch_dsl import query
@@ -687,14 +688,12 @@ class PostExploreView(APIView):
         filters = []
         must = []
         if interest_name:
+            self.update_interest_relevance(interest_name, request.user)
             must.append(query.Q('term', interest_name=interest_name))
-            #functions.append(query.SF({'filter':query.Q('term', interest_name=interest_name), 'weight': 1}))
         if topic_texts:
             must.append(query.Q('match', topics=topic_texts))
-            #functions.append(query.SF({'filter':query.Q('match', topics=topic_texts), 'weight': 3}))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
-            #functions.append(query.SF({'filter':query.Q('match', tags=tag_names), 'weight': 3}))
         if geo_location:
             functions.append(query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
             functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(','), 'scale': '1km', 'decay': 0.9}, weight=1))
@@ -715,8 +714,16 @@ class PostExploreView(APIView):
 
         # relevance to user
         functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
-        functions.append(query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
         functions.append(query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+        functions.append(query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+
+        interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
+        for relevance in interests_relevance:
+            r = math.log1p(relevance.old_views + relevance.weekly_views)
+            functions.append(query.SF({
+                'filter': query.Q('term', interest_id=relevance.interest_id),
+                'weight': r
+            }))
 
         s = PostDocument.search()
         if len(filters) > 0:
@@ -791,6 +798,35 @@ class PostExploreView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+    def update_interest_relevance(self, interest_name, user):
+        try:
+            interest = Interest.objects.get(name=interest_name)
+        except Interest.DoesNotExist:
+            return
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        try:
+            relevance = UserInterestRelevance.objects.get(interest=interest, user=user)
+        except UserInterestRelevance.DoesNotExist:
+            relevance = UserInterestRelevance.objects.create(
+                interest=interest,
+                user=user,
+                last_reset=now,
+                weekly_views=0,
+                old_views=0,
+            )
+
+        if relevance.last_reset < (now - datetime.timedelta(weeks=1)):
+            decay = 0.5
+            relevance.last_reset = now
+            relevance.old_views = int(relevance.old_views * decay) + relevance.weekly_views
+            relevance.weekly_views = 0
+
+        relevance.weekly_views += 1
+
+        relevance.save()
+
 
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()
