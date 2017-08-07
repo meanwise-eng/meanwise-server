@@ -225,90 +225,6 @@ You can keep calling the `forward` url at short intervals (eg. 5 sec) to see if 
 any results, you can inform the user of new content (similar to facebook or twitter). While doing the polling, keep 
 updating the `forward` url with the new url, even if the results were empty.
 
-Create Post
-===========
-
-This lets user to create a new post.
-
-Request Payload
----------------
-
-.. code-block:: http
-
-   POST api/v1.1/user/<user_id>/posts/ HTTP/1.1
-   Host: api.meanwise.com
-   Accept: application/json
-   Content-Type: application/json
-   Authorization: Token {token}
-
-Query Parameters
-----------------
-
-..  list-table::
-    :header-rows: 1
-
-    * - Fieldname
-      - Description
-    * - user_id
-      - The user_id of the user.
- 
-Request Body
------------------------
-
-.. code-block:: javascript
-
-  {
-    "text": "Test post",
-    "interest": 1,
-    "mentioned_users": [1, 3],
-    "geo_location_lat": 28.704059,
-    "geo_location_lng": 77.102490
-  }
-  
-Response Payload (JSON)
------------------------
-
-.. code-block:: http
-
-  HTTP/1.1 201 Created
-  Content-Type: application/json
-
-.. code-block:: javascript
-
-  {
-    "status": "success",
-    "error": "",
-    "results": {
-      "id": 78,
-      "tags": [],
-      "topics": [],
-      "geo_location_lat": null,
-      "geo_location_lng": null,
-      "image": null,
-      "video": null,
-      "text": "test data",
-      "is_deleted": false,
-      "video_height": null,
-      "video_width": null,
-      "video_thumbnail": null,
-      "resolution": null,
-      "story_index": null,
-      "created_on": "2017-08-07T18:29:10.592541Z",
-      "modified_on": "2017-08-07T18:29:10.592568Z",
-      "interest": 1,
-      "poster": 1,
-      "parent": null,
-      "story": null,
-      "liked_by": [
-          2
-      ],
-      "mentioned_users": [
-          1,
-          3
-      ]
-    }
-  }
-
 
 Create Post
 ===========
@@ -343,13 +259,61 @@ Request Body
 .. code-block:: javascript
 
   {
-    "text": "Test post",
+    "text": "Test post @username",
     "interest": 1,
-    "mentioned_users": [1, 3],
+    "tags": ["ttag1", "ttag3"],
+    "topics": ["testtopic"],
+    "image": "@/home/Pictures/mobile/IMG_20140310_195139094.jpg",
+    "mentioned_users": [3],
     "geo_location_lat": 28.704059,
     "geo_location_lng": 77.102490
   }
-  
+
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - text
+      - Text of the post.
+      - text
+    * - interest
+      - The id of the Interest that the post belongs to.
+      - Integer
+    * - image
+      - Image file.
+      - .jpg, .png
+    * - video
+      - Video file.
+      - video file type
+    * - topics
+      - An array of topic texts.
+      - array(string)
+    * - resolution
+      - Object representing the resolution of the image or video.
+      - object
+    * - resolution.width
+      - The width of the video/image.
+      - integer
+    * - resolution.height
+      - The height of the video/image.
+      - integer
+    * - tags
+      - An array of tag names.
+      - array(string)
+    * - mentioned_users
+      - An array of `user_id` who are mentioned in the post.
+      - array(values)
+    * - geo_location_lat
+      - Geo location latitude.
+      - Decimal value
+    * - geo_location_lng
+      - Geo location longitude.
+      - Decimal value
+
+
 Response Payload (JSON)
 -----------------------
 
@@ -365,13 +329,13 @@ Response Payload (JSON)
     "error": "",
     "results": {
       "id": 78,
-      "tags": [],
-      "topics": [],
-      "geo_location_lat": null,
-      "geo_location_lng": null,
+      "tags": ["ttag1", "ttag3"],
+      "topics": ["testtopic"],
+      "geo_location_lat": "28.704059",
+      "geo_location_lng": "77.102490",
       "image": null,
       "video": null,
-      "text": "test data",
+      "text": "test data @username",
       "is_deleted": false,
       "video_height": null,
       "video_width": null,
@@ -384,11 +348,8 @@ Response Payload (JSON)
       "poster": 1,
       "parent": null,
       "story": null,
-      "liked_by": [
-          2
-      ],
+      "liked_by": []
       "mentioned_users": [
-          1,
           3
       ]
     }
@@ -422,7 +383,7 @@ Query Parameters
     * - post_id
       - The id of the post.
 
- 
+
 Request Body
 -----------------------
 
@@ -433,6 +394,23 @@ Request Body
     "commented_by": 1,
     "mentioned_users": [2]
   }
+
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - comment_text
+      - Text of the comment.
+      - text
+    * - commented_by
+      - `user_id` of user who is commenting on the post.
+      - Integer
+    * - mentioned_users
+      - An array of `user_id` who are mentioned in the post.
+      - array(values)
 
 
 Response Payload (JSON)
@@ -450,7 +428,7 @@ Response Payload (JSON)
    "error": "",
    "results": {
      "id": 32,
-     "comment_text": "comment one",
+     "comment_text": "test comment @username",
      "is_deleted": false,
      "created_on": "2017-08-07T18:49:38.404246Z",
      "modified_on": "2017-08-07T18:49:38.404290Z",
