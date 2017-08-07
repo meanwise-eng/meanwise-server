@@ -224,3 +224,240 @@ Long polling
 You can keep calling the `forward` url at short intervals (eg. 5 sec) to see if there is any new content. If there are
 any results, you can inform the user of new content (similar to facebook or twitter). While doing the polling, keep 
 updating the `forward` url with the new url, even if the results were empty.
+
+Create Post
+===========
+
+This lets user to create a new post.
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   POST api/v1.1/user/<user_id>/posts/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Query Parameters
+----------------
+
+..  list-table::
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+    * - user_id
+      - The user_id of the user.
+ 
+Request Body
+-----------------------
+
+.. code-block:: javascript
+
+  {
+    "text": "Test post",
+    "interest": 1,
+    "mentioned_users": [1, 3],
+    "geo_location_lat": 28.704059,
+    "geo_location_lng": 77.102490
+  }
+  
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 201 Created
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "status": "success",
+    "error": "",
+    "results": {
+      "id": 78,
+      "tags": [],
+      "topics": [],
+      "geo_location_lat": null,
+      "geo_location_lng": null,
+      "image": null,
+      "video": null,
+      "text": "test data",
+      "is_deleted": false,
+      "video_height": null,
+      "video_width": null,
+      "video_thumbnail": null,
+      "resolution": null,
+      "story_index": null,
+      "created_on": "2017-08-07T18:29:10.592541Z",
+      "modified_on": "2017-08-07T18:29:10.592568Z",
+      "interest": 1,
+      "poster": 1,
+      "parent": null,
+      "story": null,
+      "liked_by": [
+          2
+      ],
+      "mentioned_users": [
+          1,
+          3
+      ]
+    }
+  }
+
+
+Create Post
+===========
+
+This lets user to create a new post.
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   POST api/v1.1/user/<user_id>/posts/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Query Parameters
+----------------
+
+..  list-table::
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+    * - user_id
+      - The user_id of the user.
+ 
+Request Body
+-----------------------
+
+.. code-block:: javascript
+
+  {
+    "text": "Test post",
+    "interest": 1,
+    "mentioned_users": [1, 3],
+    "geo_location_lat": 28.704059,
+    "geo_location_lng": 77.102490
+  }
+  
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 201 Created
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "status": "success",
+    "error": "",
+    "results": {
+      "id": 78,
+      "tags": [],
+      "topics": [],
+      "geo_location_lat": null,
+      "geo_location_lng": null,
+      "image": null,
+      "video": null,
+      "text": "test data",
+      "is_deleted": false,
+      "video_height": null,
+      "video_width": null,
+      "video_thumbnail": null,
+      "resolution": null,
+      "story_index": null,
+      "created_on": "2017-08-07T18:29:10.592541Z",
+      "modified_on": "2017-08-07T18:29:10.592568Z",
+      "interest": 1,
+      "poster": 1,
+      "parent": null,
+      "story": null,
+      "liked_by": [
+          2
+      ],
+      "mentioned_users": [
+          1,
+          3
+      ]
+    }
+  }
+
+
+Comment
+=======
+
+This lets user to add a comment to a post and also mention other user in the comment. If a user is mentioned then a notification to that user will also be sent.
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   POST api/v1.1/posts/<post_id>/comments/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Query Parameters
+----------------
+
+..  list-table::
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+    * - post_id
+      - The id of the post.
+
+ 
+Request Body
+-----------------------
+
+.. code-block:: javascript
+
+  {
+    "comment_text": "test comment @username",
+    "commented_by": 1,
+    "mentioned_users": [2]
+  }
+
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 201 Created
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+ {
+   "status": "success",
+   "error": "",
+   "results": {
+     "id": 32,
+     "comment_text": "comment one",
+     "is_deleted": false,
+     "created_on": "2017-08-07T18:49:38.404246Z",
+     "modified_on": "2017-08-07T18:49:38.404290Z",
+     "post": 76,
+     "commented_by": 1,
+     "mentioned_users": [
+        1
+     ]
+   }
+ }
