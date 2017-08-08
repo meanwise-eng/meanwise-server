@@ -553,7 +553,7 @@ class FriendsList(APIView):
                 # Add notification
                 notification = Notification.objects.create(
                     receiver=user,
-                    notification_type=Notification.TYPE_FRIEND_REQUEST_REJECTED,
+                    notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED,
                     user_friend=uf)
                 # send push notification
                 devices = find_user_devices(user.id)
@@ -580,19 +580,7 @@ class FriendsList(APIView):
                 )
 
             else:
-                if uf.status.lower() == 're':
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "failed",
-                            "error": "Already rejected.",
-                            "results": ""
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
-
-                elif uf.status.lower() == 'ac':
+                if uf.status.lower() == 'ac':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
                     return Response(
@@ -630,19 +618,7 @@ class FriendsList(APIView):
                 )
 
             else:
-                if uf.status.lower() == 're':
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "failed",
-                            "error": "Already rejected.",
-                            "results": ""
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
-
-                elif uf.status.lower() == 'ac':
+                if uf.status.lower() == 'ac':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
                     return Response(
@@ -700,19 +676,7 @@ class FriendsList(APIView):
                 )
 
             else:
-                if uf.status.lower() == 're':
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "failed",
-                            "error": "Already rejected.",
-                            "results": ""
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
-
-                elif uf.status.lower() == 'ac':
+                if uf.status.lower() == 'ac':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
                     return Response(
@@ -725,8 +689,7 @@ class FriendsList(APIView):
                     )
 
                 elif uf.status.lower() == 'pe':
-                    uf.status = 'RE'
-                    uf.save()
+                    uf.delete()
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
                     return Response(
@@ -747,7 +710,6 @@ class FriendsList(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
-
 
 class RemoveFriend(APIView):
     """
