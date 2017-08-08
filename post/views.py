@@ -482,25 +482,26 @@ class UserPostLike(APIView):
             raise PermissionDenied("You can only like a post as yourself")
 
         post.liked_by.add(user)
-        # Add notification
-        notification = Notification.objects.create(
-            receiver=post.poster,
-            notification_type=Notification.TYPE_LIKED_POST,
-            post=post, post_liked_by=user)
-        # send push notification
-        devices = find_user_devices(post.poster.id)
-        message_payload = {
-            'p': str(post.id),
-            'u': str(post.poster.id),
-            't': 'l',
-            'message': (
-                str(user.userprofile.first_name) + " " +
-                str(user.userprofile.last_name) + " liked your post"
-            )
-        }
+        if post.poster.id != request.user.id:
+            # Add notification
+            notification = Notification.objects.create(
+                receiver=post.poster,
+                notification_type=Notification.TYPE_LIKED_POST,
+                post=post, post_liked_by=user)
+            # send push notification
+            devices = find_user_devices(post.poster.id)
+            message_payload = {
+                'p': str(post.id),
+                'u': str(post.poster.id),
+                't': 'l',
+                'message': (
+                    str(user.userprofile.first_name) + " " +
+                    str(user.userprofile.last_name) + " liked your post"
+                )
+            }
 
-        for device in devices:
-            send_message_device(device, message_payload)
+            for device in devices:
+                send_message_device(device, message_payload)
         return Response(
             {
                 "status": "success",
@@ -631,28 +632,29 @@ class PostCommentList(APIView):
 
                 comment = serializer.save()
                 logger.info("Comment saved")
-                # Add notification
-                notification = Notification.objects.create(
-                    receiver=comment.post.poster,
-                    notification_type=Notification.TYPE_COMMENTED_POST,
-                    post=comment.post,
-                    comment=comment)
-                # send push notification
-                devices = find_user_devices(comment.post.poster.id)
-                message_payload = {
-                    'p': str(comment.post.id),
-                    'u': str(comment.post.poster.id),
-                    't': 'c',
-                    'message': (
-                        str(comment.commented_by.userprofile.first_name) + " " +
-                        str(comment.commented_by.userprofile.last_name) + " commented on your post"
-                    )
-                }
+                if comment.post.poster.id != request.user.id:
+                    # Add notification
+                    notification = Notification.objects.create(
+                        receiver=comment.post.poster,
+                        notification_type=Notification.TYPE_COMMENTED_POST,
+                        post=comment.post,
+                        comment=comment)
+                    # send push notification
+                        devices = find_user_devices(comment.post.poster.id)
+                    message_payload = {
+                        'p': str(comment.post.id),
+                        'u': str(comment.post.poster.id),
+                        't': 'c',
+                        'message': (
+                            str(comment.commented_by.userprofile.first_name) + " " +
+                            str(comment.commented_by.userprofile.last_name) + " commented on your post"
+                        )
+                    }
 
-                logger.info("No of devices to send: %s" % len(devices))
-                for device in devices:
-                    logger.info("Sending notification to device: %s" % device)
-                    send_message_device(device, message_payload)
+                    logger.info("No of devices to send: %s" % len(devices))
+                    for device in devices:
+                        logger.info("Sending notification to device: %s" % device)
+                        send_message_device(device, message_payload)
 
                 mentioned_users = serializer.validated_data.get(
                     'mentioned_users')

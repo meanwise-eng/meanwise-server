@@ -552,7 +552,7 @@ class FriendsList(APIView):
                 uf = UserFriend.objects.create(user=user, friend=friend_user)
                 # Add notification
                 notification = Notification.objects.create(
-                    receiver=user,
+                    receiver=friend_user,
                     notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED,
                     user_friend=uf)
                 # send push notification
