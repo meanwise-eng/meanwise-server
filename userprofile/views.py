@@ -618,6 +618,8 @@ class FriendsList(APIView):
                 )
 
             else:
+                allow = True if request.user.id != uf.user.id else False
+
                 if uf.status.lower() == 'ac':
                     logger.info(
                         "Friendslist - POST - Finished [API / views.py /")
@@ -630,7 +632,7 @@ class FriendsList(APIView):
                         status=status.HTTP_201_CREATED
                     )
 
-                elif uf.status.lower() == 'pe':
+                elif uf.status.lower() == 'pe' and allow:
                     uf.status = 'AC'
                     uf.save()
                     # Add notification
@@ -661,6 +663,9 @@ class FriendsList(APIView):
                         },
                         status=status.HTTP_201_CREATED
                     )
+
+                elif not allow:
+                    raise PermissionDenied("You cannot accept the request you sent to other user.")
 
         elif friend_status.lower() == 'rejected':
             if not uf:
