@@ -57,7 +57,7 @@ class PostDocument(DocType):
         return obj.interest.id
 
     def prepare_interest_name(self, obj):
-        return obj.interest.name
+        return obj.interest.name.lower()
 
     def prepare_user_firstname(self, obj):
         try:

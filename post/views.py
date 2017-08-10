@@ -640,7 +640,7 @@ class PostCommentList(APIView):
                         post=comment.post,
                         comment=comment)
                     # send push notification
-                        devices = find_user_devices(comment.post.poster.id)
+                    devices = find_user_devices(comment.post.poster.id)
                     message_payload = {
                         'p': str(comment.post.id),
                         'u': str(comment.post.poster.id),
@@ -887,12 +887,15 @@ class PostExploreView(APIView):
         geo_location = request.query_params.get('geo_location', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
+        item_count = int(request.query_params.get('item_count', 30))
         if after:
             after = datetime.datetime.fromtimestamp(float(after) / 1000)
         if before:
             before = datetime.datetime.fromtimestamp(float(before) / 1000)
+        if item_count > 30:
+            raise Exception("item_count greater than 30 is not allowed.")
 
-        items_per_page = 30
+        items_per_page = item_count
 
         interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
         friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('id', flat=True)) + \
@@ -949,19 +952,12 @@ class PostExploreView(APIView):
             }))
 
         s = PostDocument.search()
-        if len(filters) > 0:
-            q = query.Q(
-                'function_score',
-                query=query.Q('bool', must=must, filter=filters),
-                functions=functions,
-                score_mode='sum'
-            )
-        else:
-            q = query.Q(
-                'function_score',
-                functions=functions,
-                score_mode='sum'
-            )
+        q = query.Q(
+            'function_score',
+            query=query.Q('bool', must=must, filter=filters),
+            functions=functions,
+            score_mode='sum'
+        )
         s = s.query(q)
         s = s[0:items_per_page]
 
