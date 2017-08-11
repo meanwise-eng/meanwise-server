@@ -106,7 +106,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
-    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    mentioned_users = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -254,6 +254,8 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return ""
 
+    def get_mentioned_users(self, obj):
+        return [{'id': u.id, 'username': u.username} for u in obj.mentioned_users.all()]
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()

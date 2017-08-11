@@ -109,6 +109,11 @@ class UserPostList(APIView):
                     post.topics.add(t)
 
             mentioned_users = serializer.validated_data.get('mentioned_users')
+            logger.info(mentioned_users)
+            if type(mentioned_users) == str:
+                mentioned_users = ast.literal_eval(mentioned_users)
+            if len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
+                mentioned_users = ast.literal_eval(mentioned_users)
             if len(mentioned_users):
                 for i in range(len(mentioned_users)):
                     try:
@@ -167,7 +172,9 @@ class UserPostList(APIView):
                 {
                     "status": "success",
                     "error": "",
-                    "results": serializer.data
+                    "results": {
+                        "message": "Successfully created post"
+                    }
                 },
                 status=status.HTTP_201_CREATED
             )
@@ -925,14 +932,15 @@ class PostExploreView(APIView):
             filters.append(query.Q({'range': {'created_on': {'lt': before}}}))
 
         now = datetime.datetime.now()
+        origin = before if before else now
 
         # overall popularity
         functions.append(query.SF('exp', created_on={
-                         'origin': now, 'offset': '1m', 'scale': '5m', 'decay': 0.1}, weight=30))
+                         'origin': origin, 'offset': '1m', 'scale': '5m', 'decay': 0.1}, weight=30))
         functions.append(query.SF('exp', created_on={
-                         'origin': now, 'offset': '1h', 'scale': '1h', 'decay': 0.1}, weight=24))
+                         'origin': origin, 'offset': '1h', 'scale': '1h', 'decay': 0.1}, weight=24))
         functions.append(query.SF('exp', created_on={
-                         'origin': now, 'offset': '1d', 'scale': '1d', 'decay': 0.1}, weight=30))
+                         'origin': origin, 'offset': '1d', 'scale': '1d', 'decay': 0.1}, weight=30))
         functions.append(query.SF('field_value_factor',
                                   field='num_likes', modifier='log1p', weight=2))
         functions.append(query.SF('field_value_factor',
