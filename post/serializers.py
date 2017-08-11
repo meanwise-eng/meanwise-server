@@ -26,6 +26,7 @@ class PostDocumentSerializer(DocumentSerializer):
     is_liked = serializers.SerializerMethodField()
     likes_url = serializers.SerializerMethodField()
     resolution = serializers.SerializerMethodField()
+    mentioned_users = serializers.SerializerMethodField()
 
     class Meta:
         document = PostDocument
@@ -33,7 +34,7 @@ class PostDocumentSerializer(DocumentSerializer):
                   'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
                   'user_profession_text', 'image_url', 'video_url', 'video_thumb_url',
-                  'topics', 'created_on', 'is_liked', 'likes_url', 'resolution']
+                  'topics', 'created_on', 'is_liked', 'likes_url', 'resolution', 'mentioned_users']
 
     def get_id(self, obj):
         return obj._id
@@ -86,6 +87,16 @@ class PostDocumentSerializer(DocumentSerializer):
 
         return post.resolution
 
+    def get_mentioned_users(self, obj):
+        post = Post.objects.get(id=obj._id)
+
+        return [{'id': u.id, 'username': u.username} for u in post.mentioned_users.all()]
+
+class MentionedUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
 
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -106,7 +117,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
-    mentioned_users = serializers.SerializerMethodField()
+    mentioned_users = MentionedUserSerializer(many=True, read_only=True)
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -253,9 +264,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                 return obj.video_thumbnail.url
         else:
             return ""
-
-    def get_mentioned_users(self, obj):
-        return [{'id': u.id, 'username': u.username} for u in obj.mentioned_users.all()]
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
