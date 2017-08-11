@@ -926,13 +926,15 @@ class PostExploreView(APIView):
             functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
                 ','), 'scale': '1km', 'decay': 0.9}, weight=1))
 
-        if after:
-            filters.append(query.Q({'range': {'created_on': {'gt': after}}}))
-        if before:
-            filters.append(query.Q({'range': {'created_on': {'lt': before}}}))
-
         now = datetime.datetime.now()
         origin = before if before else now
+
+        if after:
+            must.append(query.Q({'range': {'created_on': {'gt': after}}}))
+        if before:
+            must.append(query.Q({'range': {'created_on': {'lt': before}}}))
+        else:
+            must.append(query.Q({'range': {'created_on': {'lt': now}}}))
 
         # overall popularity
         functions.append(query.SF('exp', created_on={
@@ -968,9 +970,11 @@ class PostExploreView(APIView):
             'function_score',
             query=query.Q('bool', must=must, filter=filters),
             functions=functions,
-            score_mode='sum'
+            score_mode='sum',
+            boost_mode='sum'
         )
         s = s.query(q)
+        logger.info(s.to_dict())
         offset = (section - 1) * item_count
         s = s[offset:offset + items_per_page]
 
