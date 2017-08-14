@@ -120,7 +120,7 @@ class UserPostList(APIView):
                     # Add notification
                     notification = Notification.objects.create(
                         receiver=m,
-                        notification_type=Notification.TYPE_UNKNOWN,
+                        notification_type=Notification.TYPE_POST_MENTIONED_USER,
                         data={
                             'post_mentioned_user': m.id,
                             'mentioned_by': int(user_id),
@@ -640,7 +640,7 @@ class PostCommentList(APIView):
                         post=comment.post,
                         comment=comment)
                     # send push notification
-                        devices = find_user_devices(comment.post.poster.id)
+                    devices = find_user_devices(comment.post.poster.id)
                     message_payload = {
                         'p': str(comment.post.id),
                         'u': str(comment.post.poster.id),
@@ -670,7 +670,7 @@ class PostCommentList(APIView):
                         # Add notification
                         notification = Notification.objects.create(
                             receiver=m,
-                            notification_type=Notification.TYPE_UNKNOWN,
+                            notification_type=Notification.TYPE_COMMENT_MENTIONED_USER,
                             comment=comment,
                             data={
                                 'comment_mentioned_user': m.id,
