@@ -638,6 +638,7 @@ class PostCommentList(APIView):
                         "You can't posts comments as another user")
 
                 comment = serializer.save()
+                print(comment)
                 logger.info("Comment saved")
                 if comment.post.poster.id != request.user.id:
                     # Add notification
@@ -663,8 +664,12 @@ class PostCommentList(APIView):
                         logger.info("Sending notification to device: %s" % device)
                         send_message_device(device, message_payload)
 
-                mentioned_users = serializer.validated_data.get(
-                    'mentioned_users')
+                mentioned_users = serializer.validated_data.get('mentioned_users')
+                logger.info(mentioned_users)
+                if type(mentioned_users) == str:
+                    mentioned_users = ast.literal_eval(mentioned_users)
+                if len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
+                    mentioned_users = ast.literal_eval(mentioned_users)
 
                 if len(mentioned_users):
                     for i in range(len(mentioned_users)):
@@ -775,7 +780,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     fields = ('id', 'post', 'commented_by',
-              'comment_text', 'created_on', 'modified_on')
+              'comment_text', 'created_on', 'modified_on', 'mentioned_users')
 
 
 class ShareViewSet(viewsets.ModelViewSet):

@@ -92,11 +92,13 @@ class PostDocumentSerializer(DocumentSerializer):
 
         return [{'id': u.id, 'username': u.username} for u in post.mentioned_users.all()]
 
+
 class MentionedUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
         fields = ('id', 'username')
+
 
 class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -264,6 +266,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                 return obj.video_thumbnail.url
         else:
             return ""
+
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -450,7 +453,7 @@ class CommentSerializer(serializers.ModelSerializer):
     user_profile_photo_small = serializers.SerializerMethodField()
 
     post_id = serializers.SerializerMethodField()
-    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    mentioned_users = MentionedUserSerializer(many=True, read_only=True)
 
     class Meta:
         model = Comment
@@ -512,8 +515,14 @@ class CommentSerializer(serializers.ModelSerializer):
             return up.profile_photo_thumbnail.url
         return ""
 
+    def get_mentioned_users(self, obj):
+        comment = Comment.objects.get(id=obj._id)
+
+        return [{'id': u.id, 'username': u.username} for u in comment.mentioned_users.all()]
+
 
 class CommentSaveSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Comment
 
