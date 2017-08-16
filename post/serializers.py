@@ -286,7 +286,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
-    mentioned_users = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    mentioned_users = MentionedUserSerializer(many=True, read_only=True)
     queryset = Post.objects.filter(is_deleted=False)
 
     class Meta:
@@ -405,6 +405,11 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                 return obj.video_thumbnail.url
         else:
             return ""
+
+    def get_mentioned_users(self, obj):
+        comment = Comment.objects.get(id=obj._id)
+
+        return [{'id': u.id, 'username': u.username} for u in comment.mentioned_users.all()]
 
 
 class PostSaveSerializer(serializers.ModelSerializer):
