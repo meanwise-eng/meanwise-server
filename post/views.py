@@ -638,7 +638,6 @@ class PostCommentList(APIView):
                         "You can't posts comments as another user")
 
                 comment = serializer.save()
-                print(comment)
                 logger.info("Comment saved")
                 if comment.post.poster.id != request.user.id:
                     # Add notification
@@ -684,6 +683,7 @@ class PostCommentList(APIView):
                             receiver=m,
                             notification_type=Notification.TYPE_COMMENT_MENTIONED_USER,
                             comment=comment,
+                            post=comment.post,
                             data={
                                 'comment_mentioned_user': m.id,
                                 'mentioned_by': comment.commented_by.id,
