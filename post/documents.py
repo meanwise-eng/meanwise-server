@@ -17,6 +17,7 @@ class PostDocument(DocType):
 
     interest_id = fields.IntegerField()
     interest_name = fields.StringField(index='not_analyzed')
+    text = fields.StringField()
     image_url = fields.StringField()
     video_url = fields.StringField()
     user_id = fields.IntegerField()

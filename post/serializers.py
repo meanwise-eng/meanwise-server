@@ -33,7 +33,7 @@ class PostDocumentSerializer(DocumentSerializer):
         fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'num_comments',
                   'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
-                  'user_profession_text', 'image_url', 'video_url', 'video_thumb_url',
+                  'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
                   'topics', 'created_on', 'is_liked', 'likes_url', 'resolution', 'mentioned_users']
 
     def get_id(self, obj):
