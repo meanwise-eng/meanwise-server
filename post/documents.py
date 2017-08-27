@@ -4,6 +4,8 @@ import datetime
 from analytics.models import SeenPost
 from .models import Post, Comment
 
+from userprofile.models import UserProfile
+
 post = Index('mw_posts')
 
 post.settings(
@@ -53,9 +55,6 @@ class PostDocument(DocType):
     def prepare_user_id(self, obj):
         user_id = obj.poster.id
         return user_id
-
-    def prepare_interest_id(self, obj):
-        return obj.interest.id
 
     def prepare_interest_name(self, obj):
         return obj.interest.name.lower()
