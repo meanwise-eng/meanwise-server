@@ -129,18 +129,34 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             user_id = request.user.id
 
         try:
-            friend_request = UserFriend.objects.get(
+            friend = Friend.objects.get(
                 Q(
-                    Q(user_id=user_id) & Q(friend_id=obj.user.id)
+                    Q(user=user_id) & Q(friend=obj.user.id)
                 ) |  # or
                 Q(
-                    Q(friend_id=user_id) & Q(user_id=obj.user.id)
+                    Q(friend=user_id) & Q(user=obj.user.id)
                 )
             )
-        except UserFriend.DoesNotExist:
+        except Friend.DoesNotExist:
             return None
 
-        return friend_request.get_status_display()
+        try:
+            friend_request = FriendRequest.object.get(
+                Q(
+                    Q(user=user_id) & Q(friend=obj.user.id)
+                ) |  # or
+                Q(
+                    Q(friend=user_id) & Q(user=obj.user.id)
+                )
+            )
+        except FriendRequest.DoesNotExist:
+            return None
+
+        if friend:
+            return 'AC'
+
+        elif friend_request:
+            return 'PE'
 
     def get_friends_url(self, obj):
         request = self.context.get('request')
@@ -153,10 +169,8 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 
     def get_friend_count(self, obj):
         try:
-            friend_count = UserFriend.objects\
-                .filter(Q(Q(user_id=obj.user.id) | Q(friend_id=obj.user.id)))\
-                .filter(status=UserFriend.STATUS_ACCEPTED)
-        except UserFriend.DoesNotExist:
+            friend_count = Friend.objects.filter(user=obj.user.id)
+        except Friend.DoesNotExist:
             return 0
 
         return friend_count.count()
@@ -295,3 +309,9 @@ class UserMentionSerializer(HaystackSerializerMixin, UserProfileSerializer):
                   "last_name", "profile_photo_small", ]
         field_aliases = {}
         exclude = {}
+
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FriendRequest
+        fields = ('id', 'user', 'friend', 'created')
