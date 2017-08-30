@@ -129,7 +129,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             user_id = request.user.id
 
         try:
-            friend = Friend.objects.get(
+            friend = UserFriend.objects.get(
                 Q(
                     Q(user=user_id) & Q(friend=obj.user.id)
                 ) |  # or
@@ -137,7 +137,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                     Q(friend=user_id) & Q(user=obj.user.id)
                 )
             )
-        except Friend.DoesNotExist:
+        except UserFriend.DoesNotExist:
             return None
 
         try:
@@ -169,8 +169,8 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 
     def get_friend_count(self, obj):
         try:
-            friend_count = Friend.objects.filter(user=obj.user.id)
-        except Friend.DoesNotExist:
+            friend_count = UserFriend.objects.filter(user=obj.user.id)
+        except UserFriend.DoesNotExist:
             return 0
 
         return friend_count.count()
