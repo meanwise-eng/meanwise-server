@@ -246,11 +246,11 @@ class FriendRequest(models.Model):
         """
         Accept a friend request
         """
-        rel = Friend.objects.create(
+        rel = UserFriend.objects.create(
             user=self.user,
             friend=self.friend
         )
-        rel2 = Friend.objects.create(
+        rel2 = UserFriend.objects.create(
             user=self.friend,
             friend=self.user
         )
@@ -297,7 +297,7 @@ class FriendManager(models.Manager):
         friends = cache.get(key)
 
         if friends is None:
-            qs = Friend.objects.select_related('user', 'friend').filter(friend=user).all()
+            qs = UserFriend.objects.select_related('user', 'friend').filter(friend=user).all()
             friends = [u.user for u in qs]
             cache.set(key, friends)
 
@@ -353,7 +353,7 @@ class FriendManager(models.Manager):
     def remove_friend(self, user, friend):
         """ Destroy a friend relationship """
         try:
-            qs = Friend.objects.filter(
+            qs = UserFriend.objects.filter(
                 Q(user=user, friend=friend) |
                 Q(user=friend, friend=user)
             ).distinct().all()
@@ -378,13 +378,13 @@ class FriendManager(models.Manager):
             return True
         else:
             try:
-                Friend.objects.get(friend=user1, user=user2)
+                UserFriend.objects.get(friend=user1, user=user2)
                 return True
-            except Friend.DoesNotExist:
+            except UserFriend.DoesNotExist:
                 return False
 
 
-class Friend(models.Model):
+class UserFriend(models.Model):
     user = models.ForeignKey(User, related_name='user')
     friend = models.ForeignKey(User, related_name='friend')
 
@@ -397,7 +397,7 @@ class Friend(models.Model):
         unique_together = ("user", "friend")
 
     def __str__(self):
-        return 'user %s - friend %s - status %s ' % (str(self.user), str(self.friend), self.status)
+        return 'user %s - friend %s ' % (str(self.user), str(self.friend))
 
 
 class InviteGroup(models.Model):

@@ -8,6 +8,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import exceptions
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
 import django.contrib.auth.password_validation as validators
 from django.core.mail import EmailMultiAlternatives
@@ -24,12 +25,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.decorators import detail_route, list_route
 
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.filters import HaystackAutocompleteFilter
 
-from userprofile.models import Profession, Skill, Interest, UserProfile, UserFriend
+from userprofile.models import Profession, Skill, Interest, UserProfile, UserFriend, FriendRequest
 from userprofile.serializers import *
 from mnotifications.models import Notification
 
@@ -383,410 +385,410 @@ class RequestInterest(APIView):
             return Response({"error": str(e)}, status.HTTP_400_BAD_REQUEST)
 
 
-class FriendsList(APIView):
-    """
-    List all friends for user (user_id) and add friends
+# class FriendsList(APIView):
+#     """
+#     List all friends for user (user_id) and add friends
 
-    """
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+#     """
+#     authentication_classes = (authentication.TokenAuthentication,)
+#     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, user_id):
-        """
-        List all friends for user (user_id)
+#     def get(self, request, user_id):
+#         """
+#         List all friends for user (user_id)
 
-        """
-        logger.info("Friends list - GET - FriendList [API / views.py /")
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            logger.error(
-                "Friendslist - GET - User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        try:
-            up = UserProfile.objects.get(user=user)
-        except UserProfile.DoesNotExist:
-            logger.error("friendslist - GET - up not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "Userprofile with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#         """
+#         logger.info("Friends list - GET - FriendList [API / views.py /")
+#         try:
+#             user = User.objects.get(id=user_id)
+#         except User.DoesNotExist:
+#             logger.error(
+#                 "Friendslist - GET - User not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "User with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+#         try:
+#             up = UserProfile.objects.get(user=user)
+#         except UserProfile.DoesNotExist:
+#             logger.error("friendslist - GET - up not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "Userprofile with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        f_status = request.query_params.get('status', 'AC')
-        if f_status.lower() == 'pending':
-            user_friends = UserFriend.objects.filter(
-                user=user).filter(status='PE')
-            user_friends_reverse = UserFriend.objects.filter(
-                friend=user).filter(status='PE')
-        else:
-            user_friends = UserFriend.objects.filter(
-                user=user).filter(status='AC')
-            user_friends_reverse = UserFriend.objects.filter(
-                friend=user).filter(status='AC')
-        user_friends_profiles = []
-        for userfriend in user_friends:
-            try:
-                user_friends_profiles.append(
-                    UserProfile.objects.get(user=userfriend.friend).id)
-            except UserProfile.DoesNotExist:
-                pass
-        for userfriendr in user_friends_reverse:
-            try:
-                user_friends_profiles.append(
-                    UserProfile.objects.get(user=userfriendr.user).id)
-            except UserProfile.DoesNotExist:
-                pass
+#         f_status = request.query_params.get('status', 'AC')
+#         if f_status.lower() == 'pending':
+#             user_friends = UserFriend.objects.filter(
+#                 user=user).filter(status='PE')
+#             user_friends_reverse = UserFriend.objects.filter(
+#                 friend=user).filter(status='PE')
+#         else:
+#             user_friends = UserFriend.objects.filter(
+#                 user=user).filter(status='AC')
+#             user_friends_reverse = UserFriend.objects.filter(
+#                 friend=user).filter(status='AC')
+#         user_friends_profiles = []
+#         for userfriend in user_friends:
+#             try:
+#                 user_friends_profiles.append(
+#                     UserProfile.objects.get(user=userfriend.friend).id)
+#             except UserProfile.DoesNotExist:
+#                 pass
+#         for userfriendr in user_friends_reverse:
+#             try:
+#                 user_friends_profiles.append(
+#                     UserProfile.objects.get(user=userfriendr.user).id)
+#             except UserProfile.DoesNotExist:
+#                 pass
 
-        page = request.GET.get('page')
-        page_size = request.GET.get('page_size')
+#         page = request.GET.get('page')
+#         page_size = request.GET.get('page_size')
 
-        user_friends_profiles, has_next_page, num_pages = get_objects_paginated(
-            user_friends_profiles, page, page_size)
-        serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(
-            id__in=user_friends_profiles),
-            many=True, context={'request': request, 'user_id': user_id})
+#         user_friends_profiles, has_next_page, num_pages = get_objects_paginated(
+#             user_friends_profiles, page, page_size)
+#         serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(
+#             id__in=user_friends_profiles),
+#             many=True, context={'request': request, 'user_id': user_id})
 
-        return Response(
-            {
-                "status": "success",
-                "error": "",
-                "results": {
-                    "data": serialized_friends_list.data,
-                    "num_pages": num_pages
-                }
-            },
-            status=status.HTTP_200_OK
-        )
+#         return Response(
+#             {
+#                 "status": "success",
+#                 "error": "",
+#                 "results": {
+#                     "data": serialized_friends_list.data,
+#                     "num_pages": num_pages
+#                 }
+#             },
+#             status=status.HTTP_200_OK
+#         )
 
-    def post(self, request, user_id):
-        """
-        Friend request, accept, reject
+#     def post(self, request, user_id):
+#         """
+#         Friend request, accept, reject
 
-        """
-        logger.info("Friendslist - POST [API / views.py /")
-        friend_id = request.data.get('friend_id', None)
-        if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
-            raise PermissionDenied(
-                "You can only send friend request as yourself")
+#         """
+#         logger.info("Friendslist - POST [API / views.py /")
+#         friend_id = request.data.get('friend_id', None)
+#         if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
+#             raise PermissionDenied(
+#                 "You can only send friend request as yourself")
 
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            logger.error(
-                "Friendslist - GET - User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#         try:
+#             user = User.objects.get(id=user_id)
+#         except User.DoesNotExist:
+#             logger.error(
+#                 "Friendslist - GET - User not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "User with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        try:
-            up = UserProfile.objects.get(user=user)
-        except UserProfile.DoesNotExist:
-            logger.error("friendslist - GET - up not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "Userprofile with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        friend_status = request.data.get('status', 'pending')
+#         try:
+#             up = UserProfile.objects.get(user=user)
+#         except UserProfile.DoesNotExist:
+#             logger.error("friendslist - GET - up not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "Userprofile with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+#         friend_status = request.data.get('status', 'pending')
 
-        # check if request for self, if so raise error
-        if friend_id:
-            if int(friend_id) == int(user_id):
-                return Response(
-                    {
-                        "status": "failed",
-                        "error": "Can't send friend request for self",
-                        "results": ""
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+#         # check if request for self, if so raise error
+#         if friend_id:
+#             if int(friend_id) == int(user_id):
+#                 return Response(
+#                     {
+#                         "status": "failed",
+#                         "error": "Can't send friend request for self",
+#                         "results": ""
+#                     },
+#                     status=status.HTTP_400_BAD_REQUEST
+#                 )
 
-        try:
-            friend_user = User.objects.get(id=int(friend_id))
-        except User.DoesNotExist:
-            friend_user = None
-            pass
+#         try:
+#             friend_user = User.objects.get(id=int(friend_id))
+#         except User.DoesNotExist:
+#             friend_user = None
+#             pass
 
-        if not friend_user:
-            logger.error(
-                "Friendslist - POST - friend User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "friend User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        # check if record already exists, if already rejected, ignore
-        try:
-            uf = UserFriend.objects.get(user=user, friend=friend_user)
-        except UserFriend.DoesNotExist:
-            try:
-                uf = UserFriend.objects.get(user=friend_user, friend=user)
-            except UserFriend.DoesNotExist:
-                uf = None
-                pass
+#         if not friend_user:
+#             logger.error(
+#                 "Friendslist - POST - friend User not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "friend User with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+#         # check if record already exists, if already rejected, ignore
+#         try:
+#             uf = UserFriend.objects.get(user=user, friend=friend_user)
+#         except UserFriend.DoesNotExist:
+#             try:
+#                 uf = UserFriend.objects.get(user=friend_user, friend=user)
+#             except UserFriend.DoesNotExist:
+#                 uf = None
+#                 pass
 
-        if friend_status.lower() == "pending":
-            if not uf:
-                uf = UserFriend.objects.create(user=user, friend=friend_user)
-                # Add notification
-                notification = Notification.objects.create(
-                    receiver=user,
-                    notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED,
-                    user_friend=uf)
-                # send push notification
-                devices = find_user_devices(user.id)
-                message_payload = {
-                    'p': '',
-                    'u': str(user.id),
-                    't': 'r',
-                    'message': (
-                        str(friend_user.userprofile.first_name) + " " +
-                        str(friend_user.userprofile.last_name) + " sent friend request."
-                    )
-                }
+#         if friend_status.lower() == "pending":
+#             if not uf:
+#                 uf = UserFriend.objects.create(user=user, friend=friend_user)
+#                 # Add notification
+#                 notification = Notification.objects.create(
+#                     receiver=user,
+#                     notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED,
+#                     user_friend=uf)
+#                 # send push notification
+#                 devices = find_user_devices(user.id)
+#                 message_payload = {
+#                     'p': '',
+#                     'u': str(user.id),
+#                     't': 'r',
+#                     'message': (
+#                         str(friend_user.userprofile.first_name) + " " +
+#                         str(friend_user.userprofile.last_name) + " sent friend request."
+#                     )
+#                 }
 
-                for device in devices:
-                    send_message_device(device, message_payload)
-                logger.info("Friendslist - POST - Finished [API / views.py /")
-                return Response(
-                    {
-                        "status": "success",
-                        "error": "",
-                        "results": "successfully added friend request"
-                    },
-                    status=status.HTTP_201_CREATED
-                )
+#                 for device in devices:
+#                     send_message_device(device, message_payload)
+#                 logger.info("Friendslist - POST - Finished [API / views.py /")
+#                 return Response(
+#                     {
+#                         "status": "success",
+#                         "error": "",
+#                         "results": "successfully added friend request"
+#                     },
+#                     status=status.HTTP_201_CREATED
+#                 )
 
-            else:
-                if uf.status.lower() == 'ac':
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "success",
-                            "error": "",
-                            "results": "Already accepted"
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
+#             else:
+#                 if uf.status.lower() == 'ac':
+#                     logger.info(
+#                         "Friendslist - POST - Finished [API / views.py /")
+#                     return Response(
+#                         {
+#                             "status": "success",
+#                             "error": "",
+#                             "results": "Already accepted"
+#                         },
+#                         status=status.HTTP_201_CREATED
+#                     )
 
-                elif uf.status.lower() == 'pe':
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "success",
-                            "error": "",
-                            "results": "Request already pending"
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
+#                 elif uf.status.lower() == 'pe':
+#                     logger.info(
+#                         "Friendslist - POST - Finished [API / views.py /")
+#                     return Response(
+#                         {
+#                             "status": "success",
+#                             "error": "",
+#                             "results": "Request already pending"
+#                         },
+#                         status=status.HTTP_201_CREATED
+#                     )
 
-        elif friend_status.lower() == 'accepted':
-            if not uf:
-                logger.error(
-                    "Friendslist - POST - Userfriend not found [api / views.py /")
-                return Response(
-                    {
-                        "status": "failed",
-                        "error": "UserFriend record with ids does not exist",
-                        "results": ""
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+#         elif friend_status.lower() == 'accepted':
+#             if not uf:
+#                 logger.error(
+#                     "Friendslist - POST - Userfriend not found [api / views.py /")
+#                 return Response(
+#                     {
+#                         "status": "failed",
+#                         "error": "UserFriend record with ids does not exist",
+#                         "results": ""
+#                     },
+#                     status=status.HTTP_400_BAD_REQUEST
+#                 )
 
-            else:
-                allow = True if request.user.id != uf.user.id else False
+#             else:
+#                 allow = True if request.user.id != uf.user.id else False
 
-                if uf.status.lower() == 'ac':
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "success",
-                            "error": "",
-                            "results": "Already accepted"
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
+#                 if uf.status.lower() == 'ac':
+#                     logger.info(
+#                         "Friendslist - POST - Finished [API / views.py /")
+#                     return Response(
+#                         {
+#                             "status": "success",
+#                             "error": "",
+#                             "results": "Already accepted"
+#                         },
+#                         status=status.HTTP_201_CREATED
+#                     )
 
-                elif uf.status.lower() == 'pe' and allow:
-                    uf.status = 'AC'
-                    uf.save()
-                    # Add notification
-                    notification = Notification.objects.create(
-                        receiver=friend_user,
-                        notification_type=Notification.TYPE_FRIEND_REQUEST_ACCEPTED,
-                        user_friend=uf)
-                    # send push notification
-                    devices = find_user_devices(friend_user.id)
-                    message_payload = {
-                        'p': '',
-                        'u': str(friend_user.id),
-                        't': 'a',
-                        'message': (
-                            str(user.userprofile.first_name) + " " +
-                            str(user.userprofile.last_name) + " accepted friend request."
-                        )
-                    }
-                    for device in devices:
-                        send_message_device(device, message_payload)
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "success",
-                            "error": "",
-                            "results": "Successfully accepted."
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
+#                 elif uf.status.lower() == 'pe' and allow:
+#                     uf.status = 'AC'
+#                     uf.save()
+#                     # Add notification
+#                     notification = Notification.objects.create(
+#                         receiver=friend_user,
+#                         notification_type=Notification.TYPE_FRIEND_REQUEST_ACCEPTED,
+#                         user_friend=uf)
+#                     # send push notification
+#                     devices = find_user_devices(friend_user.id)
+#                     message_payload = {
+#                         'p': '',
+#                         'u': str(friend_user.id),
+#                         't': 'a',
+#                         'message': (
+#                             str(user.userprofile.first_name) + " " +
+#                             str(user.userprofile.last_name) + " accepted friend request."
+#                         )
+#                     }
+#                     for device in devices:
+#                         send_message_device(device, message_payload)
+#                     logger.info(
+#                         "Friendslist - POST - Finished [API / views.py /")
+#                     return Response(
+#                         {
+#                             "status": "success",
+#                             "error": "",
+#                             "results": "Successfully accepted."
+#                         },
+#                         status=status.HTTP_201_CREATED
+#                     )
 
-                elif not allow:
-                    raise PermissionDenied("You cannot accept the request you sent to other user.")
+#                 elif not allow:
+#                     raise PermissionDenied("You cannot accept the request you sent to other user.")
 
-        elif friend_status.lower() == 'rejected':
-            if not uf:
-                logger.error(
-                    "Friendslist - POST - Userfriend not found [api / views.py /")
-                return Response(
-                    {
-                        "status": "failed",
-                        "error": "UserFriend record with ids does not exist",
-                        "results": ""
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+#         elif friend_status.lower() == 'rejected':
+#             if not uf:
+#                 logger.error(
+#                     "Friendslist - POST - Userfriend not found [api / views.py /")
+#                 return Response(
+#                     {
+#                         "status": "failed",
+#                         "error": "UserFriend record with ids does not exist",
+#                         "results": ""
+#                     },
+#                     status=status.HTTP_400_BAD_REQUEST
+#                 )
 
-            else:
-                if uf.status.lower() == 'ac':
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "success",
-                            "error": "",
-                            "results": "Already accepted"
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
+#             else:
+#                 if uf.status.lower() == 'ac':
+#                     logger.info(
+#                         "Friendslist - POST - Finished [API / views.py /")
+#                     return Response(
+#                         {
+#                             "status": "success",
+#                             "error": "",
+#                             "results": "Already accepted"
+#                         },
+#                         status=status.HTTP_201_CREATED
+#                     )
 
-                elif uf.status.lower() == 'pe':
-                    uf.delete()
-                    logger.info(
-                        "Friendslist - POST - Finished [API / views.py /")
-                    return Response(
-                        {
-                            "status": "success",
-                            "error": "",
-                            "results": "Successfully rejected."
-                        },
-                        status=status.HTTP_201_CREATED
-                    )
+#                 elif uf.status.lower() == 'pe':
+#                     uf.delete()
+#                     logger.info(
+#                         "Friendslist - POST - Finished [API / views.py /")
+#                     return Response(
+#                         {
+#                             "status": "success",
+#                             "error": "",
+#                             "results": "Successfully rejected."
+#                         },
+#                         status=status.HTTP_201_CREATED
+#                     )
 
-        logger.info("Friendslist - POST - Finished [API / views.py /")
-        return Response(
-            {
-                "status": "failed",
-                "error": "Unknown",
-                "results": "Could not update status."
-            },
-            status=status.HTTP_400_BAD_REQUEST
-        )
+#         logger.info("Friendslist - POST - Finished [API / views.py /")
+#         return Response(
+#             {
+#                 "status": "failed",
+#                 "error": "Unknown",
+#                 "results": "Could not update status."
+#             },
+#             status=status.HTTP_400_BAD_REQUEST
+#         )
 
-class RemoveFriend(APIView):
-    """
-    Remove friend
+# class RemoveFriend(APIView):
+#     """
+#     Remove friend
 
-    """
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+#     """
+#     authentication_classes = (authentication.TokenAuthentication,)
+#     permission_classes = (permissions.IsAuthenticated,)
 
-    def post(self, request, user_id):
-        """
-        Remove friend
+#     def post(self, request, user_id):
+#         """
+#         Remove friend
 
-        """
-        logger.info("RemoveFriend - POST [API / views.py /")
+#         """
+#         logger.info("RemoveFriend - POST [API / views.py /")
 
-        if int(user_id) != request.user.id:
-            raise PermissionDenied("You can remove friend for another user")
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            logger.error(
-                "RemoveFriend - Post - User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#         if int(user_id) != request.user.id:
+#             raise PermissionDenied("You can remove friend for another user")
+#         try:
+#             user = User.objects.get(id=user_id)
+#         except User.DoesNotExist:
+#             logger.error(
+#                 "RemoveFriend - Post - User not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "User with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        try:
-            up = UserFriend.objects.filter(user=user)
-        except UserProfile.DoesNotExist:
-            logger.error("Removefriend - GET - up not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "Userprofile with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#         try:
+#             up = UserFriend.objects.filter(user=user)
+#         except UserProfile.DoesNotExist:
+#             logger.error("Removefriend - GET - up not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "Userprofile with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        friend_id = request.data.get('friend_id', None)
+#         friend_id = request.data.get('friend_id', None)
 
-        try:
-            friend_user = User.objects.get(id=int(friend_id))
-        except User.DoesNotExist:
-            logger.error(
-                "Removefriend - POST - friend User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "friend User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#         try:
+#             friend_user = User.objects.get(id=int(friend_id))
+#         except User.DoesNotExist:
+#             logger.error(
+#                 "Removefriend - POST - friend User not found [api / views.py /")
+#             return Response(
+#                 {
+#                     "status": "failed",
+#                     "error": "friend User with id does not exist",
+#                     "results": ""
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        up.filter(friend=friend_user).delete()
+#         up.filter(friend=friend_user).delete()
 
-        logger.info("Friendslist - POST - Finished [API / views.py /")
-        return Response(
-            {
-                "status": "success",
-                "error": "",
-                "results": "successfully removed friend"
-            },
-            status=status.HTTP_201_CREATED
-        )
+#         logger.info("Friendslist - POST - Finished [API / views.py /")
+#         return Response(
+#             {
+#                 "status": "success",
+#                 "error": "",
+#                 "results": "successfully removed friend"
+#             },
+#             status=status.HTTP_201_CREATED
+#         )
 
 
 class ChangePasswordView(APIView):
@@ -1121,3 +1123,255 @@ class UserMentionAutoComplete(HaystackViewSet):
             self.get_queryset())
 
         return queryset.order_by('id')
+
+
+# UserFriend
+class UserFriendViewSet(viewsets.ViewSet):
+    """
+    ViewSet for UserFriend model
+    """
+
+    def list(self, request):
+        friends = UserFriend.objects.friends(request.user)
+        serializer = self.UserSerializer(friends, many=True)
+        return Response(serializer.data)
+
+    @list_route()
+    def sent_requests(self, request):
+        friend_requests = UserFriend.objects.sent_requests(user=request.user)
+        return Response(FriendRequestSerializer(friend_requests, many=True).data)
+
+    @list_route()
+    def rejected_requests(self, request):
+        friend_requests = UserFriend.objects.rejected_requests(user=request.user)
+        return Response(FriendRequestSerializer(friend_requests, many=True).data)
+
+    def create(self, request):
+        """
+        Creates a friend request
+        POST data:
+        - user_id
+        """
+        friend = User.objects.get(pk=request.data['user_id'])
+        friend_obj = Friend.objects.add_friend(
+            request.user,
+            friend
+        )
+
+        return Response(
+            FriendRequestSerializer(friend_obj).data,
+            status.HTTP_201_CREATED
+        )
+
+
+class FriendRequestView(APIView):
+    """
+    View for accepting and rejecting FriendRequest
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, user_id):
+        logger.info("FriendRequest - POST [API / views.py /")
+        friend_id = request.data.get('friend_id', None)
+
+        if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
+            raise PermissionDenied(
+                "You can only send friend request as yourself")
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            logger.error(
+                "Friendslist - GET - User not found [api / views.py /")
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "User with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            up = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            logger.error("friendslist - GET - up not found [api / views.py /")
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "Userprofile with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        friend_status = request.data.get('status', None)
+
+        # check if request for self, if so raise error
+        if friend_id:
+            if int(friend_id) == int(user_id):
+                return Response(
+                    {
+                        "status": "failed",
+                        "error": "Can't send friend request for self",
+                        "results": ""
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        try:
+            friend_user = User.objects.get(id=int(friend_id))
+        except User.DoesNotExist:
+            friend_user = None
+            pass
+
+        if not friend_user:
+            logger.error(
+                "FriendRequest - POST - friend User not found [api / views.py /")
+            return Response(
+                {
+                    "status": "failed",
+                    "error": "friend User with id does not exist",
+                    "results": ""
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            friend_request = FriendRequest.objects.get(user=friend_user, friend=user)
+        except FriendRequest.DoesNotExist:
+            try:
+                friend_request = FriendRequest.objects.get(user=user, friend=friend_user)
+            except FriendRequest.DoesNotExist:
+                friend_request = None
+                pass
+
+        allow = True if request.user.id != friend_request.user.id else False
+
+        if friend_status.lower() == "accepted":
+
+            if not friend_request:
+                try:
+                    friends = UserFriend.objects.are_friends(user=user, friend=friend_user)
+                except UserFriend.DoesNotExist:
+                    friends = None
+                    pass
+
+                if friends:
+                    logger.info(
+                        "FriendRequest - POST - Finished [API / views.py /")
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Already friends"
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
+                else:
+                    logger.error(
+                        "FriendRequest - POST - Userfriend not found [api / views.py /")
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "Friend record with ids does not exist",
+                            "results": ""
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            elif friend_request and allow:
+                # accept a friend request
+                friend_request.accept()
+
+                notification = Notification.objects.create(
+                    receiver=friend_user,
+                    notification_type=Notification.TYPE_FRIEND_REQUEST_ACCEPTED,
+                    user_friend=uf)
+                # send push notification
+                devices = find_user_devices(friend_user.id)
+                message_payload = {
+                    'p': '',
+                    'u': str(friend_user.id),
+                    't': 'a',
+                    'message': (
+                        str(user.userprofile.first_name) + " " +
+                        str(user.userprofile.last_name) + " accepted friend request."
+                    )
+                }
+                for device in devices:
+                    send_message_device(device, message_payload)
+                logger.info(
+                    "Friendslist - POST - Finished [API / views.py /")
+                return Response(
+                    {
+                        "status": "success",
+                        "error": "",
+                        "results": "Successfully accepted."
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+
+            elif not allow:
+                raise PermissionDenied("You cannot accept the request you sent to other user.")
+
+        elif friend_status.lower() == "rejected":
+
+            if not friend_request:
+                try:
+                    friends = UserFriend.objects.are_friends(user=user, friend=friend_user)
+                except UserFriend.DoesNotExist:
+                    friends = None
+                    pass
+
+                if friends:
+                    logger.info(
+                        "FriendRequest - POST - Finished [API / views.py /")
+                    return Response(
+                        {
+                            "status": "success",
+                            "error": "",
+                            "results": "Already friends"
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
+                else:
+                    logger.error(
+                        "FriendRequest - POST - Userfriend not found [api / views.py /")
+                    return Response(
+                        {
+                            "status": "failed",
+                            "error": "Friend record with ids does not exist",
+                            "results": ""
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            elif friend_request and allow:
+                friend_request.reject()
+                logger.info(
+                    "FriendsRequest - POST - Finished [API / views.py /")
+                return Response(
+                    {
+                        "status": "success",
+                        "error": "",
+                        "results": "Successfully rejected."
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+
+            elif not allow:
+                raise PermissionDenied("You cannot reject the request you sent to other user.")
+
+        logger.info("FriendRequest - POST - Finished [API / views.py /")
+        return Response(
+            {
+                "status": "failed",
+                "error": "Unknown",
+                "results": "Could not add friend"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )

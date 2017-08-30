@@ -7,6 +7,8 @@ from post.views import *
 from mnotifications.views import *
 
 router = routers.SimpleRouter()
+router.register(r'friends', UserFriendViewSet, base_name='friends')
+# router.register(r'friendrequests', FriendRequestViewSet, base_name='friendrequests')
 
 # router.register(r'user/userprofile', UserProfileViewSet)
 router.register(r'post', PostViewSet)
@@ -34,12 +36,14 @@ urlpatterns = [
         ChangePasswordView.as_view(), name="change-password"),
     url(r'^user/forgot/password/$',
         ForgotPasswordView.as_view(), name="forget-password"),
-    url(r'^user/(?P<user_id>[0-9]+)/friends/$',
-        FriendsList.as_view(), name="friend"),
-    url(r'^user/(?P<user_id>[0-9]+)/friends/$',
-        FriendsList.as_view(), name='friends-list'),
-    url(r'^user/(?P<user_id>[0-9]+)/friends/remove/$',
-        RemoveFriend.as_view(), name="remove-friend"),
+    # url(r'^user/(?P<user_id>[0-9]+)/friends/$',
+    #     FriendsList.as_view(), name="friend"),
+    # url(r'^user/(?P<user_id>[0-9]+)/friends/$',
+    #     FriendsList.as_view(), name='friends-list'),
+    # url(r'^user/(?P<user_id>[0-9]+)/friends/remove/$',
+    #     RemoveFriend.as_view(), name="remove-friend"),
+    url(r'^friendrequests/$',
+        FriendRequestView.as_view(), name="friend"),
     url(r'^user/(?P<user_id>[0-9]+)/posts/$',
         UserPostList.as_view(), name="post-list"),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/$',
