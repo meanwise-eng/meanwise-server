@@ -864,6 +864,23 @@ class FriendRequestView(APIView):
             friend_user
         )
 
+        notification = Notification.objects.create(
+            receiver=friend_user,
+            notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED)
+        # send push notification
+        devices = find_user_devices(friend_user.id)
+        message_payload = {
+            'p': '',
+            'u': str(friend_user.id),
+            't': 'a',
+            'message': (
+                str(user.userprofile.first_name) + " " +
+                str(user.userprofile.last_name) + " has sent you a friend request."
+            )
+        }
+        for device in devices:
+            send_message_device(device, message_payload)
+
         return Response(
             {
                 "status": "success",
