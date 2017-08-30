@@ -132,16 +132,13 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             friend = UserFriend.objects.get(
                 Q(
                     Q(user=user_id) & Q(friend=obj.user.id)
-                ) |  # or
-                Q(
-                    Q(friend=user_id) & Q(user=obj.user.id)
                 )
             )
         except UserFriend.DoesNotExist:
             return None
 
         try:
-            friend_request = FriendRequest.object.get(
+            friend_request = FriendRequest.objects.get(
                 Q(
                     Q(user=user_id) & Q(friend=obj.user.id)
                 ) |  # or
@@ -164,7 +161,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             return None
 
         return request.build_absolute_uri(
-            reverse('friends-list', args=[obj.user.id])
+            reverse('friends', args=[obj.user.id])
         )
 
     def get_friend_count(self, obj):

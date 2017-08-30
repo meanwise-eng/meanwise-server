@@ -299,7 +299,7 @@ class FriendManager(models.Manager):
         if friends is None:
             qs = UserFriend.objects.select_related('user', 'friend').filter(friend=user).all()
             friends = [u.user for u in qs]
-            cache.set(key, friends)
+            # cache.set(key, friends)
 
         return friends
 
@@ -312,7 +312,7 @@ class FriendManager(models.Manager):
             qs = FriendRequest.objects.select_related('user', 'friend').filter(
                 friend=user).all()
             requests = list(qs)
-            cache.set(key, requests)
+            # cache.set(key, requests)
 
         return requests
 
@@ -322,10 +322,9 @@ class FriendManager(models.Manager):
         requests = cache.get(key)
 
         if requests is None:
-            qs = FriendRequest.objects.select_related('user', 'friend').filter(
-                user=user).all()
+            qs = FriendRequest.objects.filter(user=user)
             requests = list(qs)
-            cache.set(key, requests)
+            # cache.set(key, requests)
 
         return requests
 
@@ -365,7 +364,7 @@ class FriendManager(models.Manager):
                 return True
             else:
                 return False
-        except Friend.DoesNotExist:
+        except UserFriend.DoesNotExist:
             return False
 
     def are_friends(self, user1, user2):
