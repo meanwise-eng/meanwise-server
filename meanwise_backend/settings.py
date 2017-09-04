@@ -105,6 +105,7 @@ INSTALLED_APPS = [
     'custom_auth',
     'userprofile',
     'post',
+    'discussions.apps.DiscussionsConfig',
     'django_crontab',
     'scarface',
     'analytics',
