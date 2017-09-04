@@ -4,6 +4,7 @@ from post.views import *
 
 urlpatterns = [
     url(r'^explore/$', PostExploreView.as_view(), name='post-explore'),
+    url(r'^trending/$', PostExploreTrendingView.as_view(), name='post-trending'),
     url(r'^(?P<post_id>[0-9]+)/comments/$', PostCommentList.as_view(),
         name="post-comment"),
     url(r'^(?P<post_id>[0-9]+)/comments/(?P<comment_id>[0-9]+)/$',
