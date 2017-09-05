@@ -1,10 +1,6 @@
-import datetime
-
 from rest_framework import serializers
 
 from mnotifications.models import Notification
-from userprofile.models import UserProfile, UserFriend
-from post.models import Post, Comment
 
 from userprofile.serializers import UserSerializer, UserFriendSerializer
 from post.serializers import NotificationPostSerializer, CommentSerializer
