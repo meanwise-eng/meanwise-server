@@ -79,4 +79,5 @@ urlpatterns = [
     url(r'^me/', include('userprofile.me_urls')),
     url(r'^version/', include('appversion.urls')),
     url(r'^analytics/', include('analytics.urls')),
+    url(r'^discussions/', include('discussions.urls')),
 ]

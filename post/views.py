@@ -638,7 +638,6 @@ class PostCommentList(APIView):
                         "You can't posts comments as another user")
 
                 comment = serializer.save()
-                logger.info("Comment saved")
                 if comment.post.poster.id != request.user.id:
                     # Add notification
                     notification = Notification.objects.create(
@@ -667,10 +666,10 @@ class PostCommentList(APIView):
                 logger.info(mentioned_users)
                 if type(mentioned_users) == str:
                     mentioned_users = ast.literal_eval(mentioned_users)
-                if len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
+                if mentioned_users and len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
                     mentioned_users = ast.literal_eval(mentioned_users)
 
-                if len(mentioned_users):
+                if mentioned_users and len(mentioned_users):
                     for i in range(len(mentioned_users)):
                         try:
                             m = User.objects.get(pk=mentioned_users[i].id)
