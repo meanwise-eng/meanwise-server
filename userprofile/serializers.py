@@ -129,18 +129,31 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             user_id = request.user.id
 
         try:
-            friend_request = UserFriend.objects.get(
+            friend = UserFriend.objects.get(
                 Q(
-                    Q(user_id=user_id) & Q(friend_id=obj.user.id)
-                ) |  # or
-                Q(
-                    Q(friend_id=user_id) & Q(user_id=obj.user.id)
+                    Q(user=user_id) & Q(friend=obj.user.id)
                 )
             )
         except UserFriend.DoesNotExist:
             return None
 
-        return friend_request.get_status_display()
+        try:
+            friend_request = FriendRequest.objects.get(
+                Q(
+                    Q(user=user_id) & Q(friend=obj.user.id)
+                ) |  # or
+                Q(
+                    Q(friend=user_id) & Q(user=obj.user.id)
+                )
+            )
+        except FriendRequest.DoesNotExist:
+            return None
+
+        if friend:
+            return 'AC'
+
+        elif friend_request:
+            return 'PE'
 
     def get_friends_url(self, obj):
         request = self.context.get('request')
@@ -148,14 +161,12 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             return None
 
         return request.build_absolute_uri(
-            reverse('friends-list', args=[obj.user.id])
+            reverse('friends', args=[obj.user.id])
         )
 
     def get_friend_count(self, obj):
         try:
-            friend_count = UserFriend.objects\
-                .filter(Q(Q(user_id=obj.user.id) | Q(friend_id=obj.user.id)))\
-                .filter(status=UserFriend.STATUS_ACCEPTED)
+            friend_count = UserFriend.objects.filter(user=obj.user.id)
         except UserFriend.DoesNotExist:
             return 0
 
@@ -295,3 +306,9 @@ class UserMentionSerializer(HaystackSerializerMixin, UserProfileSerializer):
                   "last_name", "profile_photo_small", ]
         field_aliases = {}
         exclude = {}
+
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FriendRequest
+        fields = ('id', 'user', 'friend', 'created')

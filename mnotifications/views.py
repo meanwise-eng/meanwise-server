@@ -1,27 +1,15 @@
-from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
-from django.utils.text import slugify
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core import exceptions
-from django.shortcuts import render
 
 import logging
 import datetime
 
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework import status, viewsets
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
-from rest_framework.pagination import PageNumberPagination
 
 from mnotifications.models import Notification, ASNSDevice
-from userprofile.models import UserProfile, UserFriend
-from post.models import Post, Comment
 
 from mnotifications.serializers import NotificationSerializer
 from common.api_helper import get_objects_paginated

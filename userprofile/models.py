@@ -5,20 +5,60 @@ from PIL import Image
 from io import BytesIO
 
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.contrib import auth
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import PermissionDenied
+from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils import timezone
 
 from taggit.managers import TaggableManager
 
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from common.utils import slugify
+
+from .exceptions import AlreadyExistsError, AlreadyFriendsError
+
+
+CACHE_TYPES = {
+    'friends': 'f-%s',
+    'requests': 'fr-%s',
+    'sent_requests': 'sfr-%s',
+    'rejected_requests': 'frj-%s',
+    'unrejected_requests': 'frur-%s',
+}
+
+BUST_CACHES = {
+    'friends': ['friends'],
+    'requests': [
+        'requests',
+        'rejected_requests',
+    ],
+    'sent_requests': ['sent_requests'],
+}
+
+
+def cache_key(type, user_pk):
+    """
+    Build the cache key for a particular type of cached value
+    """
+    return CACHE_TYPES[type] % user_pk
+
+
+def bust_cache(type, user_pk):
+    """
+    Bust our cache for a given type, can bust multiple caches
+    """
+    bust_keys = BUST_CACHES[type]
+    keys = [CACHE_TYPES[k] % user_pk for k in bust_keys]
+    cache.delete_many(keys)
 
 
 @receiver(post_save, sender=User)
@@ -170,7 +210,13 @@ class UserProfile(models.Model):
             im.thumbnail(thumbnail_size)
             im.save(thumbnail_output, format='JPEG', quality=100, optimize=True)
             self.profile_photo_thumbnail = InMemoryUploadedFile(
-                thumbnail_output, 'models.ImageField', self.profile_photo.name, 'image/jpeg', sys.getsizeof(thumbnail_output), None)
+                thumbnail_output,
+                'models.ImageField',
+                self.profile_photo.name,
+                'image/jpeg',
+                sys.getsizeof(thumbnail_output),
+                None
+            )
 
         super(UserProfile, self).save(*args, **kwargs)
 
@@ -182,30 +228,175 @@ class UserProfile(models.Model):
                                                   )
 
 
-FRIEND_STATUS = (
-    ('PE', 'Pending'),
-    ('AC', 'Accepted'),
-    ('RE', 'Rejected'),
-)
+class FriendRequest(models.Model):
+    user = models.ForeignKey(User, related_name='Friend_request_sent')
+    friend = models.ForeignKey(User, related_name='Friend_request_received')
 
-
-class UserFriend(models.Model):
-
-    STATUS_PENDING = 'PE'
-    STATUS_ACCEPTED = 'AC'
-    STATUS_REJECTED = 'RE'
-
-    user = models.ForeignKey(User, related_name='user')
-    friend = models.ForeignKey(User, related_name='friend')
-    status = models.CharField(max_length=2, choices=FRIEND_STATUS, default="PE")
-    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
-    last_updated = models.DateTimeField(auto_now=True, db_index=True)
+    created = models.DateTimeField(default=timezone.now)
 
     class Meta:
+        verbose_name = "Friend Request"
+        verbose_name_plural = "Friend Requests"
         unique_together = ("user", "friend")
 
     def __str__(self):
-        return 'user %s - friend %s - status %s ' % (str(self.user), str(self.friend), self.status)
+        return "User %s friend requested %s" % (self.user, self.friend)
+
+    def accept(self):
+        """
+        Accept a friend request
+        """
+        rel = UserFriend.objects.create(
+            user=self.user,
+            friend=self.friend
+        )
+        rel2 = UserFriend.objects.create(
+            user=self.friend,
+            friend=self.user
+        )
+
+        self.delete()
+        FriendRequest.objects.filter(
+            user=self.friend,
+            friend=self.user
+        ).delete()
+
+        # Bust requests cache - request is deleted
+        bust_cache('requests', self.friend.pk)
+        bust_cache('sent_requests', self.user.pk)
+        # Bust reverse requests cache - reverse request might be deleted
+        bust_cache('requests', self.user.pk)
+        bust_cache('sent_requests', self.friend.pk)
+        # Bust friends cache - new friends added
+        bust_cache('friends', self.friend.pk)
+        bust_cache('friends', self.user.pk)
+
+        return True
+
+    def reject(self):
+        """
+        Reject a friend request
+        """
+
+        self.delete()
+        bust_cache('requests', self.friend.pk)
+        bust_cache('sent_requests', self.user.pk)
+        return True
+
+
+class FriendManager(models.Manager):
+    """
+    Friend Manager
+    """
+
+    def friends(self, user):
+        """
+        Return a list of all friends of a user
+        """
+        key = cache_key('friends', user.pk)
+        friends = cache.get(key)
+
+        if friends is None:
+            qs = UserFriend.objects.select_related('user', 'friend').filter(friend=user).all()
+            friends = [u.user for u in qs]
+            # cache.set(key, friends)
+
+        return friends
+
+    def requests(self, user):
+        """ Return a list of friend requests """
+        key = cache_key('requests', user.pk)
+        requests = cache.get(key)
+
+        if requests is None:
+            qs = FriendRequest.objects.select_related('user', 'friend').filter(
+                friend=user).all()
+            requests = list(qs)
+            # cache.set(key, requests)
+
+        return requests
+
+    def sent_requests(self, user):
+        """ Return a list of friendship requests from user """
+        key = cache_key('sent_requests', user.pk)
+        requests = cache.get(key)
+
+        if requests is None:
+            qs = FriendRequest.objects.filter(user=user)
+            requests = list(qs)
+            # cache.set(key, requests)
+
+        return requests
+
+    def add_friend(self, user, friend):
+        """ Create a friend request """
+        if user == friend:
+            raise PermissionDenied("Users cannot be friends with themselves")
+
+        if self.are_friends(user, friend):
+            raise AlreadyFriendsError("Users are already friends")
+
+        request, created = FriendRequest.objects.get_or_create(
+            user=user,
+            friend=friend,
+        )
+
+        if created is False:
+            raise AlreadyExistsError("Friend already requested")
+
+        bust_cache('requests', friend.pk)
+        bust_cache('sent_requests', user.pk)
+
+        return request
+
+    def remove_friend(self, user, friend):
+        """ Destroy a friend relationship """
+        try:
+            qs = UserFriend.objects.filter(
+                Q(user=user, friend=friend) |
+                Q(user=friend, friend=user)
+            ).distinct().all()
+
+            if qs:
+                qs.delete()
+                bust_cache('friends', friend.pk)
+                bust_cache('friends', user.pk)
+                return True
+            else:
+                return False
+        except UserFriend.DoesNotExist:
+            return False
+
+    def are_friends(self, user1, user2):
+        """ Are these two users friends? """
+        friends1 = cache.get(cache_key('friends', user1.pk))
+        friends2 = cache.get(cache_key('friends', user2.pk))
+        if friends1 and user2 in friends1:
+            return True
+        elif friends2 and user1 in friends2:
+            return True
+        else:
+            try:
+                UserFriend.objects.get(friend=user1, user=user2)
+                return True
+            except UserFriend.DoesNotExist:
+                return False
+
+
+class UserFriend(models.Model):
+    user = models.ForeignKey(User, related_name='user')
+    friend = models.ForeignKey(User, related_name='friend')
+
+    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+    objects = FriendManager()
+
+    class Meta:
+        verbose_name = "Friend"
+        verbose_name_plural = "Friends"
+        unique_together = ("user", "friend")
+
+    def __str__(self):
+        return 'user %s - friend %s ' % (str(self.user), str(self.friend))
 
 
 class InviteGroup(models.Model):
