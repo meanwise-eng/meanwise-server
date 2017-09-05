@@ -61,20 +61,21 @@ class UserPostList(APIView):
 
     def get(self, request, user_id):
         posts = post_qs.filter(poster__id=user_id)
-        page = request.GET.get('page')
-        page_size = request.GET.get('page_size')
-        posts, has_next_page, num_pages = get_objects_paginated(
-            posts, page, page_size)
+
+        paginator = TimeBasedPaginator(posts, request)
+
         serializer = PostSerializer(
-            posts, many=True, context={'request': request})
+            paginator.page(), many=True, context={'request': request})
         return Response(
             {
                 "status": "success",
                 "error": "",
                 "results": {
                     "data": serializer.data,
-                    "num_pages": num_pages
-                }
+                    "num_pages": paginator.total_pages
+                },
+                "next": paginator.next_url,
+                "previous": paginator.prev_url
             },
             status=status.HTTP_200_OK
         )
@@ -605,21 +606,10 @@ class PostCommentList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, post_id):
-        after = request.query_params.get('after', None)
-        before = request.query_params.get('before', None)
-        item_count = int(request.query_params.get('item_count', 30))
-        section = int(request.query_params.get('section', 1))
-        if after:
-            after = datetime.datetime.fromtimestamp(float(after) / 1000)
-        if before:
-            before = datetime.datetime.fromtimestamp(float(before) / 1000)
-        if item_count > 100:
-            raise Exception("item_count greater than 100 is not allowed.")
-
         comments = Comment.objects.filter(is_deleted=False).filter(
             post__id=post_id).order_by('-created_on')
 
-        paginator = TimeBasedPaginator(comments, item_count, request, section, after, before)
+        paginator = TimeBasedPaginator(comments, request)
 
         serializer = CommentSerializer(paginator.page(), many=True)
         return Response(
@@ -628,7 +618,7 @@ class PostCommentList(APIView):
                 "error": "",
                 "results": {
                     "data": serializer.data,
-                    "num_pages": int(paginator.total / paginator.item_count)
+                    "num_pages": paginator.total_pages
                 },
                 "next": paginator.next_url,
                 "previous": paginator.prev_url,

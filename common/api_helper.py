@@ -45,19 +45,25 @@ def get_objects_paginated_offset(objects, offset=0, limit=settings.REST_FRAMEWOR
 
 class TimeBasedPaginator:
 
-    def __init__(self, query_set, item_count, request, section, after=None, before=None,
-                 time_field='created_on'):
+    def __init__(self, query_set, request, time_field='created_on'):
         self.query_set = query_set
-        self.item_count = item_count
-        self.section = section
-        self.after = after
-        self.before = before
         self.time_field = time_field
         self.request = request
 
         self.init()
 
     def init(self):
+        self.after = self.request.query_params.get('after', None)
+        self.before = self.request.query_params.get('before', None)
+        self.item_count = int(self.request.query_params.get('item_count', 30))
+        self.section = int(self.request.query_params.get('section', 1))
+        if self.after:
+            self.after = datetime.datetime.fromtimestamp(float(self.after) / 1000)
+        if self.before:
+            self.before = datetime.datetime.fromtimestamp(float(self.before) / 1000)
+        if self.item_count > 100:
+            raise Exception("item_count greater than 100 is not allowed.")
+
         now = datetime.datetime.now()
 
         q = self.query_set
@@ -114,6 +120,7 @@ class TimeBasedPaginator:
         self.next_url = next_url
         self.prev_url = prev_url
         self.total = total
+        self.total_pages = int(self.total / self.item_count) + 1
         offset = (self.section - 1) * self.item_count
         self.paginated_query_set = q[offset:offset + self.item_count]
 
