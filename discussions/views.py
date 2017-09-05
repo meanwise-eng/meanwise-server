@@ -33,20 +33,20 @@ class DiscussionListView(APIView):
         discussions = DiscussionItem.objects.all()
 
         if interest_name:
-            discussions.filter(post__interest_name=interest_name)
+            discussions = discussions.filter(post__interest_name=interest_name)
 
         if topic_texts:
-            discussions.filter(post__topic__text=topic_texts)
+            discussions = discussions.filter(post__topic__text=topic_texts)
 
         if tag_names:
-            discussions.filter(post__tags__name=tag_names)
+            discussions = discussions.filter(post__tags__name=tag_names)
 
         now = datetime.datetime.now()
 
         if after:
-            discussions.filter(datetime__gte=after)
+            discussions = discussions.filter(datetime__gte=after)
         if before:
-            discussions.filter(datetime__lte=before)
+            discussions = discussions.filter(datetime__lte=before)
 
         total = discussions.count()
 

@@ -41,7 +41,7 @@ from mnotifications.models import Notification
 
 from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
-from common.api_helper import get_objects_paginated
+from common.api_helper import get_objects_paginated, TimeBasedPaginator
 from post.documents import PostDocument
 
 from common.push_message import *
@@ -605,21 +605,34 @@ class PostCommentList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, post_id):
+        after = request.query_params.get('after', None)
+        before = request.query_params.get('before', None)
+        item_count = int(request.query_params.get('item_count', 30))
+        section = int(request.query_params.get('section', 1))
+        if after:
+            after = datetime.datetime.fromtimestamp(float(after) / 1000)
+        if before:
+            before = datetime.datetime.fromtimestamp(float(before) / 1000)
+        if item_count > 100:
+            raise Exception("item_count greater than 100 is not allowed.")
+
         comments = Comment.objects.filter(is_deleted=False).filter(
             post__id=post_id).order_by('-created_on')
-        page = request.GET.get('page')
-        page_size = request.GET.get('page_size')
-        comments, has_next_page, num_pages = get_objects_paginated(
-            comments, page, page_size)
-        serializer = CommentSerializer(comments, many=True)
+
+        paginator = TimeBasedPaginator(comments, item_count, request, section, after, before)
+
+        serializer = CommentSerializer(paginator.page(), many=True)
         return Response(
             {
                 "status": "success",
                 "error": "",
                 "results": {
                     "data": serializer.data,
-                    "num_pages": num_pages
-                }
+                    "num_pages": int(paginator.total / paginator.item_count)
+                },
+                "next": paginator.next_url,
+                "previous": paginator.prev_url,
+                "total": paginator.total
             },
             status=status.HTTP_200_OK
         )
