@@ -80,4 +80,5 @@ urlpatterns = [
     url(r'^version/', include('appversion.urls')),
     url(r'^analytics/', include('analytics.urls')),
     url(r'^discussions/', include('discussions.urls')),
+    url(r'^influencers/$', InfluencersListView.as_view()),
 ]

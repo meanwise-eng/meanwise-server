@@ -25,12 +25,15 @@ from rest_framework.decorators import permission_classes
 from rest_framework import authentication, permissions
 from rest_framework.pagination import PageNumberPagination
 
+from elasticsearch_dsl import query
+
 from drf_haystack.serializers import HaystackSerializer
 from drf_haystack.viewsets import HaystackViewSet
 from drf_haystack.filters import HaystackAutocompleteFilter
 
 from userprofile.models import Profession, Skill, Interest, UserProfile, UserFriend
 from userprofile.serializers import *
+from .documents import Influencer
 from mnotifications.models import Notification
 
 from userprofile.search_indexes import UserProfileIndex
@@ -1121,3 +1124,80 @@ class UserMentionAutoComplete(HaystackViewSet):
             self.get_queryset())
 
         return queryset.order_by('id')
+
+
+class InfluencersListView(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        interest_name = request.query_params.get('interest_name', None)
+        after = request.query_params.get('after', None)
+        before = request.query_params.get('before', None)
+        item_count = int(request.query_params.get('item_count', 30))
+        section = int(request.query_params.get('section', 1))
+        if after:
+            after = datetime.datetime.fromtimestamp(float(after) / 1000)
+        if before:
+            before = datetime.datetime.fromtimestamp(float(before) / 1000)
+        if item_count > 30:
+            raise Exception("item_count greater than 30 is not allowed.")
+
+        functions = []
+        filters = []
+
+        interest_names = list(request.user.userprofile.interests.all()
+                              .values_list('name', flat=True))
+        if interest_name:
+            filters.append(query.Q('bool', should=[
+                query.Q('match', interests_weekly=interest_name),
+                query.Q('match', interests_overall=interest_name)
+            ]))
+        else:
+            filters.append(query.Q('bool', should=[
+                query.Q('match', interests_weekly=','.join(interest_names)),
+                query.Q('match', interests_overall=','.join(interest_names))
+            ]))
+
+        functions.append(query.SF('field_value_factor',
+                                  field='popularity_weekly',
+                                  modifier='log1p',
+                                  weight=5))
+        functions.append(query.SF('field_value_factor',
+                                  field='popularity_overall',
+                                  modifier='log1p',
+                                  weight=1))
+        functions.append(query.SF('field_value_factor',
+                                  field='friends',
+                                  modifier='log1p',
+                                  weight=2))
+
+        s = Influencer.search()
+        q = query.Q(
+            'function_score',
+            query=query.Q('bool', filter=filters),
+            functions=functions,
+            score_mode='sum',
+            boost_mode='sum'
+        )
+        s = s.query(q)
+        logger.info(s.to_dict())
+        offset = (section - 1) * item_count
+        s = s[offset:offset + item_count]
+
+        results = s.execute()
+        ids = [r.meta.id for r in results]
+        logger.info(ids)
+        userprofiles = UserProfile.objects.filter(user__in=ids)
+        id_dict = {u.user.id: u for u in userprofiles}
+        logger.info(id_dict)
+        userprofiles = [id_dict[int(id)] for id in ids]
+
+        serializer = UserProfileSerializer(userprofiles, many=True, context={'request': request})
+
+        return Response({
+            'status': 'success',
+            'error': None,
+            'results': serializer.data
+        })

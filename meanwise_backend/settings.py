@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 import datetime
 from datetime import timedelta
+from elasticsearch_dsl.connections import connections
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -103,7 +104,7 @@ INSTALLED_APPS = [
     # api v4
     'api_v4',
     'custom_auth',
-    'userprofile',
+    'userprofile.apps.UserprofileConfig',
     'post',
     'discussions.apps.DiscussionsConfig',
     'django_crontab',
@@ -456,6 +457,9 @@ ELASTICSEARCH_DSL = {
         'hosts': HAYSTACK_ES_URL
     }
 }
+
+# elasticsearch-dsl
+connections.create_connection(hosts=[HAYSTACK_ES_URL])
 
 # Reset password url
 RESET_PASSWORD_URL = SITE_URL + '/reset_password/'
