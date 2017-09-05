@@ -1,0 +1,117 @@
+==============
+3. Discussions
+==============
+
+The discussions API gives a live view into you circle of interest.
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.2/discussions/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Query Parameters
+----------------
+
+..  list-table::
+    :header-rows: 1
+
+    * - Field Name
+      - Description
+    * - interest_name
+      - The name of the interest to filter by
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "status": "success",
+    "error": null,
+    "results": [
+      {
+        "post_id": 1,
+        "comment_id": 1,
+        "type": "comment",
+        "text": "Some comment or post text will be here. Display this in UI"
+        "datetime": "2017-09-03T13:13:25.748935Z",
+        "post": {
+          "image_url": "",
+          "text": "The post text",
+          "id": 1"
+        }
+        "userprofile": {
+          "first_name": "",
+          "last_name": "",
+          "username": "",
+          "user_id": 1,
+          "profile_photo_thumbnail_url": ""
+        }
+      }
+    ]
+  }
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Field Name
+      - Description
+    * - results
+      - The results contains an array of discussion items.
+      - array
+    * - type
+      - The item type. "post" or "comment".
+      - string
+    * - post_id
+      - The post id that this discussion is happening on.
+      - integer
+    * - comment_id
+      - The comment id if the type is "comment".
+      - integer | null
+    * - results.text
+      - The text to display for this discussion item.
+      - string
+    * - datetime
+      - The date and time that the post or comment occured on.
+      - datetime
+    * - results.post
+      - Excerpt from the post.
+      - Post excerpt object
+    * - results.post.image_url
+      - The image_url for the post. Display this on the left.
+      - url
+    * - results.post.text
+      - The post text.
+      - string
+    * - results.post.id
+      - The post ID.
+      - integer
+    * - results.userprofile
+      - The userprofile excerpt.
+      - UserProfile except object.
+    * - results.userprofile.first_name
+      - The first name of the user.
+      - string
+    * - results.userprofile.last_name
+      - The last name of the user.
+      - string
+    * - results.userprofile.username
+      - The username of the user.
+      - string
+    * - results.userprofile.user_id
+      - The ID of the user.
+      - integer
+    * - results.userprofile.profile_photo_thumbnail_url
+      - The URL for the userprofile thumbnail.
+      - url
