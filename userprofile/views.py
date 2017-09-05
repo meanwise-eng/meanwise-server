@@ -1038,7 +1038,7 @@ class UserFriendView(APIView):
                 pass
 
         if friend_request:
-            allow = True if request.user.id != friend_request.user.id else False
+            allow = True if request.user.id != friend_request.friend.id else False
 
         if friend_status.lower() == "accepted":
 

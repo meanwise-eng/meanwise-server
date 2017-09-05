@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied
 from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -331,7 +331,7 @@ class FriendManager(models.Manager):
     def add_friend(self, user, friend):
         """ Create a friend request """
         if user == friend:
-            raise ValidationError("Users cannot be friends with themselves")
+            raise PermissionDenied("Users cannot be friends with themselves")
 
         if self.are_friends(user, friend):
             raise AlreadyFriendsError("Users are already friends")
