@@ -109,6 +109,11 @@ class UserPostList(APIView):
                     post.topics.add(t)
 
             mentioned_users = serializer.validated_data.get('mentioned_users')
+            logger.info(mentioned_users)
+            if type(mentioned_users) == str:
+                mentioned_users = ast.literal_eval(mentioned_users)
+            if len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
+                mentioned_users = ast.literal_eval(mentioned_users)
             if len(mentioned_users):
                 for i in range(len(mentioned_users)):
                     try:
@@ -120,7 +125,7 @@ class UserPostList(APIView):
                     # Add notification
                     notification = Notification.objects.create(
                         receiver=m,
-                        notification_type=Notification.TYPE_UNKNOWN,
+                        notification_type=Notification.TYPE_POST_MENTIONED_USER,
                         data={
                             'post_mentioned_user': m.id,
                             'mentioned_by': int(user_id),
@@ -167,7 +172,9 @@ class UserPostList(APIView):
                 {
                     "status": "success",
                     "error": "",
-                    "results": serializer.data
+                    "results": {
+                        "message": "Successfully created post"
+                    }
                 },
                 status=status.HTTP_201_CREATED
             )
@@ -482,25 +489,26 @@ class UserPostLike(APIView):
             raise PermissionDenied("You can only like a post as yourself")
 
         post.liked_by.add(user)
-        # Add notification
-        notification = Notification.objects.create(
-            receiver=post.poster,
-            notification_type=Notification.TYPE_LIKED_POST,
-            post=post, post_liked_by=user)
-        # send push notification
-        devices = find_user_devices(post.poster.id)
-        message_payload = {
-            'p': str(post.id),
-            'u': str(post.poster.id),
-            't': 'l',
-            'message': (
-                str(user.userprofile.first_name) + " " +
-                str(user.userprofile.last_name) + " liked your post"
-            )
-        }
+        if post.poster.id != request.user.id:
+            # Add notification
+            notification = Notification.objects.create(
+                receiver=post.poster,
+                notification_type=Notification.TYPE_LIKED_POST,
+                post=post, post_liked_by=user)
+            # send push notification
+            devices = find_user_devices(post.poster.id)
+            message_payload = {
+                'p': str(post.id),
+                'u': str(post.poster.id),
+                't': 'l',
+                'message': (
+                    str(user.userprofile.first_name) + " " +
+                    str(user.userprofile.last_name) + " liked your post"
+                )
+            }
 
-        for device in devices:
-            send_message_device(device, message_payload)
+            for device in devices:
+                send_message_device(device, message_payload)
         return Response(
             {
                 "status": "success",
@@ -631,31 +639,36 @@ class PostCommentList(APIView):
 
                 comment = serializer.save()
                 logger.info("Comment saved")
-                # Add notification
-                notification = Notification.objects.create(
-                    receiver=comment.post.poster,
-                    notification_type=Notification.TYPE_COMMENTED_POST,
-                    post=comment.post,
-                    comment=comment)
-                # send push notification
-                devices = find_user_devices(comment.post.poster.id)
-                message_payload = {
-                    'p': str(comment.post.id),
-                    'u': str(comment.post.poster.id),
-                    't': 'c',
-                    'message': (
-                        str(comment.commented_by.userprofile.first_name) + " " +
-                        str(comment.commented_by.userprofile.last_name) + " commented on your post"
-                    )
-                }
+                if comment.post.poster.id != request.user.id:
+                    # Add notification
+                    notification = Notification.objects.create(
+                        receiver=comment.post.poster,
+                        notification_type=Notification.TYPE_COMMENTED_POST,
+                        post=comment.post,
+                        comment=comment)
+                    # send push notification
+                    devices = find_user_devices(comment.post.poster.id)
+                    message_payload = {
+                        'p': str(comment.post.id),
+                        'u': str(comment.post.poster.id),
+                        't': 'c',
+                        'message': (
+                            str(comment.commented_by.userprofile.first_name) + " " +
+                            str(comment.commented_by.userprofile.last_name) + " commented on your post"
+                        )
+                    }
 
-                logger.info("No of devices to send: %s" % len(devices))
-                for device in devices:
-                    logger.info("Sending notification to device: %s" % device)
-                    send_message_device(device, message_payload)
+                    logger.info("No of devices to send: %s" % len(devices))
+                    for device in devices:
+                        logger.info("Sending notification to device: %s" % device)
+                        send_message_device(device, message_payload)
 
-                mentioned_users = serializer.validated_data.get(
-                    'mentioned_users')
+                mentioned_users = serializer.validated_data.get('mentioned_users')
+                logger.info(mentioned_users)
+                if type(mentioned_users) == str:
+                    mentioned_users = ast.literal_eval(mentioned_users)
+                if len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
+                    mentioned_users = ast.literal_eval(mentioned_users)
 
                 if len(mentioned_users):
                     for i in range(len(mentioned_users)):
@@ -668,8 +681,9 @@ class PostCommentList(APIView):
                         # Add notification
                         notification = Notification.objects.create(
                             receiver=m,
-                            notification_type=Notification.TYPE_UNKNOWN,
+                            notification_type=Notification.TYPE_COMMENT_MENTIONED_USER,
                             comment=comment,
+                            post=comment.post,
                             data={
                                 'comment_mentioned_user': m.id,
                                 'mentioned_by': comment.commented_by.id,
@@ -766,7 +780,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     fields = ('id', 'post', 'commented_by',
-              'comment_text', 'created_on', 'modified_on')
+              'comment_text', 'created_on', 'modified_on', 'mentioned_users')
 
 
 class ShareViewSet(viewsets.ModelViewSet):
@@ -885,16 +899,20 @@ class PostExploreView(APIView):
         geo_location = request.query_params.get('geo_location', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
+        item_count = int(request.query_params.get('item_count', 30))
+        section = int(request.query_params.get('section', 1))
         if after:
             after = datetime.datetime.fromtimestamp(float(after) / 1000)
         if before:
             before = datetime.datetime.fromtimestamp(float(before) / 1000)
+        if item_count > 30:
+            raise Exception("item_count greater than 30 is not allowed.")
 
-        items_per_page = 30
+        items_per_page = item_count
 
         interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
-        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('id', flat=True)) + \
-            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('id', flat=True))
+        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
+            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
         skills_list = request.user.userprofile.skills_list
 
         functions = []
@@ -912,18 +930,24 @@ class PostExploreView(APIView):
                 query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
             functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
                 ','), 'scale': '1km', 'decay': 0.9}, weight=1))
-        if after:
-            filters.append(query.Q({'range': {'created_on': {'gt': after}}}))
-        if before:
-            filters.append(query.Q({'range': {'created_on': {'lt': before}}}))
 
         now = datetime.datetime.now()
+        origin = before if before else now
+
+        if after:
+            must.append(query.Q({'range': {'created_on': {'gt': after}}}))
+        if before:
+            must.append(query.Q({'range': {'created_on': {'lt': before}}}))
+        else:
+            must.append(query.Q({'range': {'created_on': {'lt': now}}}))
 
         # overall popularity
         functions.append(query.SF('exp', created_on={
-                         'origin': now, 'offset': '1m', 'scale': '5m', 'decay': 0.9}, weight=20))
+                         'origin': origin, 'offset': '1m', 'scale': '5m', 'decay': 0.1}, weight=30))
         functions.append(query.SF('exp', created_on={
-                         'origin': now, 'offset': '1d', 'scale': '1d', 'decay': 0.9}, weight=10))
+                         'origin': origin, 'offset': '1h', 'scale': '1h', 'decay': 0.1}, weight=24))
+        functions.append(query.SF('exp', created_on={
+                         'origin': origin, 'offset': '1d', 'scale': '1d', 'decay': 0.1}, weight=30))
         functions.append(query.SF('field_value_factor',
                                   field='num_likes', modifier='log1p', weight=2))
         functions.append(query.SF('field_value_factor',
@@ -947,21 +971,17 @@ class PostExploreView(APIView):
             }))
 
         s = PostDocument.search()
-        if len(filters) > 0:
-            q = query.Q(
-                'function_score',
-                query=query.Q('bool', must=must, filter=filters),
-                functions=functions,
-                score_mode='sum'
-            )
-        else:
-            q = query.Q(
-                'function_score',
-                functions=functions,
-                score_mode='sum'
-            )
+        q = query.Q(
+            'function_score',
+            query=query.Q('bool', must=must, filter=filters),
+            functions=functions,
+            score_mode='sum',
+            boost_mode='sum'
+        )
         s = s.query(q)
-        s = s[0:items_per_page]
+        logger.info(s.to_dict())
+        offset = (section - 1) * item_count
+        s = s[offset:offset + items_per_page]
 
         results = s.execute()
         serializer = PostDocumentSerializer(results, many=True, context={'request': request})
@@ -980,31 +1000,68 @@ class PostExploreView(APIView):
 
             return date2
 
-        if after and results.hits.total > 30:
+        if after and results.hits.total > item_count:
             max_created_on = reduce(get_biggest_date, [result.created_on for result in results])
-        elif before and results.hits.total == 0:
-            max_created_on = before
+            min_created_on = reduce(get_smallest_date, [result.created_on for result in results])
+
+            ps = PostDocument.search()
+            must.append(query.Q({
+                'range': {'created_on': {'gte': min_created_on, 'lte': max_created_on}}
+            }))
+            q = query.Q('bool', must=must, filter=filters)
+            ps = ps.query(q)
+            time_total = ps.count() - ((section - 1) * item_count)
+
+        new_params = {}
+        if after and results.hits.total > item_count:
+            if time_total > item_count:
+                after_date = after
+                new_params['section'] = section + 1
+            else:
+                after_date = max_created_on
+        elif before:
+            if section > 1:
+                before_timestamp = before
+                new_params['section'] = section - 1
+                after_date = None
+            else:
+                after_date = before
+                new_params['section'] = 1
         else:
-            max_created_on = now
-        next_url_params = query_params.copy()
+            after_date = now
+            new_params['section'] = 1
+
+        try:
+            new_params['after'] = str(int(after_date.timestamp() * 1000))
+        except Exception:
+            pass
+        try:
+            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
+        except Exception:
+            pass
+
+        next_url_params = {k: p[0] for k, p in query_params.copy().items()}
         if 'before' in next_url_params:
             del next_url_params['before']
-        next_url_params.update({'after': str(int(max_created_on.timestamp() * 1000))})
+        next_url_params.update(new_params)
         next_url = request.build_absolute_uri(
             reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
 
-        if results.hits.total != 0:
-            min_created_on = reduce(get_smallest_date, [result.created_on for result in results])
-        elif not before:
-            min_created_on = now
+        new_params = {}
+        if after:
+            before_timestamp = after
+            new_params['section'] = 1
+        elif results.hits.total > (section * item_count):
+            before_timestamp = before if before else now
+            new_params['section'] = section + 1
         else:
-            min_created_on = None
-
-        if min_created_on:
-            prev_url_params = query_params.copy()
+            before_timestamp = None
+        if before_timestamp:
+            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
+            prev_url_params = {k: p[0] for k, p in query_params.copy().items()}
             if 'after' in prev_url_params:
                 del prev_url_params['after']
-            prev_url_params.update({'before': str(int(min_created_on.timestamp() * 1000))})
+            prev_url_params.update(new_params)
             prev_url = request.build_absolute_uri(
                 reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
         else:
@@ -1018,7 +1075,7 @@ class PostExploreView(APIView):
                 # in haystack view next will go backwards. Deprecated. New clients should
                 # use forward and backward.
                 "next": prev_url,
-                # in haystack view next will go forwards. Deprecated. New clients should
+                # in haystack view previous will go forwards. Deprecated. New clients should
                 # use forward and backward.
                 "previous": next_url,
                 "forward": next_url,

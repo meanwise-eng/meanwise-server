@@ -19,6 +19,8 @@ NOTIFICATION_TYPES = (
     ('LP', 'LikedPost'),
     ('CP', 'CommentedPost'),
     ('UK', 'Unknown'),
+    ('PM', 'PostMentionedUser'),
+    ('CM', 'CommentMentionedUser')
 )
 
 
@@ -28,6 +30,8 @@ class Notification(models.Model):
     TYPE_LIKED_POST = 'LP'
     TYPE_COMMENTED_POST = 'CP'
     TYPE_UNKNOWN = 'UK'
+    TYPE_POST_MENTIONED_USER = 'PM'
+    TYPE_COMMENT_MENTIONED_USER = 'CM'
 
     receiver = models.ForeignKey(User, related_name='receiver')
     notification_type = models.CharField(max_length=2, default="UK", choices=NOTIFICATION_TYPES)
