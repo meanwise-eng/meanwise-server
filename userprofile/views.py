@@ -799,177 +799,6 @@ class InfluencersListView(APIView):
         })
 
 
-class FriendRequestView(APIView):
-    """
-    View for creating and listing friend requests
-    """
-
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request, user_id):
-
-        if int(user_id) != request.user.id:
-            raise PermissionDenied(
-                "You can only see the friend request that you sent")
-
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            logger.error(
-                "UserFriend - GET - User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        try:
-            up = UserProfile.objects.get(user=user)
-        except UserProfile.DoesNotExist:
-            logger.error("UserFriend - GET - user profile not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "Userprofile with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        friend_requests_sent = UserFriend.objects.sent_requests(user=user)
-        friend_requests_received = UserFriend.objects.requests(user=user)
-        return Response(
-            {
-                "status": "success",
-                "error": "",
-                "results": {
-                    "data": {
-                        "sent_requests": FriendRequestSerializer(friend_requests_sent, many=True).data,
-                        "received_requests": FriendRequestSerializer(friend_requests_received, many=True).data
-                    }
-                }
-            },
-            status=status.HTTP_200_OK
-        )
-
-    def post(self, request, user_id):
-        """
-        Creates a friend request
-        """
-        friend_id = request.data.get('friend_id', None)
-
-        if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
-            raise PermissionDenied(
-                "You can only send friend request as yourself")
-
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            logger.error(
-                "UserFriend - GET - User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            up = UserProfile.objects.get(user=user)
-        except UserProfile.DoesNotExist:
-            logger.error("UserProfile - GET - user profile not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "Userprofile with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            friend_user = User.objects.get(id=int(friend_id))
-        except User.DoesNotExist:
-            logger.error(
-                "UserFriend - POST - friend User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "friend User with id does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            friend_profile = UserProfile.objects.get(user=friend_user)
-        except UserProfile.DoesNotExist:
-            logger.error(
-                "UserFriend - POST - friend User not found [api / views.py /")
-            return Response(
-                {
-                    "status": "failed",
-                    "error": "friend UserProfile does not exist",
-                    "results": ""
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            friends = UserFriend.objects.get(user=user, friend=friend_user)
-        except UserFriend.DoesNotExist:
-            friends = None
-            pass
-
-        if friends:
-            logger.info(
-                "UserFriend - POST - Finished [API / views.py /")
-            return Response(
-                {
-                    "status": "success",
-                    "error": "",
-                    "results": "Already friends"
-                },
-                status=status.HTTP_201_CREATED
-            )
-
-        UserFriend.objects.add_friend(
-            request.user,
-            friend_user
-        )
-
-        notification = Notification.objects.create(
-            receiver=friend_user,
-            notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED)
-        # send push notification
-        devices = find_user_devices(friend_user.id)
-        message_payload = {
-            'p': '',
-            'u': str(friend_user.id),
-            't': 'a',
-            'message': (
-                str(user.userprofile.first_name) + " " +
-                str(user.userprofile.last_name) + " has sent you a friend request."
-            )
-        }
-        for device in devices:
-            send_message_device(device, message_payload)
-
-        return Response(
-            {
-                "status": "success",
-                "error": "",
-                "results": "Successfully added friend request."
-            },
-            status=status.HTTP_201_CREATED
-        )
-
-
 class UserFriendView(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
@@ -1024,6 +853,8 @@ class UserFriendView(APIView):
         serialized_friends_list = UserProfileSerializer(UserProfile.objects.filter(
             id__in=user_friends_profiles),
             many=True, context={'request': request, 'user_id': user_id})
+        friend_requests_sent = UserFriend.objects.sent_requests(user=user)
+        friend_requests_received = UserFriend.objects.requests(user=user)
 
         return Response(
             {
@@ -1031,6 +862,8 @@ class UserFriendView(APIView):
                 "error": "",
                 "results": {
                     "data": serialized_friends_list.data,
+                    "sent_requests": FriendRequestSerializer(friend_requests_sent, many=True).data,
+                    "received_requests": FriendRequestSerializer(friend_requests_received, many=True).data,
                     "num_pages": num_pages
                 }
             },
@@ -1106,21 +939,69 @@ class UserFriendView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # try:
+        #     check_friendship = UserFriend.objects.get(user=user, friend=friend_user)
+        # except UserFriend.DoesNotExist:
+        #     check_friendship = None
+        #     pass
+
+        # if check_friendship:
+        #     logger.info(
+        #         "UserFriend - POST - Finished [API / views.py /")
+        #     return Response(
+        #         {
+        #             "status": "success",
+        #             "error": "",
+        #             "results": "Already friends"
+        #         },
+        #         status=status.HTTP_201_CREATED
+        #     )
+
         try:
             friend_request = FriendRequest.objects.get(user=friend_user, friend=user)
         except FriendRequest.DoesNotExist:
-            try:
-                friend_request = FriendRequest.objects.get(user=user, friend=friend_user)
-            except FriendRequest.DoesNotExist:
-                friend_request = None
-                pass
+            friend_request = None
+            pass
 
         if friend_request:
-            allow = True if request.user.id != friend_request.friend.id else False
+            allow = True if request.user.id != friend_request.user.id else False
+
+        if friend_status.lower() == "pending":
+            UserFriend.objects.add_friend(
+                user,
+                friend_user
+            )
+
+            notification = Notification.objects.create(
+                receiver=friend_user,
+                notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED)
+            # send push notification
+            devices = find_user_devices(friend_user.id)
+            message_payload = {
+                'p': '',
+                'u': str(friend_user.id),
+                't': 'a',
+                'message': (
+                    str(user.userprofile.first_name) + " " +
+                    str(user.userprofile.last_name) + " has sent you a friend request."
+                )
+            }
+            for device in devices:
+                send_message_device(device, message_payload)
+
+            return Response(
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": "Successfully added friend request."
+                },
+                status=status.HTTP_201_CREATED
+            )
 
         if friend_status.lower() == "accepted":
-
+            print("called")
             if not friend_request:
+                print("Step 2")
                 try:
                     friends = UserFriend.objects.get(user=user, friend=friend_user)
                 except UserFriend.DoesNotExist:
@@ -1184,6 +1065,7 @@ class UserFriendView(APIView):
                 )
 
             elif not allow:
+                print("permission denied bitch")
                 raise PermissionDenied("You cannot accept the request you sent to other user.")
 
         elif friend_status.lower() == "rejected":
