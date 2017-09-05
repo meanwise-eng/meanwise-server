@@ -809,6 +809,8 @@ class UserFriendView(APIView):
         List all friends for user (user_id)
         """
 
+        status = request.GET.get("status")
+
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -834,6 +836,20 @@ class UserFriendView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        if status.lower() == "pending":
+            friend_requests_received = UserFriend.objects.requests(user=user)
+            return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": {
+                    "data": FriendRequestSerializer(friend_requests_received, many=True).data
+                    "num_pages": num_pages
+                }
+            },
+            status=status.HTTP_200_OK
+        )
 
         user_friends = UserFriend.objects.friends(user)
 

@@ -43,16 +43,15 @@ def add_likes(sender, **kwargs):
     influencer.save()
 
 
-# @receiver(post_save, sender=UserFriend, dispatch_uid='influencers.friend_added')
-# def add_friends(sender, **kwargs):
-#     user_friend = kwargs['instance']
+@receiver(post_save, sender=UserFriend, dispatch_uid='influencers.friend_added')
+def add_friends(sender, **kwargs):
+    user_friend = kwargs['instance']
 
-#     if user_friend.status == UserFriend.STATUS_ACCEPTED:
-#         influencer1 = Influencer.get_influencer(user_friend.user.id)
-#         influencer2 = Influencer.get_influencer(user_friend.friend.id)
+    influencer1 = Influencer.get_influencer(user_friend.user.id)
+    influencer2 = Influencer.get_influencer(user_friend.friend.id)
 
-#         influencer1.friends += 1
-#         influencer2.friends += 1
+    influencer1.friends += 1
+    influencer2.friends += 1
 
-#         influencer1.save()
-#         influencer2.save()
+    influencer1.save()
+    influencer2.save()
