@@ -302,7 +302,7 @@ class UserFriendTestCase(APITestCase):
         self.user_id_2 = user_2["results"]["user"]
 
         # url with which user 1 sends a request
-        url_1 = reverse("friend-request", kwargs={"user_id": self.user_id_1})
+        url_1 = reverse("friends", kwargs={"user_id": self.user_id_1})
 
         # url with which user 2 sends a request
         url_2 = reverse("friends", kwargs={"user_id": self.user_id_2})
@@ -310,6 +310,7 @@ class UserFriendTestCase(APITestCase):
         # send friend request to user 2
         data = {
             "friend_id": self.user_id_2,
+            "status": "pending"
         }
         response = self.client.post(url_1, data,
                                     HTTP_AUTHORIZATION='Token {}'.format(
@@ -365,7 +366,7 @@ class UserFriendTestCase(APITestCase):
         self.user_id_2 = user_2["results"]["user"]
 
         # url with which user 1 send a request
-        url_1 = reverse("friend-request", kwargs={"user_id": self.user_id_1})
+        url_1 = reverse("friends", kwargs={"user_id": self.user_id_1})
 
         # url with which user 2 send a request
         url_2 = reverse("friends", kwargs={"user_id": self.user_id_2})
@@ -373,6 +374,7 @@ class UserFriendTestCase(APITestCase):
         # send friend request to user 2
         data = {
             "friend_id": self.user_id_2,
+            "status": "pending"
         }
         response = self.client.post(url_1, data,
                                     HTTP_AUTHORIZATION='Token {}'.format(
@@ -408,7 +410,7 @@ class UserFriendTestCase(APITestCase):
         self.user_id = user["results"]["user"]
 
         # url with which user 1 send a request
-        url = reverse("friend-request", kwargs={"user_id": self.user_id})
+        url = reverse("friends", kwargs={"user_id": self.user_id})
 
         data = {
             "friend_id": self.user_id,
@@ -463,7 +465,7 @@ class RemoveFriendTestCase(APITestCase):
         print("user 2", self.user_id_2)
 
         # url with which user 1 sends a request
-        url_1 = reverse("friend-request", kwargs={"user_id": self.user_id_1})
+        url_1 = reverse("friends", kwargs={"user_id": self.user_id_1})
 
         # url with which user 2 sends a request
         url_2 = reverse("friends", kwargs={"user_id": self.user_id_2})
@@ -471,6 +473,7 @@ class RemoveFriendTestCase(APITestCase):
         # send friend request to user 2
         data = {
             "friend_id": self.user_id_2,
+            "status": "pending"
         }
         self.client.post(url_1, data,
                          HTTP_AUTHORIZATION='Token {}'.format(self.token_1),
