@@ -55,7 +55,10 @@ class TimeBasedPaginator:
     def init(self):
         self.after = self.request.query_params.get('after', None)
         self.before = self.request.query_params.get('before', None)
-        self.item_count = int(self.request.query_params.get('item_count', 30))
+        self.item_count = int(self.request.query_params.get(
+            'item_count',
+            settings.REST_FRAMEWORK['PAGE_SIZE']
+        ))
         self.section = int(self.request.query_params.get('section', 1))
         if self.after:
             self.after = datetime.datetime.fromtimestamp(float(self.after) / 1000)
@@ -92,7 +95,7 @@ class TimeBasedPaginator:
             del next_url_params['before']
         next_url_params.update(new_params)
         next_url = self.request.build_absolute_uri(
-            reverse('discussions-list')) + '?' + urllib.parse.urlencode(next_url_params)
+            self.request.path_info) + '?' + urllib.parse.urlencode(next_url_params)
 
         new_params = {}
         if self.before:
@@ -113,7 +116,7 @@ class TimeBasedPaginator:
                 del prev_url_params['after']
             prev_url_params.update(new_params)
             prev_url = self.request.build_absolute_uri(
-                reverse('discussions-list')) + '?' + urllib.parse.urlencode(prev_url_params)
+                self.request.path_info) + '?' + urllib.parse.urlencode(prev_url_params)
         else:
             prev_url = None
 
@@ -126,3 +129,48 @@ class TimeBasedPaginator:
 
     def page(self):
         return self.paginated_query_set
+
+
+class NormalPaginator:
+
+    def __init__(self, query_set, request):
+        item_count = request.query_params.get('item_count', settings.REST_FRAMEWORK['PAGE_SIZE'])
+        page = request.query_params.get('page', 1)
+        total = query_set.count()
+        self.request = request
+
+        paginator = Paginator(query_set, item_count)
+        has_next_page = False
+
+        try:
+            objects = paginator.page(self.page)
+            has_next_page = objects.has_next()
+        except PageNotAnInteger:
+            objects = paginator.page(1)
+            has_next_page = objects.has_next()
+        except EmptyPage:
+            objects = []
+        self.objects = objects
+
+        next_url = None
+
+        if has_next_page:
+            new_params = {'page': (page + 1)}
+            prev_url = self.get_new_url_from_params(new_params, request)
+        else:
+            prev_url = None
+
+        self.total_pages = paginator.num_pages
+        self.total = total
+        self.next_url = next_url
+        self.prev_url = prev_url
+
+    def page(self):
+        return self.objects
+
+    def get_new_url_from_params(self, new_params, request):
+        query_params = dict(self.request.query_params)
+        prev_url_params = {k: p[0] for k, p in query_params.copy().items()}
+        prev_url_params.update(new_params)
+        return request.build_absolute_uri(
+            request.path_info) + '?' + urllib.parse.urlencode(prev_url_params)

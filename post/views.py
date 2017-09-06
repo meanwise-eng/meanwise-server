@@ -41,7 +41,7 @@ from mnotifications.models import Notification
 
 from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
-from common.api_helper import get_objects_paginated, TimeBasedPaginator
+from common.api_helper import get_objects_paginated, TimeBasedPaginator, NormalPaginator
 from post.documents import PostDocument
 
 from common.push_message import *
@@ -578,21 +578,23 @@ class PostLikes(APIView):
         page = request.GET.get('page')
         page_size = request.GET.get('page_size')
 
-        liked_by_query = UserProfile.objects.filter(
-            user__in=post.liked_by.all()).order_by('username').all()
-        liked_by, has_next_page, num_pages = get_objects_paginated(
-            liked_by_query, page, page_size)
+        liked_by = UserProfile.objects.filter(user__in=post.liked_by.all())\
+            .order_by('first_name', 'last_name')
+        paginator = NormalPaginator(liked_by, request)
 
         serializer = UserProfileSerializer(
-            liked_by, many=True, context={'request': request})
+            paginator.page(), many=True, context={'request': request})
         return Response(
             {
                 "status": "success",
                 "error": "",
                 "results": {
                     "data": serializer.data,
-                    "num_pages": num_pages
-                }
+                    "num_pages": paginator.total_pages
+                },
+                "next": paginator.next_url,
+                "previous": paginator.prev_url,
+                "total": paginator.total
             },
             status=status.HTTP_200_OK
         )

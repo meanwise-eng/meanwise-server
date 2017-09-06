@@ -840,16 +840,16 @@ class UserFriendView(APIView):
         if status.lower() == "pending":
             friend_requests_received = UserFriend.objects.requests(user=user)
             return Response(
-            {
-                "status": "success",
-                "error": "",
-                "results": {
-                    "data": FriendRequestSerializer(friend_requests_received, many=True).data
-                    "num_pages": num_pages
-                }
-            },
-            status=status.HTTP_200_OK
-        )
+                {
+                    "status": "success",
+                    "error": "",
+                    "results": {
+                        "data": FriendRequestSerializer(friend_requests_received, many=True).data,
+                        "num_pages": num_pages
+                    }
+                },
+                status=status.HTTP_200_OK
+            )
 
         user_friends = UserFriend.objects.friends(user)
 
