@@ -36,37 +36,38 @@ Response Payload (JSON)
 
 .. code-block:: javascript
 
-  {
-    "status": "success",
-    "error": null,
-    "results": [
-      {
-        "post_id": 1,
-        "comment_id": 1,
-        "type": "comment",
-        "text": "Some comment or post text will be here. Display this in UI"
-        "datetime": "2017-09-03T13:13:25.748935Z",
-        "post": {
-          "image_url": "",
-          "text": "The post text",
-          "id": 1"
+    {
+      "status": "success",
+      "error": null,
+      "results": [
+        {
+          "post_id": 1,
+          "comment_id": 1,
+          "type": "comment",
+          "text": "Some comment or post text will be here. Display this in UI",
+          "datetime": "2017-09-03T13:13:25.748935Z",
+          "post": {
+            "image_url": "",
+            "text": "The post text",
+            "id": 1
+          },
+          "userprofile": {
+            "first_name": "",
+            "last_name": "",
+            "username": "",
+            "user_id": 1,
+            "profile_photo_thumbnail_url": ""
+          }
         }
-        "userprofile": {
-          "first_name": "",
-          "last_name": "",
-          "username": "",
-          "user_id": 1,
-          "profile_photo_thumbnail_url": ""
-        }
-      }
-    ]
-  }
+      ]
+    }
 
 ..  list-table:: Fields
     :header-rows: 1
 
     * - Field Name
       - Description
+      - Type
     * - results
       - The results contains an array of discussion items.
       - array

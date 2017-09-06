@@ -60,6 +60,8 @@ urlpatterns = [
     url(r'^search/post/$', PostExploreView.as_view(), name='post-search'),
     url(r'^interests/(?P<interest_id>[0-9]+)/topics/trending/$',
         TrendingTopicForInterest.as_view()),
+    url(r'^topics/trending/$',
+        TrendingTopics.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/new/$',
         UserNotificationsNew.as_view()),
     url(r'^user/(?P<user_id>[0-9]+)/notifications/latest/$',

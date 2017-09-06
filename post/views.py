@@ -889,6 +889,41 @@ class TrendingTopicForInterest(APIView):
         )
 
 
+class TrendingTopics(APIView):
+    """
+    Fetch the trending topics
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        interest_id = request.query_params.get('interest_id', None)
+
+        tt = TrendingTopicsInterest.objects.all()
+
+        if interest_id:
+            tt = tt.filter(interest__id=interest_id)
+        else:
+            interest_ids = list(request.user.userprofile.interests.all()
+                                .values_list('id', flat=True))
+            tt = tt.filter(interest__id__in=interest_ids)
+
+        topics = []
+        for trending_topic in tt:
+            topics = topics + trending_topic.topics
+
+        topics = list(set(topics))
+
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": topics
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
 class PostExploreView(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
