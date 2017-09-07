@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
             influencer.friends = UserFriend.objects.filter(
                 Q(user=user) | Q(friend=user)
-            ).filter(status=UserFriend.STATUS_ACCEPTED).count()
+            ).count()
 
             posts = Post.objects.filter(poster=user)
 
