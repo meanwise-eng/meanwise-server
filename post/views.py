@@ -74,8 +74,8 @@ class UserPostList(APIView):
                     "data": serializer.data,
                     "num_pages": paginator.total_pages
                 },
-                "next": paginator.next_url,
-                "previous": paginator.prev_url
+                "forward": paginator.next_url,
+                "backward": paginator.prev_url
             },
             status=status.HTTP_200_OK
         )
@@ -592,8 +592,8 @@ class PostLikes(APIView):
                     "data": serializer.data,
                     "num_pages": paginator.total_pages
                 },
-                "next": paginator.next_url,
-                "previous": paginator.prev_url,
+                "forward": paginator.next_url,
+                "backward": paginator.prev_url,
                 "total": paginator.total
             },
             status=status.HTTP_200_OK
@@ -622,8 +622,8 @@ class PostCommentList(APIView):
                     "data": serializer.data,
                     "num_pages": paginator.total_pages
                 },
-                "next": paginator.next_url,
-                "previous": paginator.prev_url,
+                "forward": paginator.next_url,
+                "backward": paginator.prev_url,
                 "total": paginator.total
             },
             status=status.HTTP_200_OK
@@ -1338,12 +1338,6 @@ class PostExploreTrendingView(APIView):
                 "status": "success",
                 "error": "",
                 "count": results.hits.total,
-                # in haystack view next will go backwards. Deprecated. New clients should
-                # use forward and backward.
-                "next": prev_url,
-                # in haystack view previous will go forwards. Deprecated. New clients should
-                # use forward and backward.
-                "previous": next_url,
                 "forward": next_url,
                 "backward": prev_url,
                 "results": serializer.data

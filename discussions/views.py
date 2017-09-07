@@ -30,16 +30,21 @@ class DiscussionListView(APIView):
         if item_count > 30:
             raise Exception("item_count greater than 30 is not allowed.")
 
-        discussions = DiscussionItem.objects.all()
+        discussions = DiscussionItem.objects.order_by('-datetime')
 
         if interest_name:
-            discussions = discussions.filter(post__interest_name=interest_name)
+            discussions = discussions.filter(post__interest__name__iexact=interest_name)
+        else:
+            interest_names = list(request.user.userprofile.interests.all()
+                                  .values_list('name', flat=True))
+            for interest_name in interest_names:
+                discussions = discussions.filter(post__interest__name__iexact=interest_name)
 
         if topic_texts:
-            discussions = discussions.filter(post__topic__text=topic_texts)
+            discussions = discussions.filter(post__topic__text__iexact=topic_texts)
 
         if tag_names:
-            discussions = discussions.filter(post__tags__name=tag_names)
+            discussions = discussions.filter(post__tags__name__iexact=tag_names)
 
         now = datetime.datetime.now()
 
@@ -101,8 +106,8 @@ class DiscussionListView(APIView):
                 "status": "success",
                 "error": None,
                 "count": total,
-                "next": next_url,
-                "previous": prev_url,
+                "forward": next_url,
+                "backward": prev_url,
                 "results": serializer.data
             },
             status=status.HTTP_200_OK)

@@ -39,6 +39,8 @@ Response Payload (JSON)
     {
       "status": "success",
       "error": null,
+      "forward": "http://api.meanwise.com/api/v1.x/discussions/?after=1504765092181",
+      "backward": "http://api.meanwise.com/api/v1.x/discussions/?before=1504765092181&section=2",
       "results": [
         {
           "post_id": 1,
