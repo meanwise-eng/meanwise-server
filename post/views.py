@@ -81,7 +81,7 @@ class UserPostList(APIView):
 
     @transaction.atomic()
     def post(self, request, user_id):
-        data = request.data.copy()
+        data = request.data
         data['poster'] = user_id
 
         if int(user_id) != int(request.user.id):
