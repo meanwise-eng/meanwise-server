@@ -61,6 +61,8 @@ ELK_LOGSTASH_PORT = os.environ.get('ELK_LOGSTASH_PORT', None)
 
 FILE_UPLOAD_PERMISSIONS = 0o644
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
+
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
     DEBUG = True
