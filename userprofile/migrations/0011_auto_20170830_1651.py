@@ -37,10 +37,6 @@ class Migration(migrations.Migration):
             model_name='userfriend',
             name='last_updated',
         ),
-        migrations.RemoveField(
-            model_name='userfriend',
-            name='status',
-        ),
         migrations.AlterUniqueTogether(
             name='friendrequest',
             unique_together=set([('user', 'friend')]),

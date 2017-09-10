@@ -383,11 +383,23 @@ class FriendManager(models.Manager):
                 return False
 
 
+FRIEND_STATUS = (
+    ('PE', 'Pending'),
+    ('AC', 'Accepted'),
+    ('RE', 'Rejected'),
+)
+
+
 class UserFriend(models.Model):
+    STATUS_PENDING = 'PE'
+    STATUS_ACCEPTED = 'AC'
+    STATUS_REJECTED = 'RE'
+
     user = models.ForeignKey(User, related_name='user')
     friend = models.ForeignKey(User, related_name='friend')
 
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+    status = models.CharField(max_length=2, choices=FRIEND_STATUS, default=None, blank=True)
     objects = FriendManager()
 
     class Meta:
@@ -396,7 +408,7 @@ class UserFriend(models.Model):
         unique_together = ("user", "friend")
 
     def __str__(self):
-        return 'user %s - friend %s ' % (str(self.user), str(self.friend))
+        return 'user %sfriend %s ' % (str(self.user), str(self.friend))
 
 
 class InviteGroup(models.Model):
