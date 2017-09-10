@@ -24,7 +24,7 @@ class DiscussionItemSerializer(serializers.ModelSerializer):
         post = obj.post
         return {
             'id': post.id,
-            'image_url': post.image.url,
+            'image_url': post.image.url if post.image else post.video_thumbnail.url,
             'text': post.text
         }
 

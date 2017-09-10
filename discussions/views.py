@@ -1,10 +1,14 @@
 import urllib
 import datetime
+import operator
+from functools import reduce
+
 from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from django.urls import reverse
+from django.db.models import Q
 
 from .serializers import DiscussionItemSerializer
 from .models import DiscussionItem
@@ -37,8 +41,11 @@ class DiscussionListView(APIView):
         else:
             interest_names = list(request.user.userprofile.interests.all()
                                   .values_list('name', flat=True))
+
+            filters = []
             for interest_name in interest_names:
-                discussions = discussions.filter(post__interest__name__iexact=interest_name)
+                filters.append(Q(post__interest__name__iexact=interest_name))
+            discussions = discussions.filter(reduce(operator.or_, filters))
 
         if topic_texts:
             discussions = discussions.filter(post__topic__text__iexact=topic_texts)
