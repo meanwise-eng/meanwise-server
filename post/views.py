@@ -76,7 +76,8 @@ class UserPostList(APIView):
                     "num_pages": paginator.total_pages
                 },
                 "forward": paginator.next_url,
-                "backward": paginator.prev_url
+                "backward": paginator.prev_url,
+                "total": paginator.total
             },
             status=status.HTTP_200_OK
         )
