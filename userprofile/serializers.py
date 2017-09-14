@@ -137,23 +137,8 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         except UserFriend.DoesNotExist:
             return None
 
-        try:
-            friend_request = FriendRequest.objects.get(
-                Q(
-                    Q(user=user_id) & Q(friend=obj.user.id)
-                ) |  # or
-                Q(
-                    Q(friend=user_id) & Q(user=obj.user.id)
-                )
-            )
-        except FriendRequest.DoesNotExist:
-            return None
-
         if friend:
-            return 'AC'
-
-        elif friend_request:
-            return 'PE'
+            return friend.status
 
     def get_friends_url(self, obj):
         request = self.context.get('request')
