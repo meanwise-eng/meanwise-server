@@ -13,6 +13,7 @@ from django.db.models.functions import Coalesce
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
+from django.db.models.signals import post_delete
 import logging
 import operator
 from functools import reduce
@@ -763,6 +764,9 @@ class PostCommentDetail(APIView):
 
         comment.is_deleted = True
         comment.save()
+
+        post_delete.send(Comment, instance=comment)
+
         return Response(
             {
                 "status": "success",

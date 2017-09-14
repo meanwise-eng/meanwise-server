@@ -107,7 +107,7 @@ INSTALLED_APPS = [
     'api_v4',
     'custom_auth',
     'userprofile.apps.UserprofileConfig',
-    'post',
+    'post.apps.PostConfig',
     'discussions.apps.DiscussionsConfig',
     'django_crontab',
     'scarface',
