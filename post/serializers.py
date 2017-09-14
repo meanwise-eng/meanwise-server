@@ -23,18 +23,17 @@ class PostDocumentSerializer(DocumentSerializer):
     topics = serializers.ListField(child=serializers.CharField())
     user_profession = serializers.SerializerMethodField()
     created_on = serializers.SerializerMethodField()
-    is_liked = serializers.SerializerMethodField()
     likes_url = serializers.SerializerMethodField()
     resolution = serializers.SerializerMethodField()
     mentioned_users = serializers.SerializerMethodField()
 
     class Meta:
         document = PostDocument
-        fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'num_comments',
+        fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'likes_url', 'num_comments',
                   'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
-                  'topics', 'created_on', 'is_liked', 'likes_url', 'resolution', 'mentioned_users']
+                  'topics', 'created_on', 'resolution', 'mentioned_users']
 
     def get_id(self, obj):
         return obj._id
