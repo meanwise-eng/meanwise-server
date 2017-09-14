@@ -39,7 +39,7 @@ class PostDocumentSerializer(DocumentSerializer):
         return obj._id
 
     def get_score(self, obj):
-        return obj._score
+        return obj._score if hasattr(obj.meta, 'score') else None
 
     def get_user_profession(self, obj):
         if not obj.user_profession_id:
