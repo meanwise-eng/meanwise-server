@@ -421,6 +421,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
+        read_only_fields = ('poster',)
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)

@@ -85,7 +85,6 @@ class UserPostList(APIView):
     @transaction.atomic()
     def post(self, request, user_id):
         data = request.data
-        data['poster'] = user_id
 
         if int(user_id) != int(request.user.id):
             raise PermissionDenied("You cannot create a post as another user")
@@ -101,7 +100,7 @@ class UserPostList(APIView):
             if 'tags' in serializer.validated_data:
                 if serializer.validated_data['tags']:
                     ts = serializer.validated_data.pop('tags')
-            post = serializer.save()
+            post = serializer.save(poster=request.user)
             if topic_names:
                 topic_names = topic_names.split(",")
                 for topic in topic_names:
