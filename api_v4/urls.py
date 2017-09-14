@@ -37,7 +37,7 @@ urlpatterns = [
     # url(r'^user/(?P<user_id>[0-9]+)/friend-request/$',
     #     FriendRequestView.as_view(), name="friend-request"),
     url(r'^user/(?P<user_id>[0-9]+)/friends/$',
-        UserFriendView.as_view(), name='friends'),
+        FriendsList.as_view(), name='friends'),
     url(r'^user/(?P<user_id>[0-9]+)/friends/remove/$',
         RemoveFriend.as_view(), name="remove-friend"),
     url(r'^user/(?P<user_id>[0-9]+)/posts/$',
