@@ -29,12 +29,12 @@ class DiscussionItemSerializer(serializers.ModelSerializer):
         }
 
     def get_userprofile(self, obj):
-        u = obj.post.poster.userprofile
+        u = obj.user.userprofile
         return {
-            'id': obj.post.poster.id,
+            'id': u.id,
             'first_name': u.first_name,
             'last_name': u.last_name,
             'username': u.username,
-            'user_id': obj.post.poster.id,
+            'user_id': u.user.id,
             'profile_photo_thumbnail_url': u.profile_photo_thumbnail.url
         }

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 
 from post.models import Post, Comment
@@ -21,3 +22,4 @@ class DiscussionItem(models.Model):
     type = models.CharField(max_length=20)
     text = models.TextField()
     datetime = models.DateTimeField()
+    user = models.ForeignKey(User)

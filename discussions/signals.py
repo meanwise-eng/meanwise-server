@@ -1,5 +1,5 @@
 import logging
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from .models import DiscussionItem
@@ -18,5 +18,13 @@ def create_discussion(sender, **kwargs):
         discussion.text = comment.comment_text
         discussion.datetime = comment.created_on
         discussion.type = DiscussionItem.TYPE_COMMENT
+        discussion.user = comment.commented_by
 
         discussion.save()
+
+
+@receiver(post_delete, sender=Comment, dispatch_uid='discussions.comment_deleted')
+def delete_discussion(sender, **kwargs):
+    comment = kwargs['instance']
+    discussion = DiscussionItem.objects.filter(comment=comment)
+    discussion.delete()
