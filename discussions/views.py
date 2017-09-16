@@ -6,6 +6,7 @@ from functools import reduce
 from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from common.api_helper import build_absolute_uri
 
 from django.urls import reverse
 from django.db.models import Q
@@ -75,7 +76,7 @@ class DiscussionListView(APIView):
         if 'before' in next_url_params:
             del next_url_params['before']
         next_url_params.update(new_params)
-        next_url = request.build_absolute_uri(
+        next_url = build_absolute_uri(
             reverse('discussions-list')) + '?' + urllib.parse.urlencode(next_url_params)
 
         new_params = {}
@@ -96,7 +97,7 @@ class DiscussionListView(APIView):
             if 'after' in prev_url_params:
                 del prev_url_params['after']
             prev_url_params.update(new_params)
-            prev_url = request.build_absolute_uri(
+            prev_url = build_absolute_uri(
                 reverse('discussions-list')) + '?' + urllib.parse.urlencode(prev_url_params)
         else:
             prev_url = None

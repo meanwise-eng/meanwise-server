@@ -2,6 +2,7 @@ from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 from django.db.models import Q
 from django.urls import reverse
+from common.api_helper import build_absolute_uri
 
 import logging
 import ast
@@ -145,7 +146,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         if not request:
             return None
 
-        return request.build_absolute_uri(
+        return build_absolute_uri(
             reverse('friends', args=[obj.user.id])
         )
 

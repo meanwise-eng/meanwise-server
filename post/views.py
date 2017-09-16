@@ -42,7 +42,8 @@ from mnotifications.models import Notification
 
 from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
-from common.api_helper import get_objects_paginated, TimeBasedPaginator, NormalPaginator
+from common.api_helper import get_objects_paginated, TimeBasedPaginator, NormalPaginator,\
+    build_absolute_uri
 from post.documents import PostDocument
 
 from common.push_message import *
@@ -1087,7 +1088,7 @@ class PostExploreView(APIView):
         if 'before' in next_url_params:
             del next_url_params['before']
         next_url_params.update(new_params)
-        next_url = request.build_absolute_uri(
+        next_url = build_absolute_uri(
             reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
 
         new_params = {}
@@ -1105,7 +1106,7 @@ class PostExploreView(APIView):
             if 'after' in prev_url_params:
                 del prev_url_params['after']
             prev_url_params.update(new_params)
-            prev_url = request.build_absolute_uri(
+            prev_url = build_absolute_uri(
                 reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
         else:
             prev_url = None
@@ -1314,7 +1315,7 @@ class PostExploreTrendingView(APIView):
         if 'before' in next_url_params:
             del next_url_params['before']
         next_url_params.update(new_params)
-        next_url = request.build_absolute_uri(
+        next_url = build_absolute_uri(
             reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
 
         new_params = {}
@@ -1332,7 +1333,7 @@ class PostExploreTrendingView(APIView):
             if 'after' in prev_url_params:
                 del prev_url_params['after']
             prev_url_params.update(new_params)
-            prev_url = request.build_absolute_uri(
+            prev_url = build_absolute_uri(
                 reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
         else:
             prev_url = None

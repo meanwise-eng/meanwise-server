@@ -1,6 +1,7 @@
 import datetime
 from rest_framework import serializers
 from django.urls import reverse
+from common.api_helper import build_absolute_uri
 
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 
@@ -79,7 +80,7 @@ class PostDocumentSerializer(DocumentSerializer):
         if not request:
             return None
 
-        return request.build_absolute_uri(reverse('post-likes', args=[obj._id]))
+        return build_absolute_uri(reverse('post-likes', args=[obj._id]))
 
     def get_resolution(self, obj):
         post = Post.objects.get(id=obj._id)
@@ -235,7 +236,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         if not request:
             return None
 
-        return request.build_absolute_uri(reverse('post-likes', args=[obj.id]))
+        return build_absolute_uri(reverse('post-likes', args=[obj.id]))
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)

@@ -11,7 +11,11 @@
 	"folders":
 	[
 		{
-			"path": "."
+			"path": ".",
+			"folder_exclude_patterns": [
+				"docker/build/app/code",
+				"docker/build/docs/docs"
+			]
 		}
 	]
 }
