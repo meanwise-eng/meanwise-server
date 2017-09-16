@@ -1,5 +1,7 @@
 import datetime
 import urllib
+import re
+import logging
 from django.conf import settings
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -41,6 +43,26 @@ def get_objects_paginated_offset(objects, offset=0, limit=settings.REST_FRAMEWOR
     except EmptyPage:
         objects = paginator.page(paginator.num_pages)
     return objects
+
+
+def build_absolute_uri(uri):
+    logger = logging.getLogger('meanwise_backend.%s' % __name__)
+    base_uri = settings.BASE_URI
+    base_api_path = '/api/v4/'
+    regex = re.compile(base_api_path)
+
+    logger.debug("Base URI: %s" % base_uri)
+    logger.debug("New URI: %s" % uri)
+
+    b_uri_p = urllib.parse.urlparse(base_uri)
+    n_uri_p = urllib.parse.urlparse(uri)
+    new_path = regex.sub(b_uri_p.path, n_uri_p.path)
+
+    logger.debug("New Path: %s" % new_path)
+
+    new_uri = b_uri_p[0:2] + (new_path,) + n_uri_p[3:]
+    logger.debug("New URI: %s" % (new_uri,))
+    return urllib.parse.urlunparse(new_uri)
 
 
 class TimeBasedPaginator:
@@ -94,7 +116,7 @@ class TimeBasedPaginator:
         if 'before' in next_url_params:
             del next_url_params['before']
         next_url_params.update(new_params)
-        next_url = self.request.build_absolute_uri(
+        next_url = build_absolute_uri(
             self.request.path_info) + '?' + urllib.parse.urlencode(next_url_params)
 
         new_params = {}
@@ -115,7 +137,7 @@ class TimeBasedPaginator:
             if 'after' in prev_url_params:
                 del prev_url_params['after']
             prev_url_params.update(new_params)
-            prev_url = self.request.build_absolute_uri(
+            prev_url = build_absolute_uri(
                 self.request.path_info) + '?' + urllib.parse.urlencode(prev_url_params)
         else:
             prev_url = None
@@ -172,5 +194,5 @@ class NormalPaginator:
         query_params = dict(self.request.query_params)
         prev_url_params = {k: p[0] for k, p in query_params.copy().items()}
         prev_url_params.update(new_params)
-        return request.build_absolute_uri(
+        return build_absolute_uri(
             request.path_info) + '?' + urllib.parse.urlencode(prev_url_params)

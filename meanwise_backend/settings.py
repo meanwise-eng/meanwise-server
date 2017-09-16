@@ -39,6 +39,7 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'meanwise1!')
 SEARCH_ENGINE = os.environ.get('SEARCH_ENGINE', 'elasticsearch')
 MEDIA_URL = os.environ.get('MEDIA_URL', 'http://localhost:8001/media/')
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
+BASE_URI = os.environ.get('BASE_URI', 'http://localhost:8000/api/v4/')
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')
