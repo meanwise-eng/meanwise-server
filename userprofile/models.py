@@ -400,6 +400,7 @@ class UserFriend(models.Model):
 
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     status = models.CharField(max_length=2, choices=FRIEND_STATUS, default=None, blank=True)
+    last_updated = models.DateTimeField(auto_now=True, db_index=True)
     objects = FriendManager()
 
     class Meta:
