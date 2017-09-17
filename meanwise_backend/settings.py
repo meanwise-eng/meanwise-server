@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import sys
+import logging
 import datetime
 from datetime import timedelta
 from elasticsearch_dsl.connections import connections
@@ -339,6 +341,9 @@ if ELK_LOGSTASH_HOST:
     }
     LOGGING['loggers']['django']['handlers'].append('graypy')
     LOGGING['loggers']['meanwise_backend']['handlers'].append('graypy')
+
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    logging.disable(logging.CRITICAL)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
