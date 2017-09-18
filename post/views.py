@@ -215,6 +215,7 @@ class UserPostDetail(APIView):
             post.story.save()
 
         post.save()
+        post_delete.send(Post, instance=post)
         return Response(
             {
                 "status": "success",

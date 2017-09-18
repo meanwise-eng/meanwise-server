@@ -45,6 +45,9 @@ class PostDocument(DocType):
     class Meta:
         model = Post
 
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
     def prepare_interest_id(self, obj):
         return obj.interest.id
 
