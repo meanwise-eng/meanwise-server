@@ -1024,7 +1024,6 @@ class PostExploreView(APIView):
         )
         s = s.query(q)
         s = s.sort('-created_on')
-        logger.info(s.to_dict())
         offset = (section - 1) * item_count
         s = s[offset:offset + items_per_page]
 
@@ -1251,7 +1250,6 @@ class PostExploreTrendingView(APIView):
             boost_mode='sum'
         )
         s = s.query(q)
-        logger.info(s.to_dict())
         offset = (section - 1) * item_count
         s = s[offset:offset + items_per_page]
 
