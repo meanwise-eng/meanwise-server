@@ -47,6 +47,9 @@ class Post(models.Model):
     geo_location_lat = models.DecimalField(null=True, max_digits=9, decimal_places=6)
     geo_location_lng = models.DecimalField(null=True, max_digits=9, decimal_places=6)
     mentioned_users = models.ManyToManyField(User, related_name='mentioned_users', blank=True)
+    pdf = models.FileField(upload_to='post_pdf', null=True, blank=True)
+    audio = models.FileField(upload_to='post_audio', null=True, blank=True)
+    link = models.URLField(max_length=1024, null=True, blank=True)
 
     parent = models.ForeignKey('self', db_index=True, null=True)
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')

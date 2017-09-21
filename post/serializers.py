@@ -120,6 +120,8 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
+    pdf = serializers.SerializerMethodField()
+    audio = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -137,7 +139,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
                   'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
-                  'mentioned_users', 'geo_location_lat', 'geo_location_lng'
+                  'mentioned_users', 'geo_location_lat', 'geo_location_lng', 'pdf', 'link', 'audio'
                   )
 
     def get_user_id(self, obj):
@@ -267,6 +269,18 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return ""
 
+    def get_pdf(self, obj):
+        pdf = obj.pdf
+        if pdf:
+            return pdf.url
+        return ""
+
+    def get_audio(self, obj):
+        audio = obj.audio
+        if audio:
+            return audio.url
+        return ""
+
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -295,7 +309,8 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
-                  'created_on', 'tags', 'topics', 'story_index', 'mentioned_users'
+                  'created_on', 'tags', 'topics', 'story_index', 'mentioned_users',
+                  'pdf', 'link', 'audio'
                   )
 
     def get_user_id(self, obj):
@@ -410,6 +425,18 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         comment = Comment.objects.get(id=obj._id)
 
         return [{'id': u.id, 'username': u.username} for u in comment.mentioned_users.all()]
+
+    def get_pdf(self, obj):
+        pdf = obj.pdf
+        if pdf:
+            return pdf.url
+        return ""
+
+    def get_audio(self, obj):
+        audio = obj.audio
+        if audio:
+            return audio.url
+        return ""
 
 
 class PostSaveSerializer(serializers.ModelSerializer):
