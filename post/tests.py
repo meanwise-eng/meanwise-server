@@ -1,10 +1,25 @@
 import json
+import string
+
+from time import sleep
+
 from itertools import islice
 
+from test.support import EnvironmentVarGuard
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
+from django.db.models import SlugField
+from django import forms
 
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
+from rest_framework import serializers
+
+from hypothesis.extra.django.models import models, add_default_field_mapping
+from hypothesis.extra.django import TestCase as HTestCase
+import hypothesis.strategies as st
+from hypothesis import given, assume, example
+from meanwise_backend.test_case import GabbiHypothesisTestCase
 
 from userprofile.models import Interest
 from .models import Story, Post
@@ -462,6 +477,111 @@ class PostLikeUnlikeTestCase(APITestCase):
                                         "Content-Type": "application/json"
                                     })
         self.assertEqual(202, response.status_code)
+
+
+class PostComment2TestCase(APITestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.interest = Interest(name="Travel", slug="travel")
+        self.interest.save()
+        self.user = User.objects.create(username="tester",
+                                        password="password",
+                                        email="tester@example.com")
+        self.post = Post(poster=self.user, text="Test", interest=self.interest)
+        self.post.save()
+
+        self.token = Token.objects.get(user=self.user)
+        self.token.save()
+
+    def tearDown(self):
+        self.token.delete()
+        self.post.delete()
+        self.user.delete()
+        self.interest.delete()
+        super().tearDown()
+
+    @given(st.text(alphabet=st.characters(max_codepoint=1000, blacklist_categories=('Cc', 'Cs')), min_size=1))
+    def test_create_post(self, comment_text):
+        assume(comment_text is not None and comment_text.strip() != '' and comment_text != '0')
+        post_id = self.post.id
+        user_id = self.user.id
+        token = self.token.key
+        """
+        Test to post a comment
+        """
+        url = reverse(
+            "post-comment", kwargs={"post_id": post_id})
+
+        comment = {
+            "post": post_id,
+            "commented_by": user_id,
+            "comment_text": comment_text
+        }
+
+        #self.run_gabi({
+        #    'tests': [{
+        #        'name': 'create comment',
+        #        'url': url,
+        #        'method': 'POST',
+        #        'status': 201,
+        #        'request_headers': {
+        #            'content-type': 'application/json',
+        #            'authorization': 'Token %s' % token
+        #        },
+        #        'data': comment
+        #    }]
+        #})
+        response = self.client.post('%s' % (url,), comment,
+                                    HTTP_AUTHORIZATION='Token {}'.format(
+                                        token),
+                                    headers={
+                                        "Content-Type": "application/json",
+                                        "Authorization": "Token {}".format(token)
+                                    })
+        self.assertEqual(201, response.status_code, response.data)
+        comment_id = response.data["results"]["id"]
+#
+        # """
+        # Test to list comments of a post
+        # """
+#
+        url = reverse("post-comment", kwargs={"post_id": post_id})
+
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+        self.assertEqual(200, response.status_code)
+        field = serializers.CharField()
+        text = field.to_representation(comment_text).strip()
+        print([repr(c["comment_text"]) for c in response.data['results']['data']], 'v: {}'.format(repr(text)))
+        self.assertTrue(text in [c["comment_text"] for c in response.data['results']['data']])
+
+        # """
+        # Test to delete a comment
+        # """
+        url = reverse("comment-detail",
+                      kwargs={"post_id": post_id, "comment_id": comment_id})
+        response = self.client.delete(url,
+                                      HTTP_AUTHORIZATION='Token {}'.format(
+                                          token),
+                                      headers={
+                                          "Content-Type": "application/json"
+                                      })
+        self.assertEqual(202, response.status_code)
+
+        url = reverse("post-comment", kwargs={"post_id": post_id})
+        response = self.client.get(url,
+                                   HTTP_AUTHORIZATION='Token {}'.format(
+                                       token),
+                                   headers={
+                                       "Content-Type": "application/json"
+                                   })
+        self.assertEqual(200, response.status_code)
+        self.assertTrue(len(response.data['results']['data']) == 0)
 
 
 class PostCommentTestCase(APITestCase):
