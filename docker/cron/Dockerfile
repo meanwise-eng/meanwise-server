@@ -12,6 +12,7 @@ RUN mkdir /var/lib/meanwise && \
 
 ADD start.sh /start.sh
 ADD awscredentials /root/.aws/credentials
+ADD refresh-index /etc/cron.d/refresh-index
 
 RUN locale-gen en_US.UTF-8
 ENV LANG  en_US.UTF-8

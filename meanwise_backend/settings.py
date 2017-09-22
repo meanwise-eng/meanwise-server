@@ -531,7 +531,7 @@ mimetypes.add_type("video/x-ms-wmv", ".wmv", True)
 # cron  to store trending topics
 
 CRONJOBS = [
-    ('*/1 * * * *', 'post.cron.my_scheduled_job', '>> /tmp/cron.log 2>&1')
+    ('*/5 * * * *', 'post.cron.my_scheduled_job', '>> /tmp/cron.log 2>&1')
 ]
 
 SCARFACE_REGION_NAME = "us-east-1"

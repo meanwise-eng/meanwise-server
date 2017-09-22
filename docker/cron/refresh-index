@@ -1,0 +1,1 @@
+*/5 * * * * root /usr/bin/python /app/manage.py search_index --populate -f >> /tmp/cron.log 2>&1
