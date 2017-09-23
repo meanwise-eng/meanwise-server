@@ -4,7 +4,7 @@ from post.models import *
 
 
 class PostAdmin(admin.ModelAdmin):
-    pass
+    fields = ('interest', 'image', 'video', 'text', 'poster', 'tags', 'mentioned_users')
 
 
 class CommentAdmin(admin.ModelAdmin):

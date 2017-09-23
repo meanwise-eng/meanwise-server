@@ -36,7 +36,7 @@ class Post(models.Model):
     video = models.FileField(upload_to='post_videos', null=True, blank=True)
     text = models.CharField(max_length=200, null=True, blank=True)
     poster = models.ForeignKey(User, related_name='poster')
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     topics = models.ManyToManyField(Topic, blank=True)
     liked_by = models.ManyToManyField(User, related_name='liked_by', blank=True)
     is_deleted = models.BooleanField(default=False)
@@ -80,6 +80,12 @@ class Post(models.Model):
                 except Exception as e:
                     print ("Error generating video thumb", e, str(e))
                 return
+
+            if self.video_thumbnail:
+                self.resolution = {
+                    'height': self.video_thumbnail.height,
+                    'width': self.video_thumbnail.width
+                }
 
         if self.image:
             im = Image.open(self.image)
