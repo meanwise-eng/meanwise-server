@@ -189,7 +189,7 @@ class PostDocument(DocType):
             boost = obj.boosts.latest('boost_datetime')
         except Boost.DoesNotExist:
             return None
-        return boost.boost_value if boost is not None else None
+        return boost.boost_value
 
     def prepare_boost_datetime(self, obj):
         try:

@@ -54,7 +54,7 @@ class Post(models.Model):
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
 
-    boosts = GenericRelation(Boost, related_query_name='posts')
+    boosts = GenericRelation(Boost, related_query_name='post')
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -65,6 +65,7 @@ class Post(models.Model):
         return "Post id: " + str(self.id) + " poster: " + str(self.poster)
 
     def save(self, *args, **kwargs):
+        inserting = self.pk is None
         if self.video:
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
@@ -105,7 +106,7 @@ class Post(models.Model):
 
         super(Post, self).save(*args, **kwargs)
 
-        if self.poster.userprofile.post_boost:
+        if inserting and self.poster.userprofile.post_boost:
             boost = Boost(
                 boost_value = self.poster.userprofile.post_boost,
                 content_object = self

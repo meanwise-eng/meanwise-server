@@ -184,7 +184,7 @@ class UserProfile(models.Model):
     user_type = models.IntegerField(default=int(0), null=False)
     profile_background_color = models.CharField(default='#FFFFFF', max_length=20)
 
-    profile_boosts = GenericRelation(Boost, related_query_name='profiles')
+    profile_boosts = GenericRelation(Boost, related_query_name='profile')
     post_boost = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):

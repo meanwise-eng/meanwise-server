@@ -11,6 +11,7 @@ class PostAdmin(admin.ModelAdmin):
               'mentioned_users')
     inlines = [BoostInline,]
 
+
 class CommentAdmin(admin.ModelAdmin):
     pass
 
