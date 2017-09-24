@@ -5,6 +5,7 @@ from analytics.models import SeenPost
 from .models import Post, Comment
 
 from userprofile.models import UserProfile
+from boost.models import Boost
 
 post = Index('mw_posts')
 
@@ -41,6 +42,9 @@ class PostDocument(DocType):
     num_recent_seen = fields.IntegerField()
     created_on = fields.DateField()
     geo_location = fields.GeoPointField()
+
+    boost_value = fields.IntegerField()
+    boost_datetime = fields.DateField()
 
     class Meta:
         model = Post
@@ -179,3 +183,18 @@ class PostDocument(DocType):
             'lat': float(obj.geo_location_lat),
             'lon': float(obj.geo_location_lng)
         }
+
+    def prepare_boost_value(self, obj):
+        try:
+            boost = obj.boosts.latest('boost_datetime')
+        except Boost.DoesNotExist:
+            return None
+        return boost.boost_value if boost is not None else None
+
+    def prepare_boost_datetime(self, obj):
+        try:
+            boost = obj.boosts.latest('boost_datetime')
+        except Boost.DoesNotExist:
+            return None
+        return boost.boost_datetime
+

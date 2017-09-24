@@ -5,6 +5,7 @@ import sys
 from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
+from django.db.models.signals import post_save
 
 from taggit.managers import TaggableManager
 from common.utils import slugify
@@ -103,6 +104,15 @@ class Post(models.Model):
             }
 
         super(Post, self).save(*args, **kwargs)
+
+        if self.poster.userprofile.post_boost:
+            boost = Boost(
+                boost_value = self.poster.userprofile.post_boost,
+                content_object = self
+            )
+            boost.save()
+
+            post_save.send(Post, instance=self, created=False)
 
     def num_likes(self):
         return self.liked_by.all().distinct().count()

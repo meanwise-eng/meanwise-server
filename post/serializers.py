@@ -27,6 +27,7 @@ class PostDocumentSerializer(DocumentSerializer):
     likes_url = serializers.SerializerMethodField()
     resolution = serializers.SerializerMethodField()
     mentioned_users = serializers.SerializerMethodField()
+    boost_datetime = serializers.SerializerMethodField()
 
     class Meta:
         document = PostDocument
@@ -34,7 +35,8 @@ class PostDocumentSerializer(DocumentSerializer):
                   'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
-                  'topics', 'created_on', 'resolution', 'mentioned_users']
+                  'topics', 'created_on', 'resolution', 'mentioned_users',
+                  'boost_value', 'boost_datetime', 'score']
 
     def get_id(self, obj):
         return obj._id
@@ -91,6 +93,9 @@ class PostDocumentSerializer(DocumentSerializer):
         post = Post.objects.get(id=obj._id)
 
         return [{'id': u.id, 'username': u.username} for u in post.mentioned_users.all()]
+
+    def get_boost_datetime(self, obj):
+        return obj.boost_datetime
 
 
 class MentionedUserSerializer(serializers.ModelSerializer):

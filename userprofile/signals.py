@@ -5,8 +5,25 @@ from django.dispatch import receiver
 
 from .documents import Influencer
 from post.models import Post, Comment
-from userprofile.models import UserFriend
+from userprofile.models import UserFriend, UserProfile
+from boost.models import Boost
 
+
+@receiver(post_save, sender=Boost, dispatch_uid='influencers.boost_save')
+def add_profile_boost(sender, **kwargs):
+    boost = kwargs['instance']
+    if boost.content_type != UserProfile:
+        return
+
+    userprofile = boost.content_object
+    latest_boost = userprofile.profile_boosts.latest('boost_datetime')
+
+    if boost == latest_boost:
+        return
+
+    influencer = Influencer.get_influencer(userprofile.user_id)
+    influencer.boost_value = boost.boost_value
+    influencer.boost_datetime = boost.boost_datetime
 
 @receiver(post_save, sender=Post, dispatch_uid='influencers.post_save')
 def add_interests_and_likes(sender, **kwargs):
@@ -55,3 +72,4 @@ def add_friends(sender, **kwargs):
 
     influencer1.save()
     influencer2.save()
+
