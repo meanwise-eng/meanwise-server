@@ -4,6 +4,7 @@ import sys
 
 from django.db import models
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 
 from taggit.managers import TaggableManager
 from common.utils import slugify
@@ -19,7 +20,7 @@ from PIL import Image
 from io import BytesIO
 
 from userprofile.models import Interest
-
+from boost.models import Boost
 
 class Topic(models.Model):
     text = models.CharField(max_length=128, unique=True)
@@ -51,6 +52,8 @@ class Post(models.Model):
     parent = models.ForeignKey('self', db_index=True, null=True)
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
+
+    boosts = GenericRelation(Boost, related_query_name='posts')
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
