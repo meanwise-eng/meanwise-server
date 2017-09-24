@@ -972,14 +972,14 @@ class FriendsList(APIView):
                     notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED,
                     user_friend=uf)
                 # send push notification
-                devices = find_user_devices(user.id)
+                devices = find_user_devices(friend_user.id)
                 message_payload = {
                     'p': '',
                     'u': str(user.id),
                     't': 'r',
                     'message': (
-                        str(friend_user.userprofile.first_name) + " " +
-                        str(friend_user.userprofile.last_name) + " sent friend request."
+                        str(user.userprofile.first_name) + " " +
+                        str(user.userprofile.last_name) + " sent friend request."
                     )
                 }
 
