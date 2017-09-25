@@ -36,7 +36,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     )
 
     queryset=Post.objects.filter(is_deleted=False)
-    
+
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
@@ -82,7 +82,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         if up.cover_photo:
             return up.cover_photo.url
         return ""
-    
+
     def get_user_profile_photo_small(self, obj):
         try:
             up = obj.poster.userprofile
@@ -191,7 +191,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     queryset=Post.objects.filter(is_deleted=False)
-    
+
     class Meta:
         model = Post
         fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id', 'user_firstname', 'user_lastname',
@@ -237,7 +237,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         if up.cover_photo:
             return up.cover_photo.url
         return ""
-    
+
     def get_user_profile_photo_small(self, obj):
         try:
             up = obj.poster.userprofile
@@ -311,8 +311,10 @@ class PostSaveSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     topics = serializers.SerializerMethodField()
     topic_names = serializers.CharField(required=False, max_length=100, allow_blank=True)
+
     class Meta:
         model = Post
+        read_only_fields = ('poster',)
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text',flat=True)
@@ -333,10 +335,10 @@ class CommentSerializer(serializers.ModelSerializer):
     user_last_name = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
     user_profile_photo_small = serializers.SerializerMethodField()
-    
-    
+
+
     post_id = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Comment
         fields = ('id', 'comment_text', 'user_id', 'user_username', 'user_first_name', 'user_last_name',
@@ -396,7 +398,7 @@ class CommentSerializer(serializers.ModelSerializer):
             return up.profile_photo_thumbnail.url
         return  ""
 
-        
+
 class CommentSaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment

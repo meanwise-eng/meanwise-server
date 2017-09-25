@@ -61,7 +61,6 @@ class UserPostList(APIView):
     @transaction.atomic()
     def post(self, request, user_id):
         data = request.data
-        request.data['poster'] = user_id
 
         if int(user_id) != int(request.user.id):
             raise PermissionDenied("You cannot create a post as another user")
@@ -77,7 +76,7 @@ class UserPostList(APIView):
             if 'tags' in  serializer.validated_data:
                 if serializer.validated_data['tags']:
                     ts = serializer.validated_data.pop('tags')
-            post = serializer.save()
+            post = serializer.save(poster=request.user)
             if topic_names:
                 topic_names = topic_names.split(",")
                 for topic in topic_names:
@@ -109,7 +108,7 @@ class UserPostList(APIView):
             for t in ts:
                 post.tags.add(t)
 
-            
+
 
             return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
@@ -208,7 +207,7 @@ class UserHomeFeed(APIView):
                 return Response({"status":"failed", "error":"Error fetching userprofile/interests for user.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
             interests_ids = userprofile.interests.all().values_list('id', flat=True)
             home_feed_posts = post_qs.filter(Q(poster__id__in=friends_ids) | Q(interest__id__in=interests_ids) | Q(poster__id=user_id))
- 
+
             # # Sorting by skills
             # skills_list = userprofile.skills_list
             # topics_subq = Topic.objects.filter(post=OuterRef('pk'))
@@ -273,7 +272,7 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,
                           IsOwnerOrReadOnly,)
     fields = ('id', 'interest', 'image', 'video', 'text', 'poster', 'tags', 'liked_by', 'is_deleted', 'created_on', 'modified_on')
-    
+
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -407,10 +406,10 @@ class PostCommentList(APIView):
                 return Response({"status":"success", "error":"", "results":serializer.data}, status=status.HTTP_201_CREATED)
             except Exception as ex:
                 logger.error(ex)
-                return Response({"status":"failed", "error": "Error saving comment.", "results":""}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+                return Response({"status":"failed", "error": "Error saving comment.", "results":""}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({"status":"failed", "error":serializer.errors, "results":""}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+
 class PostCommentDetail(APIView):
     """
     Delete a comment instance.
@@ -430,7 +429,7 @@ class PostCommentDetail(APIView):
         comment.is_deleted= True
         comment.save()
         return Response({"status":"success", "error":"", "results":"Succesfully deleted."}, status=status.HTTP_202_ACCEPTED)
-        
+
 class CommentViewSet(viewsets.ModelViewSet):
     """
     Comment apis
@@ -502,7 +501,7 @@ class TrendingTopicForInterest(APIView):
         except TrendingTopicsInterest.DoesNotExist:
             return Response({"status":"failed", "error":"Could not find relevant value in TrendingTopicsInterest.", "results":""}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"status":"success", "error":"", "results":tt.topics}, status=status.HTTP_201_CREATED)
-    
+
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()
     class Meta:
