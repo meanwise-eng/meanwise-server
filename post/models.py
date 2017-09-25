@@ -4,6 +4,8 @@ import sys
 
 from django.db import models
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
+from django.db.models.signals import post_save
 
 from taggit.managers import TaggableManager
 from common.utils import slugify
@@ -19,7 +21,7 @@ from PIL import Image
 from io import BytesIO
 
 from userprofile.models import Interest
-
+from boost.models import Boost
 
 class Topic(models.Model):
     text = models.CharField(max_length=128, unique=True)
@@ -52,6 +54,8 @@ class Post(models.Model):
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
 
+    boosts = GenericRelation(Boost, related_query_name='post')
+
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
@@ -61,6 +65,7 @@ class Post(models.Model):
         return "Post id: " + str(self.id) + " poster: " + str(self.poster)
 
     def save(self, *args, **kwargs):
+        inserting = self.pk is None
         if self.video:
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
@@ -100,6 +105,15 @@ class Post(models.Model):
             }
 
         super(Post, self).save(*args, **kwargs)
+
+        if inserting and self.poster.userprofile.post_boost:
+            boost = Boost(
+                boost_value = self.poster.userprofile.post_boost,
+                content_object = self
+            )
+            boost.save()
+
+            post_save.send(Post, instance=self, created=False)
 
     def num_likes(self):
         return self.liked_by.all().distinct().count()

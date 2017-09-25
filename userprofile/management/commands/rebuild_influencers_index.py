@@ -1,11 +1,15 @@
 import datetime
+
+from time import sleep
+
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
 from django.contrib.auth.models import User
-from userprofile.models import UserFriend
+from userprofile.models import UserFriend, UserProfile
 from post.models import Post, Comment
 from userprofile.documents import Influencer, influencers
+from boost.models import Boost
 
 
 class Command(BaseCommand):
@@ -15,11 +19,14 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        users = User.objects.all()
+        userprofiles = UserProfile.objects.all()
 
         influencers.delete(ignore=404)
+        Influencer.init()
+        sleep(3)
 
-        for user in users:
+        for userprofile in userprofiles:
+            user = userprofile.user
             influencer = Influencer.get_influencer(user.id)
 
             influencer.friends = UserFriend.objects.filter(
@@ -45,5 +52,12 @@ class Command(BaseCommand):
                 created_on__lt=one_week_ago).values_list('interest__name', flat=True))
             influencer.interests_weekly = ','.join(posts.filter(
                 created_on__gte=one_week_ago).values_list('interest__name', flat=True))
+
+            try:
+                boost = userprofile.profile_boosts.latest('boost_datetime')
+                influencer.boost_value = boost.boost_value
+                influencer.boost_datetime = boost.boost_datetime
+            except Boost.DoesNotExist:
+                pass
 
             influencer.save()
