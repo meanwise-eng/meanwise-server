@@ -30,7 +30,25 @@ class Topic(models.Model):
         return "Topic id: " + str(self.id) + " text: " + str(self.text)
 
 
+POST_TYPES = (
+    ('image', 'Image'),
+    ('video', 'Video'),
+    ('pdf', 'PDF'),
+    ('audio', 'Audio'),
+    ('text', 'Text'),
+    ('link', 'Link')
+)
+
+
 class Post(models.Model):
+    TYPE_IMAGE = 'image'
+    TYPE_VIDEO = 'video'
+    TYPE_PDF = 'pdf'
+    TYPE_AUDIO = 'audio'
+    TYPE_TEXT = 'text'
+    TYPE_LINK = 'link'
+
+    post_type = models.CharField(max_length=5, default=None, choices=POST_TYPES)
     interest = models.ForeignKey(Interest, db_index=True)
     image = models.ImageField(upload_to='post_images', null=True, blank=True)
     video = models.FileField(upload_to='post_videos', null=True, blank=True)
@@ -48,9 +66,11 @@ class Post(models.Model):
     geo_location_lng = models.DecimalField(null=True, max_digits=9, decimal_places=6)
     mentioned_users = models.ManyToManyField(User, related_name='mentioned_users', blank=True)
     pdf = models.FileField(upload_to='post_pdf', null=True, blank=True)
+    pdf_thumbnail = models.ImageField(upload_to='post_pdf_thumbnails', null=True, blank=True)
     audio = models.FileField(upload_to='post_audio', null=True, blank=True)
+    audio_thumbnail = models.ImageField(upload_to='post_audio_thumbnails', null=True, blank=True)
     link = models.URLField(max_length=1024, null=True, blank=True)
-
+    link_meta_data = pgJSONField(blank=True, null=True)
     parent = models.ForeignKey('self', db_index=True, null=True)
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
