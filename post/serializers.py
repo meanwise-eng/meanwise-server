@@ -122,8 +122,8 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
     pdf_url = serializers.SerializerMethodField()
     audio_url = serializers.SerializerMethodField()
-    pdf_thumbnail_url = serializers.SerializerMethodField()
-    audio_thumbnail_url = serializers.SerializerMethodField()
+    pdf_thumb_url = serializers.SerializerMethodField()
+    audio_thumb_url = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     post_type = serializers.SerializerMethodField()
 
@@ -144,7 +144,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
                   'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng', 'pdf_url', 'link',
-                  'audio_url', 'pdf_thumbnail_url', 'audio_thumbnail_url', 'link_meta_data'
+                  'audio_url', 'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data'
                   )
 
     def get_user_id(self, obj):
@@ -280,7 +280,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return pdf.url
         return ""
 
-    def get_pdf_thumbnail_url(self, obj):
+    def get_pdf_thumb_url(self, obj):
         pdf_thumbnail = obj.pdf_thumbnail
         if pdf_thumbnail:
             return pdf_thumbnail.url
@@ -292,7 +292,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return audio.url
         return ""
 
-    def get_audio_thumbnail_url(self, obj):
+    def get_audio_thumb_url(self, obj):
         audio_thumbnail = obj.audio_thumbnail
         if audio_thumbnail:
             return audio_thumbnail.url
@@ -301,7 +301,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_link_meta_data(self, obj):
         return obj.link_meta_data if obj.link_meta_data else {}
 
-    def prepare_post_type(self, obj):
+    def get_post_type(self, obj):
         if obj.post_type:
             return obj.post_type
         return None
@@ -329,8 +329,8 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     queryset = Post.objects.filter(is_deleted=False)
     pdf_url = serializers.SerializerMethodField()
     audio_url = serializers.SerializerMethodField()
-    pdf_thumbnail_url = serializers.SerializerMethodField()
-    audio_thumbnail_url = serializers.SerializerMethodField()
+    pdf_thumb_url = serializers.SerializerMethodField()
+    audio_thumb_url = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     post_type = serializers.SerializerMethodField()
 
@@ -341,7 +341,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
                   'created_on', 'tags', 'topics', 'story_index', 'mentioned_users',
-                  'pdf_url', 'pdf_thumbnail_url', 'link', 'audio_url', 'audio_thumbnail_url',
+                  'pdf_url', 'pdf_thumb_url', 'link', 'audio_url', 'audio_thumb_url',
                   'link_meta_data'
                   )
 
@@ -464,7 +464,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return pdf.url
         return ""
 
-    def get_pdf_thumbnail_url(self, obj):
+    def get_pdf_thumb_url(self, obj):
         pdf_thumbnail = obj.pdf_thumbnail
         if pdf_thumbnail:
             return pdf_thumbnail.url
@@ -476,7 +476,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return audio.url
         return ""
 
-    def get_audio_thumbnail_url(self, obj):
+    def get_audio_thumb_url(self, obj):
         audio_thumbnail = obj.audio_thumbnail
         if audio_thumbnail:
             return audio_thumbnail.url
@@ -485,7 +485,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_link_meta_data(self, obj):
         return obj.link_meta_data if obj.link_meta_data else {}
 
-    def prepare_post_type(self, obj):
+    def get_post_type(self, obj):
         if obj.post_type:
             return obj.post_type
         return None
