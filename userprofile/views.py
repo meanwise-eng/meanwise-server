@@ -916,7 +916,7 @@ class FriendsList(APIView):
         else:
             friend_id = request.data.get('friend_id', None)
 
-        if int(user_id) != request.user.id):
+        if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
             raise PermissionDenied(
                 "You can only send friend request as yourself")
 
