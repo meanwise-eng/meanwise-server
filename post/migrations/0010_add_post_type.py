@@ -35,7 +35,7 @@ def add_post_type(apps, scheme_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0011_post_post_type'),
+        ('post', '0009_auto_20170921_1657'),
     ]
 
     operations = [
