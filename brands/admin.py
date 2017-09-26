@@ -1,9 +1,15 @@
 from django.contrib import admin
 from django import forms
+from django.contrib.admin import TabularInline
 
 from boost.admin import BoostInline
 
-from .models import Brand
+from .models import Brand, BrandMember
+
+
+class MemberInline(TabularInline):
+    model = BrandMember
+    extra = 1
 
 
 class BrandForm(forms.ModelForm):
@@ -22,7 +28,7 @@ class BrandForm(forms.ModelForm):
 
 
 class BrandAdmin(admin.ModelAdmin):
-    inlines = [BoostInline, ]
+    inlines = [MemberInline, BoostInline, ]
     form = BrandForm
 
 
