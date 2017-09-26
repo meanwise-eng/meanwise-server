@@ -41,6 +41,12 @@ class PostDocument(DocType):
     num_recent_seen = fields.IntegerField()
     created_on = fields.DateField()
     geo_location = fields.GeoPointField()
+    pdf_url = fields.StringField()
+    audio_url = fields.StringField()
+    link = fields.StringField()
+    pdf_thumb_url = fields.StringField()
+    audio_thumb_url = fields.StringField()
+    post_type = fields.StringField()
 
     class Meta:
         model = Post
@@ -176,3 +182,42 @@ class PostDocument(DocType):
             'lat': float(obj.geo_location_lat),
             'lon': float(obj.geo_location_lng)
         }
+
+    def prepare_audio_url(self, obj):
+        _audio = obj.audio
+        if _audio:
+            return _audio.url
+        return ""
+
+    def prepare_pdf_url(self, obj):
+        _pdf = obj.pdf
+        if _pdf:
+            return _pdf.url
+        return ""
+
+    def prepare_link(self, obj):
+        _link = obj.link
+        if _link:
+            return _link.url
+        return ""
+
+    def prepare_audio_thumb_url(self, obj):
+        # needs to be added
+        if obj.audio:
+            if obj.audio_thumbnail:
+                return obj.audio_thumbnail.url
+        else:
+            return None
+
+    def prepare_pdf_thumb_url(self, obj):
+        # needs to be added
+        if obj.pdf:
+            if obj.pdf_thumbnail:
+                return obj.pdf_thumbnail.url
+        else:
+            return None
+
+    def prepare_post_type(self, obj):
+        if obj.post_type:
+            return obj.post_type
+        return None

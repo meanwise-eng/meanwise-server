@@ -125,6 +125,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     pdf_thumbnail_url = serializers.SerializerMethodField()
     audio_thumbnail_url = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
+    post_type = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -143,8 +144,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
                   'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng', 'pdf_url', 'link',
-                  'audio_url', 'pdf_thumbnail_url', 'audio_thumbnail_url', 'link_meta_data',
-                  'post_type'
+                  'audio_url', 'pdf_thumbnail_url', 'audio_thumbnail_url', 'link_meta_data'
                   )
 
     def get_user_id(self, obj):
@@ -301,6 +301,11 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_link_meta_data(self, obj):
         return obj.link_meta_data if obj.link_meta_data else {}
 
+    def prepare_post_type(self, obj):
+        if obj.post_type:
+            return obj.post_type
+        return None
+
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -327,6 +332,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     pdf_thumbnail_url = serializers.SerializerMethodField()
     audio_thumbnail_url = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
+    post_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -478,6 +484,11 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def get_link_meta_data(self, obj):
         return obj.link_meta_data if obj.link_meta_data else {}
+
+    def prepare_post_type(self, obj):
+        if obj.post_type:
+            return obj.post_type
+        return None
 
 
 class PostSaveSerializer(serializers.ModelSerializer):
