@@ -22,6 +22,7 @@ from io import BytesIO
 
 from userprofile.models import Interest
 from boost.models import Boost
+from brands.models import Brand
 
 class Topic(models.Model):
     text = models.CharField(max_length=128, unique=True)
@@ -55,6 +56,7 @@ class Post(models.Model):
     story_index = models.IntegerField(null=True)
 
     boosts = GenericRelation(Boost, related_query_name='post')
+    brand = models.ForeignKey(Brand, null=True, related_name='posts')
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -66,6 +68,13 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         inserting = self.pk is None
+
+        try:
+            brand = Brand.objects.get(members__user=self.poster)
+            self.brand = brand
+        except Brand.DoesNotExist:
+            pass
+
         if self.video:
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)

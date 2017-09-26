@@ -1,5 +1,9 @@
-from django_elasticsearch_dsl import DocType, Index, fields
 import datetime
+
+from django_elasticsearch_dsl import DocType, Index, fields
+
+from django.urls import reverse
+from common.api_helper import build_absolute_uri
 
 from analytics.models import SeenPost
 from .models import Post, Comment
@@ -45,6 +49,9 @@ class PostDocument(DocType):
 
     boost_value = fields.IntegerField()
     boost_datetime = fields.DateField()
+
+    brand = fields.StringField()
+    brand_logo_url = fields.StringField()
 
     class Meta:
         model = Post
@@ -197,4 +204,16 @@ class PostDocument(DocType):
         except Boost.DoesNotExist:
             return None
         return boost.boost_datetime
+
+    def prepare_brand(self, obj):
+        if obj.brand is None:
+            return None
+
+        return build_absolute_uri(reverse('brand-details', kwargs={'brand_id': obj.brand.id}))
+
+    def prepare_brand_logo_url(self, obj):
+        if obj.brand is None:
+            return None
+
+        return obj.brand.logo_thumbnail.url
 
