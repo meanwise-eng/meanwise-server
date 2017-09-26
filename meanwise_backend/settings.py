@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     'post.apps.PostConfig',
     'discussions.apps.DiscussionsConfig',
     'boost.apps.BoostConfig',
+    'brands.apps.BrandsConfig',
     'django_crontab',
     'scarface',
     'analytics',
