@@ -8,10 +8,9 @@ from taggit_serializer.serializers import TagListSerializerField, TaggitSerializ
 from django.contrib.auth.models import User
 from userprofile.models import UserProfile, Profession
 from post.models import Post, Comment, Share, Story
-from post.search_indexes import PostIndex
 from post.documents import PostDocument
 
-from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
+from drf_haystack.serializers import HaystackSerializerMixin
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 
@@ -302,9 +301,18 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.link_meta_data if obj.link_meta_data else {}
 
     def get_post_type(self, obj):
-        if obj.post_type:
-            return obj.post_type
-        return None
+        if obj.image:
+            return Post.TYPE_IMAGE
+        elif obj.video:
+            return Post.TYPE_VIDEO
+        elif obj.audio:
+            return Post.TYPE_AUDIO
+        elif obj.link:
+            return Post.TYPE_LINK
+        elif obj.pdf:
+            return Post.TYPE_PDF
+        elif obj.text or not (obj.image and obj.video and obj.link and obj.text and obj.pdf):
+            return Post.TYPE_TEXT
 
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -486,9 +494,18 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.link_meta_data if obj.link_meta_data else {}
 
     def get_post_type(self, obj):
-        if obj.post_type:
-            return obj.post_type
-        return None
+        if obj.image:
+            return Post.TYPE_IMAGE
+        elif obj.video:
+            return Post.TYPE_VIDEO
+        elif obj.audio:
+            return Post.TYPE_AUDIO
+        elif obj.link:
+            return Post.TYPE_LINK
+        elif obj.pdf:
+            return Post.TYPE_PDF
+        elif obj.text or not (obj.image and obj.video and obj.link and obj.text and obj.pdf):
+            return Post.TYPE_TEXT
 
 
 class PostSaveSerializer(serializers.ModelSerializer):

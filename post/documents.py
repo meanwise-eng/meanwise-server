@@ -218,6 +218,15 @@ class PostDocument(DocType):
             return None
 
     def prepare_post_type(self, obj):
-        if obj.post_type:
-            return obj.post_type
-        return None
+        if obj.image:
+            return Post.TYPE_IMAGE
+        elif obj.video:
+            return Post.TYPE_VIDEO
+        elif obj.audio:
+            return Post.TYPE_AUDIO
+        elif obj.link:
+            return Post.TYPE_LINK
+        elif obj.pdf:
+            return Post.TYPE_PDF
+        elif obj.text or not (obj.image or obj.video or obj.link or obj.text or obj.pdf):
+            return Post.TYPE_TEXT
