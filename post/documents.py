@@ -187,19 +187,19 @@ class PostDocument(DocType):
         _audio = obj.audio
         if _audio:
             return _audio.url
-        return ""
+        return None
 
     def prepare_pdf_url(self, obj):
         _pdf = obj.pdf
         if _pdf:
             return _pdf.url
-        return ""
+        return None
 
     def prepare_link(self, obj):
         _link = obj.link
         if _link:
             return _link.url
-        return ""
+        return None
 
     def prepare_audio_thumb_url(self, obj):
         # needs to be added
