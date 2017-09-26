@@ -18,6 +18,7 @@ class BrandForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['profile_image'].required = False
+        self.fields['compact_display_image'].help_text = "This will be displayed in the explore screen"
 
 
 class BrandAdmin(admin.ModelAdmin):

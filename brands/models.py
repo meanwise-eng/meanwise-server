@@ -18,6 +18,7 @@ class Brand(models.Model):
     profile_image = models.ImageField(upload_to='brand_profiles', null=True)
     profile_color = models.CharField(max_length=7, default='#000000')
     description = models.CharField(max_length=500)
+    compact_display_image = models.ImageField(upload_to='brand_compact_display')
 
     boosts = GenericRelation(Boost, related_query_name='brand')
 
