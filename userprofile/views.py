@@ -906,9 +906,17 @@ class FriendsList(APIView):
         Friend request, accept, reject
 
         """
-        logger.info("Friendslist - POST [API / views.py /")
-        friend_id = request.data.get('friend_id', None)
-        if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
+        friend_status = request.data.get('status', 'pending')
+
+        # for pending request the friend_id and user_id is actually reversed
+        # from front-end :O
+        if friend_status == 'pending':
+            friend_id = user_id
+            user_id = request.data.get('friend_id', None)
+        else:
+            friend_id = request.data.get('friend_id', None)
+
+        if int(user_id) != request.user.id):
             raise PermissionDenied(
                 "You can only send friend request as yourself")
 
@@ -938,7 +946,6 @@ class FriendsList(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        friend_status = request.data.get('status', 'pending')
 
         # check if request for self, if so raise error
         if friend_id:
