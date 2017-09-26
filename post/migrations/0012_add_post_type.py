@@ -3,23 +3,26 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+from django.db.models import Q
+
 from post.models import Post
 
 
 def add_post_type(apps, scheme_editor):
     Posts = apps.get_model("post", "Post")
-    post_image = Posts.objects.filter(image__isnull=False)
-    post_video = Posts.objects.filter(video__isnull=False)
-    post_link = Posts.objects.filter(link__isnull=False)
-    post_pdf = Posts.objects.filter(pdf__isnull=False)
-    post_audio = Posts.objects.filter(audio__isnull=False)
+    post_image = Posts.objects.filter(~Q(image='') & ~Q(image=None))
+    post_video = Posts.objects.filter(~Q(video='') & ~Q(video=None))
+    post_link = Posts.objects.filter(~Q(link='') & ~Q(link=None))
+    post_pdf = Posts.objects.filter(~Q(pdf='') & ~Q(pdf=None))
+    post_audio = Posts.objects.filter(~Q(audio='') & ~Q(audio=None))
     post_text = Posts.objects.filter(
-        text__isnull=False,
-        image__isnull=True,
-        video__isnull=True,
-        link__isnull=True,
-        pdf__isnull=True,
-        audio__isnull=True)
+        (~Q(text='') & ~Q(text=None)) &
+        (Q(image='') | Q(image=None)) &
+        (Q(video='') | Q(video=None)) &
+        (Q(link='') | Q(link=None)) &
+        (Q(pdf='') | Q(pdf=None)) &
+        (Q(audio='') | Q(audio=None))
+    )
 
     post_image.update(post_type=Post.TYPE_IMAGE)
     post_video.update(post_type=Post.TYPE_VIDEO)
