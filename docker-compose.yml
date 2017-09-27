@@ -18,6 +18,7 @@ services:
     environment:
       ELK_LOGSTASH_HOST: '192.168.22.131'
       ELK_LOGSTASH_PORT: '12201'
+      STATIC_URL: 'http://localhost:8001/static/'
 
   nginx:
     image: nginx:1.12.0

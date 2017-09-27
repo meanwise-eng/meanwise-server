@@ -396,7 +396,7 @@ class UserFriendTestCase(APITestCase):
                                     headers={
                                         "Content-Type": "application/json"
                                     })
-        print(response)
+
         self.assertEqual(201, response.status_code)
 
     def test_request_yourself(self):
@@ -457,12 +457,11 @@ class RemoveFriendTestCase(APITestCase):
         user_1 = self.create_profile("test123", "test@example.com")
         self.token_1 = user_1["results"]["auth_token"]
         self.user_id_1 = user_1["results"]["user"]
-        print("user 1", self.user_id_1)
+
         # create user 2
         user_2 = self.create_profile("test1231", "test2@gmail.com")
         self.token_2 = user_1["results"]["auth_token"]
         self.user_id_2 = user_2["results"]["user"]
-        print("user 2", self.user_id_2)
 
         # url with which user 1 sends a request
         url_1 = reverse("friends", kwargs={"user_id": self.user_id_1})

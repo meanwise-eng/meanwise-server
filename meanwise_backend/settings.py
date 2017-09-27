@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import sys
+import logging
 import datetime
 from datetime import timedelta
 from elasticsearch_dsl.connections import connections
@@ -110,6 +112,8 @@ INSTALLED_APPS = [
     'userprofile.apps.UserprofileConfig',
     'post.apps.PostConfig',
     'discussions.apps.DiscussionsConfig',
+    'boost.apps.BoostConfig',
+    'brands.apps.BrandsConfig',
     'django_crontab',
     'scarface',
     'analytics',
@@ -340,6 +344,9 @@ if ELK_LOGSTASH_HOST:
     LOGGING['loggers']['django']['handlers'].append('graypy')
     LOGGING['loggers']['meanwise_backend']['handlers'].append('graypy')
 
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    logging.disable(logging.CRITICAL)
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
@@ -539,7 +546,7 @@ mimetypes.add_type("application/pdf", ".pdf", True)
 # cron  to store trending topics
 
 CRONJOBS = [
-    ('*/1 * * * *', 'post.cron.my_scheduled_job', '>> /tmp/cron.log 2>&1')
+    ('*/5 * * * *', 'post.cron.my_scheduled_job', '>> /tmp/cron.log 2>&1')
 ]
 
 SCARFACE_REGION_NAME = "us-east-1"

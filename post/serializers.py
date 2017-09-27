@@ -4,13 +4,16 @@ from django.urls import reverse
 from common.api_helper import build_absolute_uri
 
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
+from common.api_helper import build_absolute_uri
 
 from django.contrib.auth.models import User
 from userprofile.models import UserProfile, Profession
 from post.models import Post, Comment, Share, Story
 from post.documents import PostDocument
+from brands.models import Brand
 
 from drf_haystack.serializers import HaystackSerializerMixin
+from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 
@@ -26,6 +29,7 @@ class PostDocumentSerializer(DocumentSerializer):
     likes_url = serializers.SerializerMethodField()
     resolution = serializers.SerializerMethodField()
     mentioned_users = serializers.SerializerMethodField()
+    boost_datetime = serializers.SerializerMethodField()
 
     class Meta:
         document = PostDocument
@@ -33,7 +37,8 @@ class PostDocumentSerializer(DocumentSerializer):
                   'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
-                  'topics', 'created_on', 'resolution', 'mentioned_users']
+                  'topics', 'created_on', 'resolution', 'mentioned_users',
+                  'boost_value', 'boost_datetime', 'brand', 'brand_logo_url']
 
     def get_id(self, obj):
         return obj._id
@@ -91,6 +96,9 @@ class PostDocumentSerializer(DocumentSerializer):
 
         return [{'id': u.id, 'username': u.username} for u in post.mentioned_users.all()]
 
+    def get_boost_datetime(self, obj):
+        return obj.boost_datetime
+
 
 class MentionedUserSerializer(serializers.ModelSerializer):
 
@@ -125,6 +133,8 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     audio_thumb_url = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     post_type = serializers.SerializerMethodField()
+    brand_logo_url = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -142,8 +152,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
                   'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
-                  'mentioned_users', 'geo_location_lat', 'geo_location_lng', 'pdf_url', 'link',
-                  'audio_url', 'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data'
+                  'mentioned_users', 'geo_location_lat', 'geo_location_lng',
+                  'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
+                  'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data'
                   )
 
     def get_user_id(self, obj):
@@ -313,6 +324,18 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return Post.TYPE_PDF
         elif obj.text or not (obj.image and obj.video and obj.link and obj.text and obj.pdf):
             return Post.TYPE_TEXT
+ 
+    def get_brand_logo_url(self, obj):
+        if obj.brand:
+            return obj.brand.logo.url
+
+        return None
+
+    def get_brand(self, obj):
+        if obj.brand is None:
+            return None
+
+        return build_absolute_uri(reverse('brand-details', kwargs={'brand_id': obj.brand.id}))
 
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -518,7 +541,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        read_only_fields = ('poster',)
+        read_only_fields = ('poster', 'brand')
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)

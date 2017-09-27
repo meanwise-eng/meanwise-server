@@ -215,6 +215,7 @@ class UserPostDetail(APIView):
             post.story.save()
 
         post.save()
+        post_delete.send(Post, instance=post)
         return Response(
             {
                 "status": "success",
@@ -1023,7 +1024,6 @@ class PostExploreView(APIView):
         )
         s = s.query(q)
         s = s.sort('-created_on')
-        logger.info(s.to_dict())
         offset = (section - 1) * item_count
         s = s[offset:offset + items_per_page]
 
@@ -1233,6 +1233,13 @@ class PostExploreTrendingView(APIView):
         functions.append(
             query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
 
+        # manual boost
+        functions.append(query.SF('exp', boost_datetime={
+            'origin': origin, 'scale': '1d', 'decay': 0.1},
+            weight=5))
+        functions.append(query.SF('field_value_factor', field='boost_value',
+                                  modifier='log1p', weight=30, missing=0))
+
         interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
         for relevance in interests_relevance:
             r = math.log1p(relevance.old_views + relevance.weekly_views)
@@ -1250,7 +1257,6 @@ class PostExploreTrendingView(APIView):
             boost_mode='sum'
         )
         s = s.query(q)
-        logger.info(s.to_dict())
         offset = (section - 1) * item_count
         s = s[offset:offset + items_per_page]
 

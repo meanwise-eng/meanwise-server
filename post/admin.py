@@ -1,10 +1,15 @@
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 from post.models import *
+from boost.models import Boost
+from boost.admin import BoostInline
 
 
 class PostAdmin(admin.ModelAdmin):
-    pass
+    fields = ('interest', 'image', 'video', 'text', 'poster', 'tags',
+              'mentioned_users')
+    inlines = [BoostInline,]
 
 
 class CommentAdmin(admin.ModelAdmin):

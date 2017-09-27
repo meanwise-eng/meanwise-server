@@ -32,6 +32,9 @@ class Influencer(DocType):
     friends = Integer()
     last_reset = Date()
 
+    boost_value = Integer()
+    boost_datetime = Date()
+
     class Meta:
         index = 'mw_influencers'
 
@@ -49,6 +52,8 @@ class Influencer(DocType):
             influencer.popularity_overall = 0
             influencer.friends = 0
             influencer.last_reset = now
+            influencer.boost_value = None
+            influencer.boost_datetime = None
 
         if influencer.last_reset < (now - datetime.timedelta(weeks=1)):
             influencer.interests_overall = '%s,%s' % (

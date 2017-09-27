@@ -6,6 +6,7 @@ ADD ./start.sh /start.sh
 
 ADD awscredentials /root/.aws/credentials
 ADD ./code /app
+COPY ./cron.d/* /etc/cron.d/
 
 WORKDIR /app
 
