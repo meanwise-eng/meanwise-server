@@ -1,6 +1,7 @@
 FROM meanwise/api-base:1.0.0
 
 ENV APP_WORKERS 1
+ENV ENVIRONMENT=production
 
 ADD awscredentials /root/.aws/credentials
 ADD ./code /app
