@@ -476,7 +476,7 @@ RESET_PASSWORD_URL = SITE_URL + '/reset_password/'
 PASSWORD_RESET_EXPIRY_DAYS = 7
 
 # Cache Settings
-#CACHES = {
+# CACHES = {
 #    'default': {
 #        'BACKEND': 'django_redis.cache.RedisCache',
 #        'LOCATION': 'redis://' + REDIS_HOST,
@@ -488,7 +488,7 @@ PASSWORD_RESET_EXPIRY_DAYS = 7
 #    }
 #}
 #CACHE_KEY_PREFIX = 'cc'
-#CACHE_TIMEOUT = 1  # in hours
+# CACHE_TIMEOUT = 1  # in hours
 
 # Google API Key for Places Auto complete
 GOOGLE_LOCATION_API_KEY = 'AIzaSyBPU3h4lDlKHZW17pci_bUZ5LVgimdlTYk'
@@ -524,11 +524,24 @@ TAGGIT_CASE_INSENSITIVE = True
 
 import mimetypes
 
+# video
 mimetypes.add_type("video/mp4", ".mp4", True)
 mimetypes.add_type("video/3gpp", ".3gp", True)
 mimetypes.add_type("video/quicktime", ".mov", True)
 mimetypes.add_type("video/x-msvideo", ".avi", True)
 mimetypes.add_type("video/x-ms-wmv", ".wmv", True)
+
+# audio
+mimetypes.add_type("audio/mpeg", ".mp3", True)
+mimetypes.add_type("audio/x-wav", ".wav", True)
+mimetypes.add_type("audio/x-ms-wma", ".wma", True)
+mimetypes.add_type("audio/ogg", ".ogg", True)
+mimetypes.add_type("audio/3gpp", ".3gp", True)
+mimetypes.add_type("audio/aac", ".aac", True)
+mimetypes.add_type("audio/aiff", ".aiff", True)
+
+# pdf
+mimetypes.add_type("application/pdf", ".pdf", True)
 
 # cron  to store trending topics
 

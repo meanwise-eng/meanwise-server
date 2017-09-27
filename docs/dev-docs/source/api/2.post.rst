@@ -64,6 +64,7 @@ Response Payload (JSON)
           "flute"
         ],
         "user_id": 38,
+        "post_type": "video",
         "num_likes": 0,
         "num_comments": 0,
         "interest_id": 2,
@@ -91,7 +92,13 @@ Response Payload (JSON)
         "id": "94",
         "mentioned_users": [91, 102],
         "geo_location_lat": 28.704059,
-        "geo_location_lng": 77.102490
+        "geo_location_lng": 77.102490,
+        "link": "",
+        "link_meta_data": {},
+        "pdf_url": "",
+        "pdf_thumb_url": "",
+        "audio_url": "",
+        "audio_thumb_url": "",
       }
     ]
   }
@@ -121,6 +128,9 @@ Response Payload (JSON)
     * - results.user_id
       - The ID of the user who posted the Post.
       - integer
+    * - post_type
+      - Post type of a post.
+      - string 
     * - num_likes
       - The number of likes that this post has received.
       - integer
@@ -202,6 +212,33 @@ Response Payload (JSON)
     * - geo_location_lng
       - Geo location longitude.
       - Decimal value
+    * - audio_url
+      - Post audio's URL.
+      - url
+    * - audio_thumb_url
+      - Post audio's thumbnail URL.
+      - url
+    * - pdf_url
+      - Post pdf's URL.
+      - url
+    * - pdf_thumb_url
+      - Post pdf's thumbnail URL.
+      - url
+    * - link
+      - Link type post link URL.
+      - url
+    * - link_meta_data
+      - Object representing meta data of link in a Post.
+      - object
+    * - link_meta_data.title
+      - Title of the link shared in a Post.
+      - string
+    * - link_meta_data.description
+      - Description of the link shared in a Post.
+      - string
+    * - link_meta_data.image
+      - URL of image thumbnail of the link shared in a Post.
+      - url
 
 Pagination
 ----------
