@@ -56,7 +56,7 @@ class Brand(models.Model):
 class BrandMember(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_query_name='members')
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='members')
 
     def __str__(self):
         return "%s %s for %s" % (self.user.userprofile.first_name,
