@@ -1,0 +1,342 @@
+=========
+5. Brands
+=========
+
+Brands List
+===========
+
+List of brands.
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.2/brands/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Query Parameters
+----------------
+
+..  list-table::
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+    * - interest_id
+      - The id of the interest to filter by.
+    * - tag_name
+      - A tag name that you want to filter by.
+    * - topic_text
+      - A topic text that you want to filter by.
+    * - after
+      - A timestamp added by forward pagination url. Tells the server to get results after this time.
+    * - before
+      - A timestamp added by backward pagination url. Tells the server to get results before this time.
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "backward": "http://localhost:8000/api/v4/brands/?section=2&before=1501847983555",
+    "forward": null,
+    "count": 90,
+    "error": "",
+    "status": "success",
+    "results": [
+      {
+        "id": 1,
+        "members": "http://localhost:8000/api/v4/brands/1/members/",
+        "posts": "http://localhost:8000/api/v4/brands/1/posts/",
+        "name": "Pixomondo",
+        "logo": "http://localhost:8001/media/brand_logos/11396104-2854485373262802_jkwGb3u_YwU5uGB_EeAfWvE.jpg",
+        "logo_thumbnail": "http://localhost:8001/media/brand_thumbnails/11396104-2854485373262802_jkwGb3u_YwU5uGB.jpg",
+        "profile_image": null,
+        "profile_color": "#000000",
+        "description": "asdfasfd",
+        "compact_display_image": "http://localhost:8001/media/brand_compact_display/Screenshot_from_2017-08-16_10-53-44.png"
+      }
+    ]
+  }
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - results.id
+      - ID of the brand.
+      - integer
+    * - results.members
+      - URL that will show the members that will belong to this brand.
+      - url
+    * - results.posts
+      - URL that will show the posts that belong to this brand.
+      - url
+    * - results.name
+      - Name of the Brand.
+      - string
+    * - results.logo
+      - URL for the Brand logo image.
+      - url
+    * - results.logo_thumbnail
+      - URL for the Brand logo image thumbnail.
+      - url + file
+    * - results.profile_image
+      - URL for the Brand profile image.
+      - url | null
+    * - results.profile_color
+      - Color for the Brand profile in RGB.
+      - string
+    * - results.description
+      - Description for the Brand.
+      - string
+    * - results.compact_display_image
+      - URL for the image to represent the brand in the explore screen.
+      - url + file
+
+Brand Details
+=============
+
+Use this to get details of the Brand using Brand ID.
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.2/brands/{brand_id} HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Path Parameters
+---------------
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+    * - brand_id
+      - The ID of the Brand that you want to get the details for.
+
+Response
+--------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "error": "",
+    "status": "success",
+    "results": {
+      "id": 1,
+      "members": "http://localhost:8000/api/v4/brands/1/members/",
+      "posts": "http://localhost:8000/api/v4/brands/1/posts/",
+      "name": "Pixomondo",
+      "logo": "http://localhost:8001/media/brand_logos/11396104-2854485373262802_jkwGb3u_YwU5uGB_EeAfWvE.jpg",
+      "logo_thumbnail": "http://localhost:8001/media/brand_thumbnails/11396104-2854485373262802_jkwGb3u_YwU5uGB.jpg",
+      "profile_image": null,
+      "profile_color": "#000000",
+      "description": "asdfasfd",
+      "compact_display_image": "http://localhost:8001/media/brand_compact_display/Screenshot_from_2017-08-16_10-53-44.png"
+    }
+  }
+
+Brand Members
+=============
+
+Use this to get details of the Brand using Brand ID.
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.2/brands/{brand_id}/members/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Response
+--------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "error": "",
+    "status": "success",
+    "results": [
+      {
+        "id": 6,
+        "user_id": 7,
+        "email": "call.max17@gmail.com",
+        "username": "max9xs",
+        "profile_photo": "http://localhost:8001/media/profile_photos/1836_j5i1TZV_u4fycQn_xELS1UJ_hjuzuGq.jpg",
+        "cover_photo": "http://localhost:8001/media/cover_photos/1183_RswVHzT_feXmJpV_onBHJYN_JM7dCDC_gI4mxSI_pr7PkIV_LznrZCZ_RubrQWP_DCGDIA_r9GfmzX.jpg",
+        "profile_photo_small": "http://localhost:8001/media/profile_photo_thumbs/1836_j5i1TZV_u4fycQn_xELS1UJ_sd7iziQ.jpg",
+        "first_name": "Hardik",
+        "last_name": "Mehta",
+        "bio": "",
+        "user_skills": [
+          {
+            "id": 11,
+            "name": "Violin"
+          },
+          {
+            "id": 8,
+            "name": "Guitar"
+          },
+          {
+            "id": 12,
+            "name": "Flute"
+          },
+          {
+            "id": 10,
+            "name": "Photoshop"
+          }
+        ],
+        "skills": [
+          11,
+          8,
+          12,
+          10
+        ],
+        "profession": null,
+        "user_profession": {},
+        "interests": [
+          7,
+          9,
+          10,
+          6
+        ],
+        "user_interests": [
+          {
+            "id": 7,
+            "name": "Travel"
+          },
+          {
+            "id": 9,
+            "name": "Gaming"
+          }
+        ],
+        "intro_video": null,
+        "phone": null,
+        "dob": "1995-06-24",
+        "profile_story_title": null,
+        "profile_story_description": "ios Dev",
+        "city": "Dallas County, United States",
+        "profession_text": "IOS Dev",
+        "skills_list": [
+          "Swift",
+          "ObjectiveC",
+          "Sketch",
+          "UX Design",
+          "Photoshop"
+        ],
+        "user_type": 1,
+        "profile_background_color": "#3E9AC3",
+        "friend_request_status": null,
+        "friends_url": "http://localhost:8000/api/v4/user/7/friends/",
+        "friend_count": 5
+      }
+    ]
+  }
+
+Brand Posts
+===========
+
+Use this to get posts that belongs to the Brand.
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.2/brands/{brand_id}/posts/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Response
+--------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "error": "",
+    "status": "success",
+    "results": [
+      {
+        "id": 641,
+        "text": "Testing",
+        "user_id": 7,
+        "num_likes": 0,
+        "num_comments": 0,
+        "interest_id": 2,
+        "user_firstname": "Hardik",
+        "user_lastname": "Mehta",
+        "user_profile_photo": "http://localhost:8001/media/profile_photos/1836_j5i1TZV_u4fycQn_xELS1UJ_hjuzuGq.jpg",
+        "user_cover_photo": "http://localhost:8001/media/cover_photos/1183_RswVHzT_feXmJpV_onBHJYN_JM7dCDC_gI4mxSI_pr7PkIV_LznrZCZ_RubrQWP_DCGDIA_r9GfmzX.jpg",
+        "user_profile_photo_small": "http://localhost:8001/media/profile_photo_thumbs/1836_j5i1TZV_u4fycQn_xELS1UJ_sd7iziQ.jpg",
+        "user_profession": {},
+        "user_profession_text": "IOS Dev",
+        "image_url": "",
+        "video_url": "",
+        "video_thumb_url": "",
+        "resolution": null,
+        "created_on": "2017-09-26T16:56:04.739150Z",
+        "tags": [
+          "a",
+          "f"
+        ],
+        "topics": [
+          "ghi",
+          "jkl"
+        ],
+        "story": null,
+        "story_index": null,
+        "is_liked": false,
+        "likes_url": "http://localhost:8000/api/v4/posts/641/likes/",
+        "mentioned_users": [
+          {
+            "id": 3,
+            "username": "hilarl"
+          }
+        ],
+        "geo_location_lat": "32.234240",
+        "geo_location_lng": "123.343420",
+        "brand": "http://localhost:8000/api/v4/brands/1/",
+        "brand_logo_url": "http://localhost:8001/media/brand_logos/11396104-2854485373262802_jkwGb3u_YwU5uGB_EeAfWvE.jpg"
+      }
+    ]
+  }
