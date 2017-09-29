@@ -10,7 +10,7 @@ import django.contrib.postgres.fields.jsonb
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0008_auto_20170814_1529'),
+        ('post', '0010_post_brand'),
     ]
 
     operations = [
@@ -47,6 +47,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='post',
             name='post_type',
-            field=models.CharField(choices=[('image', 'Image'), ('video', 'Video'), ('pdf', 'PDF'), ('audio', 'Audio'), ('text', 'Text'), ('link', 'Link')], default=None, max_length=5),
+            field=models.CharField(choices=[('image', 'Image'), ('video', 'Video'), ('pdf', 'PDF'), ('audio', 'Audio'), ('text', 'Text'), ('link', 'Link')], default=None, max_length=5, null=True),
         ),
     ]

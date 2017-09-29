@@ -256,7 +256,7 @@ class UserProfileDetail(APIView):
         return Response(
             {
                 "status": "success",
-                "error": "test",
+                "error": "",
                 "results": serializer.data
             },
             status=status.HTTP_200_OK
