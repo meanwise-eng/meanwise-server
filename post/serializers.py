@@ -38,7 +38,7 @@ class PostDocumentSerializer(DocumentSerializer):
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
                   'topics', 'created_on', 'resolution', 'mentioned_users',
-                  'boost_value', 'boost_datetime', 'brand', 'brand_logo_url']
+                  'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type']
 
     def get_id(self, obj):
         return obj._id
@@ -324,7 +324,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return Post.TYPE_PDF
         elif obj.text or not (obj.image and obj.video and obj.link and obj.text and obj.pdf):
             return Post.TYPE_TEXT
- 
+
     def get_brand_logo_url(self, obj):
         if obj.brand:
             return obj.brand.logo.url
