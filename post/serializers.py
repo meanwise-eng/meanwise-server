@@ -38,7 +38,9 @@ class PostDocumentSerializer(DocumentSerializer):
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
                   'topics', 'created_on', 'resolution', 'mentioned_users',
-                  'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type']
+                  'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type',
+                  'panaroma_type',
+        ]
 
     def get_id(self, obj):
         return obj._id
@@ -154,7 +156,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
-                  'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data'
+                  'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
                   )
 
     def get_user_id(self, obj):
@@ -373,7 +375,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
                   'created_on', 'tags', 'topics', 'story_index', 'mentioned_users',
                   'pdf_url', 'pdf_thumb_url', 'link', 'audio_url', 'audio_thumb_url',
-                  'link_meta_data'
+                  'link_meta_data', 'panaroma_type'
                   )
 
     def get_user_id(self, obj):

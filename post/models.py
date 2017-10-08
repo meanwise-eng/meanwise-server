@@ -41,6 +41,10 @@ POST_TYPES = (
     ('text', 'Text'),
     ('link', 'Link')
 )
+PANAROMA_TYPES = (
+    ('', 'None'),
+    ('equirectangular', 'Equirectangular'),
+)
 
 
 class Post(models.Model):
@@ -52,6 +56,7 @@ class Post(models.Model):
     TYPE_LINK = 'link'
 
     post_type = models.CharField(max_length=5, default=None, choices=POST_TYPES, null=True)
+    panaroma_type = models.CharField(max_length=15, default=None, choices=PANAROMA_TYPES, null=True)
     interest = models.ForeignKey(Interest, db_index=True)
     image = models.ImageField(upload_to='post_images', null=True, blank=True)
     video = models.FileField(upload_to='post_videos', null=True, blank=True)

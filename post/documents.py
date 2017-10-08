@@ -52,6 +52,7 @@ class PostDocument(DocType):
     pdf_thumb_url = fields.StringField()
     audio_thumb_url = fields.StringField()
     post_type = fields.StringField()
+    panaroma_type = fields.StringField()
 
     boost_value = fields.IntegerField()
     boost_datetime = fields.DateField()
