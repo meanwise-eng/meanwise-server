@@ -31,6 +31,8 @@ class BrandDocument(DocType):
 
     description = fields.StringField(index='not_analyzed')
 
+    interest_ids = fields.IntegerField(index='not_analyzed')
+
     class Meta:
         model = Brand
         fields = ('name', 'profile_color', 'created_on', 'last_update_on')
@@ -69,3 +71,6 @@ class BrandDocument(DocType):
 
     def prepare_posts(self, obj):
         return build_absolute_uri(reverse('brand-posts', kwargs={'brand_id': obj.id}))
+
+    def prepare_interest_ids(self, obj):
+        return [p.interest.id for p in obj.posts.all()]

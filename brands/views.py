@@ -27,11 +27,11 @@ logger = logging.getLogger('meanwise_backend.%s' % __name__)
 class BrandListView(APIView):
 
     def get(self, request):
-        interest_id = request.data.get('interest_id', None)
-        tag_name = request.data.get('tag_name', None)
-        topic_text = request.data.get('topic_text', None)
-        item_count = request.data.get('item_count', settings.REST_FRAMEWORK['PAGE_SIZE'])
-        section = request.data.get('section', 1)
+        interest_id = request.query_params.get('interest_id', None)
+        tag_name = request.query_params.get('tag_name', None)
+        topic_text = request.query_params.get('topic_text', None)
+        item_count = request.query_params.get('item_count', settings.REST_FRAMEWORK['PAGE_SIZE'])
+        section = request.query_params.get('section', 1)
         before = request.query_params.get('before', None)
         if before:
             before = datetime.datetime.fromtimestamp(float(before) / 1000)
@@ -45,10 +45,10 @@ class BrandListView(APIView):
         filters = []
         must = []
         if interest_id:
-            must.append(query.Q('term', interest_id=interest_id))
+            must.append(query.Q('term', interest_ids=interest_id))
         # else:
         #     filters.append(query.Q('bool', should=[
-        #         query.Q('terms', interest_id=interest_ids),
+        #         query.Q('terms', interest_ids=interest_ids),
         #         query.Q('terms', user_id=friends_ids)
         #     ]))
         if topic_text:
