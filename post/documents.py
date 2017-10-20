@@ -53,6 +53,7 @@ class PostDocument(DocType):
     audio_thumb_url = fields.StringField()
     post_type = fields.StringField()
     panaroma_type = fields.StringField()
+    post_thumbnail_url = fields.StringField()
 
     boost_value = fields.IntegerField()
     boost_datetime = fields.DateField()
@@ -271,3 +272,6 @@ class PostDocument(DocType):
             return None
 
         return obj.brand.logo_thumbnail.url
+
+    def prepare_post_thumbnail_url(self, obj):
+        return obj.post_thumbnail().url if obj.post_thumbnail() else None

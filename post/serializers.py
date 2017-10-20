@@ -39,7 +39,7 @@ class PostDocumentSerializer(DocumentSerializer):
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
                   'topics', 'created_on', 'resolution', 'mentioned_users',
                   'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type',
-                  'panaroma_type',
+                  'panaroma_type', 'post_thumbnail_url',
         ]
 
     def get_id(self, obj):
@@ -137,6 +137,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     post_type = serializers.SerializerMethodField()
     brand_logo_url = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
+    post_thumbnail_url = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -157,6 +158,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
+                  'post_thumbnail_url',
                   )
 
     def get_user_id(self, obj):
@@ -338,6 +340,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return None
 
         return build_absolute_uri(reverse('brand-details', kwargs={'brand_id': obj.brand.id}))
+
+    def get_post_thumbnail_url(self, obj):
+        return obj.post_thumbnail().url if obj.post_thumbnail() else None
 
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):

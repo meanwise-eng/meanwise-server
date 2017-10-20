@@ -46,6 +46,7 @@ class Notification(models.Model):
     title = models.CharField(max_length=100, null=True)
     message = models.CharField(max_length=250, null=True)
     datetime = models.DateTimeField(null=True)
+    thumbnail = models.URLField(null=True)
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)

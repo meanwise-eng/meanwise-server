@@ -139,6 +139,7 @@ class UserPostList(APIView):
                         profile_photo_thumbnail=up.profile_photo_thumbnail.url,
                         title='%s %s' % (up.first_name, up.last_name),
                         message='Has mentioned you in a post',
+                        thumbnail=post.post_thumbnail().url if post.post_thumbnail() else None,
                         datetime=datetime.datetime.now())
                     # send push notification
                     devices = find_user_devices(mentioned_users[i].id)
@@ -509,6 +510,7 @@ class UserPostLike(APIView):
                 title=up.fullname(),
                 message='liked your post',
                 datetime=datetime.datetime.now(),
+                thumbnail=post.post_thumbnail().url if post.post_thumbnail() else None,
                 data={'liked_by': user.id})
             # send push notification
             devices = find_user_devices(post.poster.id)
@@ -669,6 +671,7 @@ class PostCommentList(APIView):
                         title=up.fullname(),
                         message='Commented on your post',
                         datetime=datetime.datetime.now(),
+                        thumbnail=comment.post.post_thumbnail().url if comment.post.post_thumbnail() else None,
                         data={'comment_id': comment.id, 'post_id': comment.post.id})
                     # send push notification
                     devices = find_user_devices(comment.post.poster.id)
@@ -711,6 +714,7 @@ class PostCommentList(APIView):
                             profile_photo_thumbnail=up.profile_photo.url,
                             title=up.fullname(),
                             message='Has mentioned you in a comment',
+                            thumbnail=comment.post.post_thumbnail().url if comment.post.post_thumbnail() else None,
                             data={
                                 'comment_mentioned_user': m.id,
                                 'mentioned_by': comment.commented_by.id,

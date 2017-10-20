@@ -91,6 +91,32 @@ class Post(models.Model):
 
     OWNER_FIELD = 'poster'
 
+    def post_thumbnail(self):
+        if self.get_post_type() == Post.TYPE_IMAGE:
+            return self.image
+        if self.get_post_type() == Post.TYPE_VIDEO:
+            return self.video_thumbnail
+        if self.get_post_type() == Post.TYPE_PDF:
+            return self.pdf_thumbnail
+        if self.get_post_type() == Post.TYPE_AUDIO:
+            return self.audio_thumbnail
+        return None
+
+    def get_post_type(self):
+        if self.post_type:
+            return self.post_type
+        if self.image:
+            return Post.TYPE_IMAGE
+        if self.video_thumbnail:
+            return Post.TYPE_VIDEO
+        if self.pdf_thumbnail:
+            return Post.TYPE_PDF
+        if self.audio_thumbnail:
+            return Post.TYPE_AUDIO
+        if self.link:
+            return Post.TYPE_LINK
+        return Post.TYPE_TEXT
+
     def __str__(self):
         return "Post id: " + str(self.id) + " poster: " + str(self.poster)
 
