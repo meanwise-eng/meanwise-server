@@ -901,6 +901,7 @@ class FriendsList(APIView):
             status=status.HTTP_200_OK
         )
 
+    @transaction.atomic
     def post(self, request, user_id):
         """
         Friend request, accept, reject
@@ -990,10 +991,18 @@ class FriendsList(APIView):
             if not uf:
                 uf = UserFriend.objects.create(user=user, friend=friend_user, status=UserFriend.STATUS_PENDING)
                 # Add notification
+                msg_body = "%s %s sent you a friend request." % (str(user.userprofile.first_name),
+                                                                 str(user.userprofile.last_name))
                 notification = Notification.objects.create(
                     receiver=friend_user,
                     notification_type=Notification.TYPE_FRIEND_REQUEST_RECEIVED,
-                    user_friend=uf)
+                    user_friend=uf,
+                    profile_photo_thumbnail=up.profile_photo_thumbnail.url,
+                    title=up.fullname(),
+                    message="Sent you a friend request",
+                    datetime=datetime.datetime.now(),
+                    data={'friend_id': user.id})
+
                 # send push notification
                 devices = find_user_devices(friend_user.id)
                 message_payload = {
@@ -1078,7 +1087,12 @@ class FriendsList(APIView):
                     notification = Notification.objects.create(
                         receiver=friend_user,
                         notification_type=Notification.TYPE_FRIEND_REQUEST_ACCEPTED,
-                        user_friend=uf)
+                        user_friend=uf,
+                        profile_photo_thumbnail=up.profile_photo_thumbnail.url,
+                        title=up.fullname(),
+                        message='Accepted friend request',
+                        datetime=datetime.datetime.now(),
+                        data={'friend_id': user.id})
                     # send push notification
                     devices = find_user_devices(friend_user.id)
                     message_payload = {

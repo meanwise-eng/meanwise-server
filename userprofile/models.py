@@ -187,6 +187,9 @@ class UserProfile(models.Model):
     profile_boosts = GenericRelation(Boost, related_query_name='profile')
     post_boost = models.PositiveIntegerField(null=True, blank=True)
 
+    def fullname(self):
+        return '%s %s' % (self.first_name, self.last_name)
+
     def save(self, *args, **kwargs):
 
         if self.cover_photo:

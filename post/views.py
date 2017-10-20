@@ -126,6 +126,7 @@ class UserPostList(APIView):
                     post.mentioned_users.add(m)
 
                     # Add notification
+                    up = request.user.userprofile
                     notification = Notification.objects.create(
                         receiver=m,
                         notification_type=Notification.TYPE_POST_MENTIONED_USER,
@@ -134,7 +135,11 @@ class UserPostList(APIView):
                             'mentioned_by': int(user_id),
                             'post_id': post.id
                         },
-                        post=post)
+                        post=post,
+                        profile_photo_thumbnail=up.profile_photo_thumbnail.url,
+                        title='%s %s' % (up.first_name, up.last_name),
+                        message='Has mentioned you in a post',
+                        datetime=datetime.datetime.now())
                     # send push notification
                     devices = find_user_devices(mentioned_users[i].id)
                     message_payload = {
@@ -495,10 +500,16 @@ class UserPostLike(APIView):
         post.liked_by.add(user)
         if post.poster.id != request.user.id:
             # Add notification
+            up = user.userprofile
             notification = Notification.objects.create(
                 receiver=post.poster,
                 notification_type=Notification.TYPE_LIKED_POST,
-                post=post, post_liked_by=user)
+                post=post, post_liked_by=user,
+                profile_photo_thumbnail=up.profile_photo_thumbnail.url,
+                title=up.fullname(),
+                message='liked your post',
+                datetime=datetime.datetime.now(),
+                data={'liked_by': user.id})
             # send push notification
             devices = find_user_devices(post.poster.id)
             message_payload = {
@@ -648,11 +659,17 @@ class PostCommentList(APIView):
                 comment = serializer.save()
                 if comment.post.poster.id != request.user.id:
                     # Add notification
+                    up = comment.commented_by.userprofile
                     notification = Notification.objects.create(
                         receiver=comment.post.poster,
                         notification_type=Notification.TYPE_COMMENTED_POST,
                         post=comment.post,
-                        comment=comment)
+                        comment=comment,
+                        profile_photo_thumbnail=up.profile_photo_thumbnail.url,
+                        title=up.fullname(),
+                        message='Commented on your post',
+                        datetime=datetime.datetime.now(),
+                        data={'comment_id': comment.id, 'post_id': comment.post.id})
                     # send push notification
                     devices = find_user_devices(comment.post.poster.id)
                     message_payload = {
@@ -691,6 +708,9 @@ class PostCommentList(APIView):
                             notification_type=Notification.TYPE_COMMENT_MENTIONED_USER,
                             comment=comment,
                             post=comment.post,
+                            profile_photo_thumbnail=up.profile_photo.url,
+                            title=up.fullname(),
+                            message='Has mentioned you in a comment',
                             data={
                                 'comment_mentioned_user': m.id,
                                 'mentioned_by': comment.commented_by.id,

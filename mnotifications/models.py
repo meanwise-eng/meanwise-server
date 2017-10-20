@@ -41,6 +41,12 @@ class Notification(models.Model):
     post_liked_by = models.ForeignKey(User, related_name='post_liked_by', blank=True, null=True)
     data = pgJSONField(null=True)
     was_notified = models.BooleanField(default=False)
+
+    profile_photo_thumbnail = models.CharField(max_length=255, null=True)
+    title = models.CharField(max_length=100, null=True)
+    message = models.CharField(max_length=250, null=True)
+    datetime = models.DateTimeField(null=True)
+
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 

@@ -17,7 +17,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ('id', 'receiver', 'notification_type', 'user_friend',
-                  'post', 'comment', 'post_liked_by', 'was_notified', 'created_on', 'data')
+                  'post', 'comment', 'post_liked_by', 'was_notified', 'created_on', 'data',
+                  'profile_photo_thumbnail', 'title', 'message', 'datetime')
 
     def get_notification_type(self, obj):
         return obj.get_notification_type_display()
