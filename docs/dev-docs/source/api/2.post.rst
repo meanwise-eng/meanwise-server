@@ -354,6 +354,9 @@ Request Body
     * - geo_location_lng
       - Geo location longitude.
       - Decimal value
+    * - post_type
+      - The type of the post. Allowed types are: image, video, text, audio, pdf, link.
+      - string
     * - pdf
       - The PDF file.
       - file
