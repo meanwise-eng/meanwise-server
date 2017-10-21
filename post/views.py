@@ -511,7 +511,7 @@ class UserPostLike(APIView):
                 message='liked your post',
                 datetime=datetime.datetime.now(),
                 thumbnail=post.post_thumbnail().url if post.post_thumbnail() else None,
-                data={'liked_by': user.id})
+                data={'liked_by': user.id, 'post_id': post.id})
             # send push notification
             devices = find_user_devices(post.poster.id)
             message_payload = {
@@ -718,7 +718,8 @@ class PostCommentList(APIView):
                             data={
                                 'comment_mentioned_user': m.id,
                                 'mentioned_by': comment.commented_by.id,
-                                'comment_id': comment.id
+                                'comment_id': comment.id,
+                                'post_id': comment.post.id,
                             })
                         # send push notification
                         devices = find_user_devices(mentioned_users[i].id)
