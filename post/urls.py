@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^(?P<post_id>[0-9]+)/comments/(?P<comment_id>[0-9]+)/$',
         PostCommentDetail.as_view(), name="comment-detail"),
     url(r'^(?P<post_id>[0-9]+)/likes/$', PostLikes.as_view(), name='post-likes'),
+    url(r'^(?P<post_id>[0-9]+)/$', PostDetails.as_view(), name='post-details'),
     url(r'^tags/autocomplete/$', AutocompleteTag.as_view()),
     url(r'^topics/autocomplete/$', AutocompleteTopic.as_view()),
 ]

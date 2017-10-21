@@ -39,7 +39,7 @@ class PostDocumentSerializer(DocumentSerializer):
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
                   'topics', 'created_on', 'resolution', 'mentioned_users',
                   'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type',
-                  'panaroma_type', 'post_thumbnail_url',
+                  'panaroma_type', 'post_thumbnail_url', 'is_work',
         ]
 
     def get_id(self, obj):
@@ -158,7 +158,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
-                  'post_thumbnail_url',
+                  'post_thumbnail_url', 'is_work',
                   )
 
     def get_user_id(self, obj):
@@ -380,7 +380,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
                   'created_on', 'tags', 'topics', 'story_index', 'mentioned_users',
                   'pdf_url', 'pdf_thumb_url', 'link', 'audio_url', 'audio_thumb_url',
-                  'link_meta_data', 'panaroma_type'
+                  'link_meta_data', 'panaroma_type', 'is_work',
                   )
 
     def get_user_id(self, obj):
@@ -548,7 +548,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        read_only_fields = ('poster', 'brand')
+        read_only_fields = ('poster', 'brand', 'is_deleted',)
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)
@@ -563,6 +563,12 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
         return data
 
+
+class PostUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields = ('is_work',)
 
 class StorySerializer(serializers.ModelSerializer):
     posts = serializers.SerializerMethodField()

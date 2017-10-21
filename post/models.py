@@ -82,6 +82,7 @@ class Post(models.Model):
     parent = models.ForeignKey('self', db_index=True, null=True)
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
+    is_work = models.BooleanField()
 
     boosts = GenericRelation(Boost, related_query_name='post')
     brand = models.ForeignKey(Brand, null=True, related_name='posts')

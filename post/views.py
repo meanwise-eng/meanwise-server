@@ -207,7 +207,7 @@ class UserPostDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return Post.objects.get(pk=pk)
+            return Post.objects.get(pk=pk, is_deleted=False)
         except Post.DoesNotExist:
             raise Http404
 
@@ -229,6 +229,65 @@ class UserPostDetail(APIView):
                 "results": "Succesfully deleted."
             },
             status=status.HTTP_202_ACCEPTED
+        )
+
+
+class PostDetails(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def get_object(self, pk):
+        post = self.get_post(pk)
+        self.check_object_permissions(self.request, post)
+
+        return post
+
+    def get_post(self, pk):
+        try:
+            return Post.objects.get(pk=pk, is_deleted=False)
+        except Post.DoesNotExist:
+            raise Http404
+
+    def get(self, request, post_id):
+        post = self.get_post(post_id)
+
+        serializer = PostSerializer(post, context={'request': request})
+
+        return Response(
+            {
+                "status": "success",
+                "error": None,
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def patch(self, request, post_id):
+        data = request.data
+        post = self.get_object(post_id)
+
+        serializer = PostUpdateSerializer(post, data=data, partial=True,
+                                          context={'request': request})
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "status": "failed",
+                    "error": serializer.errors,
+                    "results": None
+                }
+            )
+
+        serializer.save()
+
+        return Response(
+            {
+                "status": "success",
+                "error": None,
+                "results": {
+                    "message": "Post successfully updated."
+                }
+            }
         )
 
 

@@ -13,7 +13,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
         owner_field = 'owner'
         if hasattr(type(obj), 'OWNER_FIELD'):
-            owner_field = getattr(obj, type(obj).OWNER_FIELD)
+            owner_field = getattr(type(obj), 'OWNER_FIELD')
 
         if not hasattr(obj, owner_field):
             return False

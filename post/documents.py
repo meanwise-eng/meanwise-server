@@ -54,6 +54,7 @@ class PostDocument(DocType):
     post_type = fields.StringField()
     panaroma_type = fields.StringField()
     post_thumbnail_url = fields.StringField()
+    is_work = fields.BooleanField()
 
     boost_value = fields.IntegerField()
     boost_datetime = fields.DateField()

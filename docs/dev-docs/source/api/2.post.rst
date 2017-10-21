@@ -444,7 +444,7 @@ Query Parameters
 
 
 Request Body
------------------------
+------------
 
 .. code-block:: javascript
 
@@ -498,3 +498,55 @@ Response Payload (JSON)
      ]
    }
  }
+
+Post Update
+===========
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   POST api/v1.1/posts/<post_id>/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Request Body
+------------
+
+.. code-block:: javascript
+
+  {
+    "is_work": true
+  }
+
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - is_work
+      - Specified whether the post is for work or inspiration.
+      - boolean
+
+Response
+--------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "status": "success",
+    "error": null,
+    "results": {
+      "message": "Post was succesfully updated."
+    }
+  }
