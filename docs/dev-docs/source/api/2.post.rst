@@ -99,6 +99,7 @@ Response Payload (JSON)
         "pdf_thumb_url": "",
         "audio_url": "",
         "audio_thumb_url": "",
+        "post_thumbnail_url": "http://localhost:8001/media/post_images/image.jpg",
       }
     ]
   }
@@ -239,6 +240,10 @@ Response Payload (JSON)
     * - link_meta_data.image
       - URL of image thumbnail of the link shared in a Post.
       - url
+    * - post_thumbnail_url
+      - The thumbnail URL based on what type of post it is. i.e. If post is an image post it will
+        the image thumbnail.
+      - url
 
 Pagination
 ----------
@@ -349,7 +354,24 @@ Request Body
     * - geo_location_lng
       - Geo location longitude.
       - Decimal value
-
+    * - pdf
+      - The PDF file.
+      - file
+    * - pdf_thumbnail
+      - An image to show as the PDF thumbnail.
+      - image
+    * - audio
+      - The Audio file.
+      - file
+    * - audio_thumbnail
+      - An image to show as the Audio thumbnail.
+      - image
+    * - link
+      - The URL that will be linked to.
+      - url
+    * - link_meta_data
+      - Additional data about the link that will be used to display the link in app.
+      - object
 
 Response Payload (JSON)
 -----------------------

@@ -1,0 +1,202 @@
+=============
+Notifications
+=============
+
+Latest Notifications
+====================
+
+Request
+-------
+
+.. code-block:: http
+
+   GET api/v1.2/user/{user_id}/notifications/latest/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Path Parameters
+~~~~~~~~~~~~~~~
+
+  * - user_id
+    - The User ID of which User for which you want to view the notifications.
+
+Response
+--------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+    {
+        "status": "success",
+        "error": null,
+        "results": {
+            "num_pages": 1,
+            "data": [
+            {
+                "id": 6179,
+                "notification_type": "PostMentionedUser",
+                "was_notified": false,
+                "created_on": "2017-10-20T09:24:29.388893Z",
+                "data": {
+                    "mentioned_by": 7,
+                    "post_mentioned_user": 42,
+                    "post_id": 657
+                },
+                "profile_photo_thumbnail": "http://localhost:8001/media/profile_photo_thumbs/1836_j5i1TZV_u4fycQn_xELS1UJ_sd7iziQ.jpg",
+                "title": "Hardik Mehta",
+                "message": "Has mentioned you in a post",
+                "datetime": "2017-10-20T09:24:29.388423Z",
+                "thumbnail_url": "http://localhost:8001/media/post_images/image_3v03kvC.png"
+            }
+            ]
+        }
+    }
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - results.num_pages
+      - The number of pages available.
+      - integer
+    * - results.data
+      - An array of notifications.
+      - array
+    * - results.data.id
+      - The ID of the notification.
+      - integer
+    * - results.data.notification_type
+      - The notification type. The clients will use this to decide which action to take when tapped.
+      - string
+    * - results.data.created_on
+      - The date and time when the notification was created.
+      - datetime
+    * - results.data.data
+      - An object containing arbitrary data based on the type of the notification. The details of
+        the data available for each notification type is details in a section for each type below.
+      - object
+    * - profile_photo_thumbnail_url
+      - The URL for the profile photo of the user which this notification is about.
+      - url
+    * - title
+      - Title of the notification.
+      - string
+    * - message
+      - The message for the notification.
+      - string(250)
+    * - datetime
+      - The time at which this notification will appear.
+      - datetime
+    * - thumbnail_url
+      - The URL of the content, if any. Eg. The post thumbnail.
+      - url
+
+Post Type Data format
+---------------------
+
+This section show the different data structure for the :code:`results.data.data` field depending
+on the post type.
+
+PostMentionedUser
+~~~~~~~~~~~~~~~~~
+
+..  list-table:: Fields
+    :header-rows: 1
+    
+    * - Fieldname
+      - Description
+      - Type
+    * - mentioned_by
+      - The user who mentioned the receiver.
+      - integer
+    * - post_mentioned_user
+      - The user who was mentioned in the post.
+      - integer
+    * - post_id
+      - The Post ID of the post that mentioned the user.
+      - integer
+
+CommentMentionedUser
+~~~~~~~~~~~~~~~~~~~~
+
+..  list-table:: Fields
+    :header-rows: 1
+    
+    * - Fieldname
+      - Description
+      - Type
+    * - mentioned_by
+      - The user who mentioned the receiver.
+      - integer
+    * - comment_mentioned_user
+      - The user who was mentioned in the post.
+      - integer
+    * - post_id
+      - The Post ID of the post that the comment that mentioned the user belongs to.
+      - integer
+    * - comment_id
+      - The Comment ID of the comment that mentioned the user.
+      - integer
+
+FriendRequestReceived
+~~~~~~~~~~~~~~~~~~~~~
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - friend_id
+      - The person who initiated the Frient Request.
+      - integer
+
+FriendRequestAccepted
+~~~~~~~~~~~~~~~~~~~~~
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - friend_id
+      - The person who accepted the Frient Request.
+      - integer
+
+LikedPost
+~~~~~~~~~
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - liked_by
+      - The User ID of the user who liked the post.
+      - integer
+    * - post_id
+      - The Post ID of the post that was liked.
+      - integer
+
+CommentedPost
+~~~~~~~~~~~~~
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - post_id
+      - The Post ID of the post that was commented on.
+      - integer
+    * - comment_id
+      - The Comment ID of the comment.
+      - integer
