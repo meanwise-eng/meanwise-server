@@ -77,3 +77,5 @@ hypothesis==3.28.3
 hypothesis[django]
 gabbi==1.35.1
 URLObject==2.4.3
+sendgrid==5.2.1
+sendgrid-django==4.0.4
