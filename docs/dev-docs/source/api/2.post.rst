@@ -375,6 +375,15 @@ Request Body
     * - link_meta_data
       - Additional data about the link that will be used to display the link in app.
       - object
+    * - link_meta_data.title
+      - Title of the link shared in a Post.
+      - string
+    * - link_meta_data.description
+      - Description of the link shared in a Post.
+      - string
+    * - link_meta_data.image
+      - URL of image thumbnail of the link shared in a Post.
+      - url
 
 Response Payload (JSON)
 -----------------------
