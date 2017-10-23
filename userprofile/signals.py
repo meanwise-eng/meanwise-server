@@ -1,9 +1,13 @@
 import elasticsearch
 import datetime
 import logging
+import sendgrid
+import json
 
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 
 from .documents import Influencer
 from post.models import Post, Comment
@@ -97,3 +101,43 @@ def add_friends(sender, **kwargs):
     influencer1.save()
     influencer2.save()
 
+
+@receiver(post_save, sender=UserProfile, dispatch_uid='userprofile.registered')
+def send_welcome_email(sender, **kwargs):
+    if kwargs['created']:
+        userprofile = kwargs['instance']
+        email = userprofile.user.email
+        name = userprofile.fullname()
+
+        sg = sendgrid.SendGridAPIClient(apikey=settings.SENDGRID_API_KEY)
+
+        contact = {
+            "email": userprofile.user.email,
+            "first_name": userprofile.first_name,
+            "last_name": userprofile.last_name
+        }
+        logger.debug(contact)
+        response = sg.client.contactdb.recipients.post(request_body=[contact])
+        if response.status_code == 201:
+            list_id = settings.SENDGRID_NEW_USER_LIST_ID
+            res_body = json.loads(response.body.decode('utf-8'))
+            recipient_id = res_body['persisted_recipients'][0]
+
+            response = sg.client.contactdb.lists._(list_id).recipients._(recipient_id).post()
+            logger.debug("Contact added to list: %s" % (response.status_code))
+
+        data = {
+            'content': [{'type': 'text/html', 'value': 'dummy'}],
+            'from': {'email': 'm@meanwise.com', 'name': 'Meanwise'},
+            'personalizations': [{
+                'subject': 'dummy',
+                'to': [{
+                    'email': email,
+                    'name': name
+                }]
+            }],
+            'template_id': '1431c751-060c-429c-80d5-7a312c81c698'
+        }
+
+        response = sg.client.mail.send.post(request_body=data)
+        logger.debug("SG Response code: %s" % (response.status_code,))

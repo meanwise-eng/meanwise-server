@@ -43,6 +43,8 @@ MEDIA_URL = os.environ.get('MEDIA_URL', 'http://localhost:8001/media/')
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 BASE_URI = os.environ.get('BASE_URI', 'http://localhost:8000/api/v4/')
 
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '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')
+SENDGRID_NEW_USER_LIST_ID = os.environ.get('SENDGRID_NEW_USER_LIST_ID', '2016754')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'apikey')
 EMAIL_HOST_PASSWORD = os.environ.get(
