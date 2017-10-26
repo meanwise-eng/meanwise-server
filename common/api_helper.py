@@ -2,6 +2,8 @@ import datetime
 import urllib
 import re
 import logging
+from urlobject import URLObject
+
 from django.conf import settings
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -45,8 +47,9 @@ def get_objects_paginated_offset(objects, offset=0, limit=settings.REST_FRAMEWOR
     return objects
 
 
-def build_absolute_uri(uri):
+def build_absolute_uri(uri, params=None):
     logger = logging.getLogger('meanwise_backend.%s' % __name__)
+
     base_uri = settings.BASE_URI
     base_api_path = '/api/v4/'
     regex = re.compile(base_api_path)
@@ -61,8 +64,13 @@ def build_absolute_uri(uri):
     logger.debug("New Path: %s" % new_path)
 
     new_uri = b_uri_p[0:2] + (new_path,) + n_uri_p[3:]
-    logger.debug("New URI: %s" % (new_uri,))
-    return urllib.parse.urlunparse(new_uri)
+
+    url = URLObject(urllib.parse.urlunparse(new_uri))
+    if params:
+        url = url.with_query(url.query.set_params(params))
+
+    logger.debug("New URI: %s" % (url,))
+    return str(url)
 
 
 class TimeBasedPaginator:

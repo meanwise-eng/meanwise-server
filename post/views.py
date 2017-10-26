@@ -1233,6 +1233,13 @@ class PostExploreTrendingView(APIView):
         functions.append(
             query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
 
+        # manual boost
+        functions.append(query.SF('exp', boost_datetime={
+            'origin': origin, 'scale': '1d', 'decay': 0.1},
+            weight=5))
+        functions.append(query.SF('field_value_factor', field='boost_value',
+                                  modifier='log1p', weight=30, missing=0))
+
         interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
         for relevance in interests_relevance:
             r = math.log1p(relevance.old_views + relevance.weekly_views)

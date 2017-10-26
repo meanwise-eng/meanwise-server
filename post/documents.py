@@ -1,10 +1,15 @@
-from django_elasticsearch_dsl import DocType, Index, fields
 import datetime
+
+from django_elasticsearch_dsl import DocType, Index, fields
+
+from django.urls import reverse
+from common.api_helper import build_absolute_uri
 
 from analytics.models import SeenPost
 from .models import Post, Comment
 
 from userprofile.models import UserProfile
+from boost.models import Boost
 
 post = Index('mw_posts')
 
@@ -41,6 +46,19 @@ class PostDocument(DocType):
     num_recent_seen = fields.IntegerField()
     created_on = fields.DateField()
     geo_location = fields.GeoPointField()
+    pdf_url = fields.StringField()
+    audio_url = fields.StringField()
+    link = fields.StringField()
+    pdf_thumb_url = fields.StringField()
+    audio_thumb_url = fields.StringField()
+    post_type = fields.StringField()
+    panaroma_type = fields.StringField()
+
+    boost_value = fields.IntegerField()
+    boost_datetime = fields.DateField()
+
+    brand = fields.StringField()
+    brand_logo_url = fields.StringField()
 
     class Meta:
         model = Post
@@ -179,3 +197,77 @@ class PostDocument(DocType):
             'lat': float(obj.geo_location_lat),
             'lon': float(obj.geo_location_lng)
         }
+
+    def prepare_audio_url(self, obj):
+        _audio = obj.audio
+        if _audio:
+            return _audio.url
+        return None
+
+    def prepare_pdf_url(self, obj):
+        _pdf = obj.pdf
+        if _pdf:
+            return _pdf.url
+        return None
+
+    def prepare_link(self, obj):
+        _link = obj.link
+        if _link:
+            return _link.url
+        return None
+
+    def prepare_audio_thumb_url(self, obj):
+        # needs to be added
+        if obj.audio:
+            if obj.audio_thumbnail:
+                return obj.audio_thumbnail.url
+        else:
+            return None
+
+    def prepare_pdf_thumb_url(self, obj):
+        # needs to be added
+        if obj.pdf:
+            if obj.pdf_thumbnail:
+                return obj.pdf_thumbnail.url
+        else:
+            return None
+
+    def prepare_post_type(self, obj):
+        if obj.image:
+            return Post.TYPE_IMAGE
+        elif obj.video:
+            return Post.TYPE_VIDEO
+        elif obj.audio:
+            return Post.TYPE_AUDIO
+        elif obj.link:
+            return Post.TYPE_LINK
+        elif obj.pdf:
+            return Post.TYPE_PDF
+        elif obj.text or not (obj.image or obj.video or obj.link or obj.text or obj.pdf):
+            return Post.TYPE_TEXT
+
+    def prepare_boost_value(self, obj):
+        try:
+            boost = obj.boosts.latest('boost_datetime')
+        except Boost.DoesNotExist:
+            return None
+        return boost.boost_value
+
+    def prepare_boost_datetime(self, obj):
+        try:
+            boost = obj.boosts.latest('boost_datetime')
+        except Boost.DoesNotExist:
+            return None
+        return boost.boost_datetime
+
+    def prepare_brand(self, obj):
+        if obj.brand is None:
+            return None
+
+        return build_absolute_uri(reverse('brand-details', kwargs={'brand_id': obj.brand.id}))
+
+    def prepare_brand_logo_url(self, obj):
+        if obj.brand is None:
+            return None
+
+        return obj.brand.logo_thumbnail.url

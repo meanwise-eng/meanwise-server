@@ -76,4 +76,4 @@ arrow==0.10.0
 hypothesis==3.28.3
 hypothesis[django]
 gabbi==1.35.1
-
+URLObject==2.4.3

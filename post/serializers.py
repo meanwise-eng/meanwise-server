@@ -4,13 +4,15 @@ from django.urls import reverse
 from common.api_helper import build_absolute_uri
 
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
+from common.api_helper import build_absolute_uri
 
 from django.contrib.auth.models import User
 from userprofile.models import UserProfile, Profession
 from post.models import Post, Comment, Share, Story
-from post.search_indexes import PostIndex
 from post.documents import PostDocument
+from brands.models import Brand
 
+from drf_haystack.serializers import HaystackSerializerMixin
 from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
@@ -27,6 +29,7 @@ class PostDocumentSerializer(DocumentSerializer):
     likes_url = serializers.SerializerMethodField()
     resolution = serializers.SerializerMethodField()
     mentioned_users = serializers.SerializerMethodField()
+    boost_datetime = serializers.SerializerMethodField()
 
     class Meta:
         document = PostDocument
@@ -34,7 +37,10 @@ class PostDocumentSerializer(DocumentSerializer):
                   'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
                   'user_profile_photo_small', 'user_cover_photo', 'user_profession',
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
-                  'topics', 'created_on', 'resolution', 'mentioned_users']
+                  'topics', 'created_on', 'resolution', 'mentioned_users',
+                  'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type',
+                  'panaroma_type',
+        ]
 
     def get_id(self, obj):
         return obj._id
@@ -92,6 +98,9 @@ class PostDocumentSerializer(DocumentSerializer):
 
         return [{'id': u.id, 'username': u.username} for u in post.mentioned_users.all()]
 
+    def get_boost_datetime(self, obj):
+        return obj.boost_datetime
+
 
 class MentionedUserSerializer(serializers.ModelSerializer):
 
@@ -120,6 +129,14 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
+    pdf_url = serializers.SerializerMethodField()
+    audio_url = serializers.SerializerMethodField()
+    pdf_thumb_url = serializers.SerializerMethodField()
+    audio_thumb_url = serializers.SerializerMethodField()
+    link_meta_data = serializers.SerializerMethodField()
+    post_type = serializers.SerializerMethodField()
+    brand_logo_url = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -132,12 +149,14 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
+        fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
                   'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
                   'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
-                  'mentioned_users', 'geo_location_lat', 'geo_location_lng'
+                  'mentioned_users', 'geo_location_lat', 'geo_location_lng',
+                  'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
+                  'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
                   )
 
     def get_user_id(self, obj):
@@ -267,6 +286,59 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return ""
 
+    def get_pdf_url(self, obj):
+        pdf = obj.pdf
+        if pdf:
+            return pdf.url
+        return ""
+
+    def get_pdf_thumb_url(self, obj):
+        pdf_thumbnail = obj.pdf_thumbnail
+        if pdf_thumbnail:
+            return pdf_thumbnail.url
+        return ""
+
+    def get_audio_url(self, obj):
+        audio = obj.audio
+        if audio:
+            return audio.url
+        return ""
+
+    def get_audio_thumb_url(self, obj):
+        audio_thumbnail = obj.audio_thumbnail
+        if audio_thumbnail:
+            return audio_thumbnail.url
+        return ""
+
+    def get_link_meta_data(self, obj):
+        return obj.link_meta_data if obj.link_meta_data else {}
+
+    def get_post_type(self, obj):
+        if obj.image:
+            return Post.TYPE_IMAGE
+        elif obj.video:
+            return Post.TYPE_VIDEO
+        elif obj.audio:
+            return Post.TYPE_AUDIO
+        elif obj.link:
+            return Post.TYPE_LINK
+        elif obj.pdf:
+            return Post.TYPE_PDF
+        elif obj.text or not (obj.image and obj.video and obj.link and obj.text and obj.pdf):
+            return Post.TYPE_TEXT
+
+    def get_brand_logo_url(self, obj):
+        if obj.brand:
+            return obj.brand.logo.url
+
+        return None
+
+    def get_brand(self, obj):
+        if obj.brand is None:
+            return None
+
+        return build_absolute_uri(reverse('brand-details', kwargs={'brand_id': obj.brand.id}))
+
 
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
@@ -288,14 +360,22 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     topics = serializers.SerializerMethodField()
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
     queryset = Post.objects.filter(is_deleted=False)
+    pdf_url = serializers.SerializerMethodField()
+    audio_url = serializers.SerializerMethodField()
+    pdf_thumb_url = serializers.SerializerMethodField()
+    audio_thumb_url = serializers.SerializerMethodField()
+    link_meta_data = serializers.SerializerMethodField()
+    post_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ('id', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
+        fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
                   'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
-                  'created_on', 'tags', 'topics', 'story_index', 'mentioned_users'
+                  'created_on', 'tags', 'topics', 'story_index', 'mentioned_users',
+                  'pdf_url', 'pdf_thumb_url', 'link', 'audio_url', 'audio_thumb_url',
+                  'link_meta_data', 'panaroma_type'
                   )
 
     def get_user_id(self, obj):
@@ -411,6 +491,47 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         return [{'id': u.id, 'username': u.username} for u in comment.mentioned_users.all()]
 
+    def get_pdf_url(self, obj):
+        pdf = obj.pdf
+        if pdf:
+            return pdf.url
+        return ""
+
+    def get_pdf_thumb_url(self, obj):
+        pdf_thumbnail = obj.pdf_thumbnail
+        if pdf_thumbnail:
+            return pdf_thumbnail.url
+        return ""
+
+    def get_audio_url(self, obj):
+        audio = obj.audio
+        if audio:
+            return audio.url
+        return ""
+
+    def get_audio_thumb_url(self, obj):
+        audio_thumbnail = obj.audio_thumbnail
+        if audio_thumbnail:
+            return audio_thumbnail.url
+        return ""
+
+    def get_link_meta_data(self, obj):
+        return obj.link_meta_data if obj.link_meta_data else {}
+
+    def get_post_type(self, obj):
+        if obj.image:
+            return Post.TYPE_IMAGE
+        elif obj.video:
+            return Post.TYPE_VIDEO
+        elif obj.audio:
+            return Post.TYPE_AUDIO
+        elif obj.link:
+            return Post.TYPE_LINK
+        elif obj.pdf:
+            return Post.TYPE_PDF
+        elif obj.text or not (obj.image and obj.video and obj.link and obj.text and obj.pdf):
+            return Post.TYPE_TEXT
+
 
 class PostSaveSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
@@ -422,7 +543,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        read_only_fields = ('poster',)
+        read_only_fields = ('poster', 'brand')
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)

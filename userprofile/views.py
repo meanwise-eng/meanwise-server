@@ -1,4 +1,5 @@
 import math
+import datetime
 
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -255,7 +256,7 @@ class UserProfileDetail(APIView):
         return Response(
             {
                 "status": "success",
-                "error": "test",
+                "error": "",
                 "results": serializer.data
             },
             status=status.HTTP_200_OK
@@ -742,6 +743,8 @@ class InfluencersListView(APIView):
 
         functions = []
         filters = []
+        now = datetime.datetime.now()
+        origin = now
 
         interest_names = list(request.user.userprofile.interests.all()
                               .values_list('name', flat=True))
@@ -769,6 +772,18 @@ class InfluencersListView(APIView):
                                   modifier='log1p',
                                   weight=2))
 
+        # apply manual boost
+        functions.append(query.SF('gauss', boost_datetime={
+            'origin': origin,
+            'scale': '1d',
+            'decay': 0.1
+        }, weight=5))
+        functions.append(query.SF('field_value_factor',
+                                  field='boost_value',
+                                  modifier='log1p',
+                                  missing=0,
+                                  weight=30))
+
         s = Influencer.search()
         q = query.Q(
             'function_score',
@@ -783,12 +798,13 @@ class InfluencersListView(APIView):
         s = s[offset:offset + item_count]
 
         results = s.execute()
-        ids = [r.meta.id for r in results]
-        logger.info(ids)
+        ids = [int(r.meta.id) for r in results]
+        logger.debug(ids)
         userprofiles = UserProfile.objects.filter(user__in=ids)
         id_dict = {u.user.id: u for u in userprofiles}
-        logger.info(id_dict)
+        logger.debug(id_dict.keys())
         userprofiles = [id_dict[int(id)] for id in ids]
+
 
         serializer = UserProfileSerializer(userprofiles, many=True, context={'request': request})
 
@@ -890,8 +906,16 @@ class FriendsList(APIView):
         Friend request, accept, reject
 
         """
-        logger.info("Friendslist - POST [API / views.py /")
-        friend_id = request.data.get('friend_id', None)
+        friend_status = request.data.get('status', 'pending')
+
+        # for pending request the friend_id and user_id is actually reversed
+        # from front-end :O
+        if friend_status == 'pending':
+            friend_id = user_id
+            user_id = request.data.get('friend_id', None)
+        else:
+            friend_id = request.data.get('friend_id', None)
+
         if not friend_id or (int(friend_id) != request.user.id and int(user_id) != request.user.id):
             raise PermissionDenied(
                 "You can only send friend request as yourself")
@@ -922,7 +946,6 @@ class FriendsList(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        friend_status = request.data.get('status', 'pending')
 
         # check if request for self, if so raise error
         if friend_id:
