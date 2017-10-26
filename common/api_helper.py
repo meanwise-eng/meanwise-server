@@ -165,7 +165,7 @@ class NormalPaginator:
 
     def __init__(self, query_set, request):
         item_count = request.query_params.get('item_count', settings.REST_FRAMEWORK['PAGE_SIZE'])
-        page = request.query_params.get('page', 1)
+        page = int(request.query_params.get('page', 1))
         total = query_set.count()
         self.request = request
 
