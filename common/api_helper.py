@@ -2,6 +2,7 @@ import datetime
 import urllib
 import re
 import logging
+import math
 from urlobject import URLObject
 
 from django.conf import settings
@@ -164,39 +165,29 @@ class TimeBasedPaginator:
 class NormalPaginator:
 
     def __init__(self, query_set, request):
-        item_count = request.query_params.get('item_count', settings.REST_FRAMEWORK['PAGE_SIZE'])
+        item_count = int(request.query_params.get('item_count', settings.REST_FRAMEWORK['PAGE_SIZE']))
         page = int(request.query_params.get('page', 1))
         total = query_set.count()
         self.request = request
 
-        paginator = Paginator(query_set, item_count)
-        has_next_page = False
-
-        try:
-            objects = paginator.page(self.page)
-            has_next_page = objects.has_next()
-        except PageNotAnInteger:
-            objects = paginator.page(1)
-            has_next_page = objects.has_next()
-        except EmptyPage:
-            objects = []
-        self.objects = objects
+        offset = (page - 1) * item_count
+        self.paginated_query_set = query_set[offset:offset + item_count]
 
         next_url = None
 
-        if has_next_page:
+        self.total_pages = math.ceil(total / item_count)
+        if page < self.total_pages:
             new_params = {'page': (page + 1)}
             prev_url = self.get_new_url_from_params(new_params, request)
         else:
             prev_url = None
 
-        self.total_pages = paginator.num_pages
         self.total = total
         self.next_url = next_url
         self.prev_url = prev_url
 
     def page(self):
-        return self.objects
+        return self.paginated_query_set
 
     def get_new_url_from_params(self, new_params, request):
         query_params = dict(self.request.query_params)
