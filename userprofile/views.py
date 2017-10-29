@@ -1090,7 +1090,7 @@ class FriendsList(APIView):
                         user_friend=uf,
                         profile_photo_thumbnail=up.profile_photo_thumbnail.url,
                         title=up.fullname(),
-                        message='Accepted friend request',
+                        message='Accepted your friend request',
                         datetime=datetime.datetime.now(),
                         data={'friend_id': user.id})
                     # send push notification

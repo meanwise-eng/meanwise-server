@@ -138,7 +138,7 @@ class UserPostList(APIView):
                         post=post,
                         profile_photo_thumbnail=up.profile_photo_thumbnail.url,
                         title='%s %s' % (up.first_name, up.last_name),
-                        message='Has mentioned you in a post',
+                        message='Mentioned you in a post',
                         thumbnail=post.post_thumbnail().url if post.post_thumbnail() else None,
                         datetime=datetime.datetime.now())
                     # send push notification
@@ -567,7 +567,7 @@ class UserPostLike(APIView):
                 post=post, post_liked_by=user,
                 profile_photo_thumbnail=up.profile_photo_thumbnail.url,
                 title=up.fullname(),
-                message='liked your post',
+                message='Liked your post',
                 datetime=datetime.datetime.now(),
                 thumbnail=post.post_thumbnail().url if post.post_thumbnail() else None,
                 data={'liked_by': user.id, 'post_id': post.id})
@@ -772,7 +772,7 @@ class PostCommentList(APIView):
                             post=comment.post,
                             profile_photo_thumbnail=up.profile_photo.url,
                             title=up.fullname(),
-                            message='Has mentioned you in a comment',
+                            message='Mentioned you in a comment',
                             thumbnail=comment.post.post_thumbnail().url if comment.post.post_thumbnail() else None,
                             data={
                                 'comment_mentioned_user': m.id,
