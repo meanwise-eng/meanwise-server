@@ -52,6 +52,7 @@ def convert_old_notifications(apps, scheme_editor):
                 notification.message = 'Commented on your post'
                 notification.datetime = notification.created_on
                 notification.thumbnail = notification.post.post_thumbnail().url if notification.post.post_thumbnail() else None
+                notification.data['commented_by'] = notification.comment.commented_by.id
 
 
             elif notification.notification_type == Notification.TYPE_POST_MENTIONED_USER:

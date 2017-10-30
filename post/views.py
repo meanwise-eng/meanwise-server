@@ -731,7 +731,11 @@ class PostCommentList(APIView):
                         message='Commented on your post',
                         datetime=datetime.datetime.now(),
                         thumbnail=comment.post.post_thumbnail().url if comment.post.post_thumbnail() else None,
-                        data={'comment_id': comment.id, 'post_id': comment.post.id})
+                        data={
+                            'comment_id': comment.id,
+                            'post_id': comment.post.id,
+                            'commented_by': comment.commented_by.id,
+                        })
                     # send push notification
                     devices = find_user_devices(comment.post.poster.id)
                     message_payload = {
