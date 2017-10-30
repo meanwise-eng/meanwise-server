@@ -1,4 +1,6 @@
 import datetime
+import json
+
 from rest_framework import serializers
 from django.urls import reverse
 from common.api_helper import build_absolute_uri
@@ -30,6 +32,7 @@ class PostDocumentSerializer(DocumentSerializer):
     resolution = serializers.SerializerMethodField()
     mentioned_users = serializers.SerializerMethodField()
     boost_datetime = serializers.SerializerMethodField()
+    link_meta_data = serializers.SerializerMethodField()
 
     class Meta:
         document = PostDocument
@@ -39,7 +42,8 @@ class PostDocumentSerializer(DocumentSerializer):
                   'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
                   'topics', 'created_on', 'resolution', 'mentioned_users',
                   'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type',
-                  'panaroma_type', 'post_thumbnail_url', 'is_work',
+                  'panaroma_type', 'post_thumbnail_url', 'is_work', 'link',  'pdf_url', 'audio_url',
+                  'pdf_thumb_url', 'audio_thumb_url',
         ]
 
     def get_id(self, obj):
@@ -89,8 +93,7 @@ class PostDocumentSerializer(DocumentSerializer):
         return build_absolute_uri(reverse('post-likes', args=[obj._id]))
 
     def get_resolution(self, obj):
-        post = Post.objects.get(id=obj._id)
-
+        post = self.get_post(obj)
         return post.resolution
 
     def get_mentioned_users(self, obj):
@@ -100,6 +103,19 @@ class PostDocumentSerializer(DocumentSerializer):
 
     def get_boost_datetime(self, obj):
         return obj.boost_datetime
+
+    def get_link_meta_data(self, obj):
+        post = self.get_post(obj)
+
+        return post.link_meta_data
+
+    def get_post(self, obj):
+        try:
+            post = Post.objects.get(id=obj._id)
+        except Post.DoesNotExist:
+            raise Exception("Post doesn't exist in db for ID: %s" % obj._id)
+
+        return post
 
 
 class MentionedUserSerializer(serializers.ModelSerializer):
@@ -313,7 +329,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return ""
 
     def get_link_meta_data(self, obj):
-        return obj.link_meta_data if obj.link_meta_data else {}
+        return obj.link_meta_data if obj.link_meta_data else None
 
     def get_post_type(self, obj):
         if obj.image:
@@ -521,7 +537,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return ""
 
     def get_link_meta_data(self, obj):
-        return obj.link_meta_data if obj.link_meta_data else {}
+        return obj.link_meta_data if obj.link_meta_data else None
 
     def get_post_type(self, obj):
         if obj.image:
@@ -562,6 +578,11 @@ class PostSaveSerializer(serializers.ModelSerializer):
                 "You cannot submit geo_location_lng without geo_location_lat")
 
         return data
+
+    def validate_link_meta_data(self, data):
+        if data:
+            data = json.loads(data)
+        return None
 
 
 class PostUpdateSerializer(serializers.ModelSerializer):

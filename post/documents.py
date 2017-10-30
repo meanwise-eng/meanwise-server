@@ -213,10 +213,7 @@ class PostDocument(DocType):
         return None
 
     def prepare_link(self, obj):
-        _link = obj.link
-        if _link:
-            return _link.url
-        return None
+        return obj.link
 
     def prepare_audio_thumb_url(self, obj):
         # needs to be added
