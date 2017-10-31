@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import logging
+import datetime
 
 from django.db import migrations
 
@@ -11,7 +12,8 @@ from userprofile.models import UserProfile
 
 
 def convert_old_notifications(apps, scheme_editor):
-    notifications = Notification.objects.filter(title=None)
+    three_weeks_ago = datetime.datetime.now() - datetime.timedelta(weeks=3)
+    notifications = Notification.objects.filter(created_on__gt=three_weeks_ago)
 
     for notification in notifications:
         try:
