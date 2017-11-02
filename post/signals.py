@@ -2,6 +2,8 @@ import logging
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
 
+import elasticsearch
+
 from boost.models import Boost
 
 from .models import Post, Comment
@@ -43,3 +45,32 @@ def remove_boost_from_post_index(sender, **kwargs):
         return
 
     post_save.send(Post, instance=boost.content_object, created=False)
+
+@receiver(post_save, sender=Post, dispatch_uid='post.post_saved')
+def create_post_index(sender, **kwargs):
+    post = kwargs['instance']
+
+    if post.is_deleted:
+        return
+
+    try:
+        post_doc = PostDocument.get(id=post.id)
+    except elasticsearch.NotFoundError:
+        post_doc = PostDocument()
+
+    post_doc.set_from_post(post)
+    post_doc.save()
+
+@receiver(post_delete, sender=Post, dispatch_uid='post.post_deleted')
+def delete_post_index(sender, **kwargs):
+    post = kwargs['instance']
+
+    if not post.is_deleted:
+        return
+
+    try:
+        post_doc = PostDocument.get(id=post.id)
+    except elasticsearch.NotFoundError:
+        return
+
+    post_doc.delete()

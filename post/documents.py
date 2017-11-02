@@ -1,6 +1,6 @@
 import datetime
 
-from django_elasticsearch_dsl import DocType, Index, fields
+from elasticsearch_dsl import (Integer, String, Date, Boolean, Index, DocType, GeoPoint,)
 
 from django.urls import reverse
 from common.api_helper import build_absolute_uri
@@ -22,48 +22,48 @@ post.settings(
 @post.doc_type
 class PostDocument(DocType):
 
-    interest_id = fields.IntegerField()
-    interest_name = fields.StringField(index='not_analyzed')
-    text = fields.StringField()
-    image_url = fields.StringField()
-    video_url = fields.StringField()
-    user_id = fields.IntegerField()
-    tags = fields.ListField(fields.StringField())
-    num_likes = fields.IntegerField()
-    num_recent_likes = fields.IntegerField()
-    num_comments = fields.IntegerField()
-    num_recent_comments = fields.IntegerField()
-    user_firstname = fields.StringField()
-    user_lastname = fields.StringField()
-    user_profile_photo = fields.StringField()
-    user_cover_photo = fields.StringField()
-    user_profession_id = fields.IntegerField()
-    user_profession_text = fields.StringField()
-    user_profile_photo_small = fields.StringField()
-    video_thumb_url = fields.StringField()
-    topics = fields.ListField(fields.StringField())
-    num_seen = fields.IntegerField()
-    num_recent_seen = fields.IntegerField()
-    created_on = fields.DateField()
-    geo_location = fields.GeoPointField()
-    pdf_url = fields.StringField()
-    audio_url = fields.StringField()
-    link = fields.StringField()
-    pdf_thumb_url = fields.StringField()
-    audio_thumb_url = fields.StringField()
-    post_type = fields.StringField()
-    panaroma_type = fields.StringField()
-    post_thumbnail_url = fields.StringField()
-    is_work = fields.BooleanField()
+    interest_id = Integer()
+    interest_name = String(index='not_analyzed')
+    text = String()
+    image_url = String()
+    video_url = String()
+    user_id = Integer()
+    tags = String()
+    num_likes = Integer()
+    num_recent_likes = Integer()
+    num_comments = Integer()
+    num_recent_comments = Integer()
+    user_firstname = String()
+    user_lastname = String()
+    user_profile_photo = String()
+    user_cover_photo = String()
+    user_profession_id = Integer()
+    user_profession_text = String()
+    user_profile_photo_small = String()
+    video_thumb_url = String()
+    topics = String()
+    num_seen = Integer()
+    num_recent_seen = Integer()
+    created_on = Date()
+    geo_location = GeoPoint()
+    pdf_url = String()
+    audio_url = String()
+    link = String()
+    pdf_thumb_url = String()
+    audio_thumb_url = String()
+    post_type = String()
+    panaroma_type = String()
+    post_thumbnail_url = String()
+    is_work = Boolean()
 
-    boost_value = fields.IntegerField()
-    boost_datetime = fields.DateField()
+    boost_value = Integer()
+    boost_datetime = Date()
 
-    brand = fields.StringField()
-    brand_logo_url = fields.StringField()
+    brand = String()
+    brand_logo_url = String()
 
     class Meta:
-        model = Post
+        index = 'mw_posts'
 
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
@@ -273,3 +273,18 @@ class PostDocument(DocType):
 
     def prepare_post_thumbnail_url(self, obj):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
+
+    def set_from_post(self, post):
+        properties = ('interest_id', 'interest_name', 'text', 'image_url', 'video_url', 'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments', 'num_recent_comments', 'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo', 'user_profession_id', 'user_profession_text', 'user_profile_photo_small', 'video_thumb_url', 'topics', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location', 'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url', 'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work', 'boost_value', 'boost_datetime', 'brand', 'brand_logo_url')
+        for key in properties:
+            method = 'prepare_%s' % key
+            if hasattr(self, method):
+               value = getattr(self, method)(post)
+            elif hasattr(post, key):
+                value = getattr(post, key)
+            else:
+                raise Exception("Cannot get value for key %s" % key)
+
+            setattr(self, key, value)
+
+        self._id = post.id

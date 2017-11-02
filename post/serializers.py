@@ -19,10 +19,38 @@ from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 
-class PostDocumentSerializer(DocumentSerializer):
+class PostDocumentSerializer(serializers.Serializer):
+
+    user_id = serializers.IntegerField()
+    num_comments = serializers.IntegerField()
+    interest_id = serializers.IntegerField()
+    user_firstname = serializers.CharField()
+    user_lastname = serializers.CharField()
+    user_profile_photo = serializers.CharField()
+    user_profile_photo_small = serializers.CharField()
+    user_cover_photo = serializers.CharField()
+    user_profession_text = serializers.CharField()
+    text = serializers.CharField()
+    image_url = serializers.CharField()
+    video_url = serializers.CharField()
+    video_thumb_url = serializers.CharField()
+    topics = serializers.ListField(child=serializers.CharField())
+    created_on = serializers.DateTimeField()
+    resolution = serializers.CharField()
+    mentioned_users = serializers.ListField(serializers.DictField())
+    brand = serializers.CharField()
+    brand_logo_url = serializers.CharField()
+    post_type = serializers.CharField()
+    panaroma_type = serializers.CharField()
+    post_thumbnail_url = serializers.CharField()
+    is_work = serializers.BooleanField()
+    link = serializers.CharField()
+    pdf_url = serializers.CharField()
+    audio_url = serializers.CharField()
+    pdf_thumb_url = serializers.CharField()
+    audio_thumb_url = serializers.CharField()
 
     id = serializers.SerializerMethodField()
-    score = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     tags = serializers.ListField(child=serializers.CharField())
     topics = serializers.ListField(child=serializers.CharField())
@@ -33,18 +61,7 @@ class PostDocumentSerializer(DocumentSerializer):
     mentioned_users = serializers.SerializerMethodField()
     boost_datetime = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
-
-    class Meta:
-        document = PostDocument
-        fields = ['tags', 'user_id', 'num_likes', 'is_liked', 'likes_url', 'num_comments',
-                  'interest_id', 'user_firstname', 'user_lastname', 'user_profile_photo',
-                  'user_profile_photo_small', 'user_cover_photo', 'user_profession',
-                  'user_profession_text', 'text', 'image_url', 'video_url', 'video_thumb_url',
-                  'topics', 'created_on', 'resolution', 'mentioned_users',
-                  'boost_value', 'boost_datetime', 'brand', 'brand_logo_url', 'post_type',
-                  'panaroma_type', 'post_thumbnail_url', 'is_work', 'link',  'pdf_url', 'audio_url',
-                  'pdf_thumb_url', 'audio_thumb_url',
-        ]
+    user_profession = serializers.SerializerMethodField()
 
     def get_id(self, obj):
         return obj._id
@@ -116,6 +133,21 @@ class PostDocumentSerializer(DocumentSerializer):
             raise Exception("Post doesn't exist in db for ID: %s" % obj._id)
 
         return post
+
+    def get_user_profession(self, doc):
+        obj = self.get_post(doc)
+        try:
+            up = obj.poster.userprofile
+        except UserProfile.DoesNotExist:
+            return ""
+        profession = up.profession
+        data = {}
+        if profession:
+            data = {
+                'name': profession.text,
+                'id': profession.id,
+            }
+        return data
 
 
 class MentionedUserSerializer(serializers.ModelSerializer):
