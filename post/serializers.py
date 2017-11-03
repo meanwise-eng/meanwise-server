@@ -34,7 +34,6 @@ class PostDocumentSerializer(serializers.Serializer):
     image_url = serializers.CharField()
     video_url = serializers.CharField()
     video_thumb_url = serializers.CharField()
-    topics = serializers.ListField(child=serializers.CharField())
     created_on = serializers.DateTimeField()
     resolution = serializers.CharField()
     mentioned_users = serializers.ListField(serializers.DictField())
@@ -52,8 +51,8 @@ class PostDocumentSerializer(serializers.Serializer):
 
     id = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
-    tags = serializers.ListField(child=serializers.CharField())
-    topics = serializers.ListField(child=serializers.CharField())
+    tags = serializers.SerializerMethodField()
+    topics = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
     created_on = serializers.SerializerMethodField()
     likes_url = serializers.SerializerMethodField()
@@ -148,6 +147,18 @@ class PostDocumentSerializer(serializers.Serializer):
                 'id': profession.id,
             }
         return data
+
+    def get_topics(self, obj):
+        if obj.topics:
+            return list(obj.topics)
+
+        return []
+
+    def get_tags(self, obj):
+        if obj.tags:
+            return list(obj.tags)
+
+        return []
 
 
 class MentionedUserSerializer(serializers.ModelSerializer):

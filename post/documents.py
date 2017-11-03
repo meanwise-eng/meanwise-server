@@ -274,6 +274,14 @@ class PostDocument(DocType):
     def prepare_post_thumbnail_url(self, obj):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
 
+    def prepare_topics(self, obj):
+        if obj.topics.count() == 0:
+            return []
+        return [topic.text for topic in obj.topics.all()]
+
+    def prepare_tags(self, obj):
+        return [tag.name for tag in obj.tags.all()]
+
     def set_from_post(self, post):
         properties = ('interest_id', 'interest_name', 'text', 'image_url', 'video_url', 'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments', 'num_recent_comments', 'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo', 'user_profession_id', 'user_profession_text', 'user_profile_photo_small', 'video_thumb_url', 'topics', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location', 'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url', 'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work', 'boost_value', 'boost_datetime', 'brand', 'brand_logo_url')
         for key in properties:
