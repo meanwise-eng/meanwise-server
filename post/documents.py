@@ -11,7 +11,7 @@ from .models import Post, Comment
 from userprofile.models import UserProfile
 from boost.models import Boost
 
-post = Index('mw_posts')
+post = Index('mw_posts_2')
 
 post.settings(
     number_of_shards=1,
