@@ -63,7 +63,7 @@ class PostDocument(DocType):
     brand_logo_url = String()
 
     class Meta:
-        index = 'mw_posts'
+        index = 'mw_posts_2'
 
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
