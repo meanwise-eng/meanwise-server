@@ -23,6 +23,7 @@ class PostDocumentSerializer(serializers.Serializer):
 
     user_id = serializers.IntegerField()
     num_comments = serializers.IntegerField()
+    num_likes = serializers.IntegerField()
     interest_id = serializers.IntegerField()
     user_firstname = serializers.CharField()
     user_lastname = serializers.CharField()
