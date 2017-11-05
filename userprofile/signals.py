@@ -121,7 +121,8 @@ def send_welcome_email(sender, **kwargs):
         if response.status_code == 201:
             list_id = settings.SENDGRID_NEW_USER_LIST_ID
             res_body = json.loads(response.body.decode('utf-8'))
-            recipient_id = res_body['persisted_recipients'][0]
+            if len(res_body['persisted_recipients']) > 0:
+                recipient_id = res_body['persisted_recipients'][0]
 
             response = sg.client.contactdb.lists._(list_id).recipients._(recipient_id).post()
             logger.debug("Contact added to list: %s" % (response.status_code))
