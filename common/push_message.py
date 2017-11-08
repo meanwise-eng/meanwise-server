@@ -34,7 +34,8 @@ def send_message_device(device, message_payload):
     }
     try:
         message = PushMessage(badge_count=1, context='url_alert', context_id='none',
-                              has_new_content=True, message=message, sound="default")
+                              has_new_content=True, message=message, sound="default",
+                              extra_payload=extra_pload)
     except Exception as e:
         logger.error(e)
         return 0

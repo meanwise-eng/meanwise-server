@@ -53,7 +53,7 @@ django-taggit-serializer==0.1.5
 drf-haystack
 moviepy
 django-crontab
-django-scarface
+django-scarface==3.0.2
 django-storages==1.5.2
 boto3==1.4.4
 django-health-check==2.3.0
