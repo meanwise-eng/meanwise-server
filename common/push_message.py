@@ -40,8 +40,8 @@ def send_message_device(device, message_payload):
         logger.error(e)
         return 0
     try:
-        device.send(message, extra_pload={'p': message_payload[
-                    'p'], 'u': message_payload['u'], 't': message_payload['t']})
+        device.send(message)
+
     except Exception as e:
         logger.error(e)
         return 0
