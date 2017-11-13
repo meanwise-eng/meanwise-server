@@ -58,7 +58,7 @@ class UserPostList(APIView):
     List all User posts, or create a new User post.
     """
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
 
     def get(self, request, user_id):
@@ -639,7 +639,7 @@ class UserPostUnLike(APIView):
 class PostLikes(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get_post(self, post_id):
         try:
@@ -680,7 +680,7 @@ class PostCommentList(APIView):
     List all post related comments, or create a new User comment.
     """
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request, post_id):
         comments = Comment.objects.filter(is_deleted=False).filter(

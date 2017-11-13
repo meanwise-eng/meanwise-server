@@ -221,7 +221,7 @@ class UserProfileDetail(APIView):
     Edit a userprofile instance.
     """
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get_object(self, user_id):
         try:
