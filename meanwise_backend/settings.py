@@ -119,7 +119,6 @@ INSTALLED_APPS = [
     'django_crontab',
     'scarface',
     'analytics',
-    'django_elasticsearch_dsl',
 ]
 
 if DEBUG:

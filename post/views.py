@@ -1029,6 +1029,7 @@ class PostExploreView(APIView):
         interest_name = request.query_params.get('interest_name', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
+        user_id = request.query_params.get('user_id', None)
         geo_location = request.query_params.get('geo_location', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
@@ -1068,6 +1069,8 @@ class PostExploreView(APIView):
                 query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
             functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
                 ','), 'scale': '1km', 'decay': 0.9}, weight=1))
+        if user_id:
+            must.append(query.Q('term', user_id=user_id))
 
         now = datetime.datetime.now()
         origin = before if before else now
@@ -1463,3 +1466,22 @@ class PostSearchView(HaystackViewSet):
         queryset = super(PostSearchView, self).filter_queryset(
             self.get_queryset())
         return queryset.order_by('-created_on')
+
+
+class UserTopicsListView(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request, user_id):
+        user_topics = UserTopic.objects.filter(user_id=user_id).order_by('-popularity', 'topic', 'interest')
+
+        serializer = UserTopicSerializer(user_topics, many=True)
+
+        return Response({
+            'status': 'success',
+            'error': None,
+            'results': {
+                'user_topics': serializer.data
+            }
+        })

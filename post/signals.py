@@ -6,7 +6,7 @@ import elasticsearch
 
 from boost.models import Boost
 
-from .models import Post, Comment
+from .models import Post, Comment, UserTopic, Topic
 from .documents import PostDocument
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
@@ -74,3 +74,65 @@ def delete_post_index(sender, **kwargs):
         return
 
     post_doc.delete()
+
+
+@receiver(m2m_changed, sender=Post.topics.through, dispatch_uid='post.post_saved_user_post')
+def update_user_topic(sender, **kwargs):
+    post = kwargs['instance']
+
+    popularity = 1
+    popularity += post.liked_by.count()
+    popularity += post.comments.count()
+
+    if kwargs['reverse'] == True:
+        return
+
+    if kwargs['pk_set'] is None:
+        return
+
+    for post_topic_id in kwargs['pk_set']:
+        topic = Topic.objects.get(pk=post_topic_id)
+        try:
+            user_topic = UserTopic.objects.get(user=post.poster, topic=topic.text,
+                                               interest=post.interest.name)
+        except UserTopic.DoesNotExist:
+            user_topic = None
+            pass
+
+        if kwargs['action'] == 'post_add':
+            if user_topic is None:
+                user_topic = UserTopic(user=post.poster, topic=topic.text,
+                                   interest=post.interest.name)
+                user_topic.popularity = 1
+
+            user_topic.popularity += popularity
+            user_topic.save()
+
+        if kwargs['action'] == 'post_remove' and user_topic is not None:
+            user_topic.popularity -= popularity
+            if user_topic.popularity == 0:
+                user_topic.popularity = 0
+
+            user_topic.save()
+
+
+@receiver(post_delete, sender=Post, dispatch_uid='post.post_deleted_user_post')
+def reduce_topic_popularity(sender, **kwargs):
+    post = kwargs['instance']
+
+    popularity = 1
+    popularity += post.liked_by.count()
+    popularity += post.comments.count()
+
+    for topic in post.topics.all():
+        try:
+            user_topic = UserTopic.objects.get(user=post.poster, topic=topic.text,
+                                               interest=post.interest.name)
+        except UserTopic.DoesNotExist:
+            continue
+
+        user_topic.popularity -= popularity
+        if user_topic.popularity == 0:
+            user_topic.popularity = 0
+
+        user_topic.save()

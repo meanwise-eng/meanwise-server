@@ -54,6 +54,8 @@ urlpatterns = [
         UserPostLike.as_view(), name="post-like"),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/unlike/$',
         UserPostUnLike.as_view(), name="post-unlike"),
+    url(r'^user/(?P<user_id>[0-9]+)/user-topics/',
+        UserTopicsListView.as_view(), name='user-topics'),
     url(r'^story/(?P<story_id>[0-9]+)/',
         StoryDetail.as_view(), name='post-story'),
     url(r'^posts/', include('post.urls')),

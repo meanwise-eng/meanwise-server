@@ -10,7 +10,7 @@ from common.api_helper import build_absolute_uri
 
 from django.contrib.auth.models import User
 from userprofile.models import UserProfile, Profession
-from post.models import Post, Comment, Share, Story
+from post.models import Post, Comment, Share, Story, UserTopic
 from post.documents import PostDocument
 from brands.models import Brand
 
@@ -749,3 +749,10 @@ class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
 #         fields = ("text", "post_text", "post_id", "interest_name", "interest_slug", "created_on", 'tag_names', 'topic_texts', 'term')
 #         field_aliases = {}
 #         exclude = {}
+
+
+class UserTopicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserTopic
+        fields = ('topic', 'interest', 'popularity',)

@@ -199,7 +199,7 @@ class Story(models.Model):
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, db_index=True)
+    post = models.ForeignKey(Post, db_index=True, related_name='comments')
     commented_by = models.ForeignKey(User)
     comment_text = models.CharField(max_length=200)
     is_deleted = models.BooleanField(default=False)
@@ -232,3 +232,10 @@ class TrendingTopicsInterest(models.Model):
 
     def __str__(self):
         return "Interest name: " + str(self.interest.name) + " topics: " + str(self.topics)
+
+
+class UserTopic(models.Model):
+    user = models.ForeignKey(User)
+    topic = models.CharField(max_length=128)
+    interest = models.CharField(max_length=128)
+    popularity = models.IntegerField()
