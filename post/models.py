@@ -45,6 +45,17 @@ PANAROMA_TYPES = (
     ('', 'None'),
     ('equirectangular', 'Equirectangular'),
 )
+VISIBILITY_CHOICES = (
+    ('Public', 'Public'),
+    ('Friends', 'Friends'),
+    ('List', 'List'),
+)
+
+
+class ShareList(models.Model):
+
+    user = models.ForeignKey(User)
+    share_with = JSONField()
 
 
 class Post(models.Model):
@@ -83,6 +94,11 @@ class Post(models.Model):
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
     is_work = models.BooleanField()
+
+    # privacy settings
+    visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES)
+    share_list_id = models.ForeignKey(ShareList, null=True, blank=True)
+    allow_sharing = models.BooleanField()
 
     boosts = GenericRelation(Boost, related_query_name='post')
     brand = models.ForeignKey(Brand, null=True, related_name='posts')
