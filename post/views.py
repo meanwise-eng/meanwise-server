@@ -1055,7 +1055,7 @@ class PostExploreView(APIView):
         if interest_name:
             self.update_interest_relevance(interest_name, request.user)
             must.append(query.Q('term', interest_name=interest_name))
-        else:
+        elif user_id is None:
             must.append(query.Q('bool', should=[
                 query.Q('terms', interest_id=interest_ids),
                 query.Q('terms', user_id=friends_ids)
@@ -1081,6 +1081,19 @@ class PostExploreView(APIView):
             must.append(query.Q({'range': {'created_on': {'lt': before}}}))
         else:
             must.append(query.Q({'range': {'created_on': {'lt': now}}}))
+
+        # applying privacy
+        privacy_qs = []
+        privacy_qs.append(query.Q('term', visible_to='Public'))
+        privacy_qs.append(query.Q('bool', must=[
+            query.Q('term', visible_to='Friends'),
+            query.Q('terms', user_id=friends_ids)
+        ]))
+        privacy_qs.append(query.Q('bool', must=[
+            query.Q('term', visible_to='List'),
+            query.Q('term', share_list_user_ids=request.user.id)
+        ]))
+        must.append(query.Q('bool', should=privacy_qs))
 
         # overall popularity
         functions.append(query.SF('field_value_factor',
@@ -1259,6 +1272,7 @@ class PostExploreTrendingView(APIView):
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
         geo_location = request.query_params.get('geo_location', None)
+        user_id = request.query_params.get('user_id', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
         item_count = int(request.query_params.get('item_count', 30))
@@ -1282,7 +1296,7 @@ class PostExploreTrendingView(APIView):
         must = []
         if interest_name:
             must.append(query.Q('term', interest_name=interest_name))
-        else:
+        elif user_id is None:
             must.append(query.Q('bool', should=[
                 query.Q('terms', interest_id=interest_ids),
                 query.Q('terms', user_id=friends_ids)
@@ -1296,6 +1310,8 @@ class PostExploreTrendingView(APIView):
                 query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
             functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
                 ','), 'scale': '1km', 'decay': 0.9}, weight=1))
+        if user_id:
+            must.append(query.Q('term', user_id=user_id))
 
         now = datetime.datetime.now()
         origin = before if before else now
@@ -1306,6 +1322,19 @@ class PostExploreTrendingView(APIView):
             must.append(query.Q({'range': {'created_on': {'lt': before}}}))
         else:
             must.append(query.Q({'range': {'created_on': {'lt': now}}}))
+
+        # applying privacy
+        privacy_qs = []
+        privacy_qs.append(query.Q('term', visible_to='Public'))
+        privacy_qs.append(query.Q('bool', must=[
+            query.Q('term', visible_to='Friends'),
+            query.Q('terms', user_id=friends_ids)
+        ]))
+        privacy_qs.append(query.Q('bool', must=[
+            query.Q('term', visible_to='List'),
+            query.Q('term', share_list_user_ids=request.user.id)
+        ]))
+        must.append(query.Q('bool', should=privacy_qs))
 
         # overall popularity
         functions.append(query.SF('exp', created_on={

@@ -605,6 +605,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
         required=False, max_length=100, allow_blank=True)
     geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
+    share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
 
     class Meta:
         model = Post
@@ -631,9 +632,11 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
 class PostUpdateSerializer(serializers.ModelSerializer):
 
+    share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
+
     class Meta:
         model = Post
-        fields = ('is_work',)
+        fields = ('is_work', 'share_list_user_ids', 'visible_to', 'allow_sharing')
 
 class StorySerializer(serializers.ModelSerializer):
     posts = serializers.SerializerMethodField()

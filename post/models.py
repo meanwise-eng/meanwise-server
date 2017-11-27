@@ -96,8 +96,9 @@ class Post(models.Model):
     is_work = models.BooleanField()
 
     # privacy settings
-    visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES)
-    share_list_id = models.ForeignKey(ShareList, null=True, blank=True)
+    visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
+    share_list = models.ForeignKey(ShareList, null=True, blank=True)
+    share_list_user_ids = JSONField(blank=True, default=[])
     allow_sharing = models.BooleanField()
 
     boosts = GenericRelation(Boost, related_query_name='post')

@@ -56,6 +56,11 @@ class PostDocument(DocType):
     post_thumbnail_url = String()
     is_work = Boolean()
 
+    visible_to = String(index='not_analyzed')
+    share_list_id = Integer()
+    share_list_user_ids = Integer()
+    allow_sharing = Boolean()
+
     boost_value = Integer()
     boost_datetime = Date()
 
@@ -282,8 +287,23 @@ class PostDocument(DocType):
     def prepare_tags(self, obj):
         return [tag.name for tag in obj.tags.all()]
 
+    def prepare_share_list_id(self, obj):
+        return obj.share_list.id if obj.share_list else None
+
+    def prepare_share_list_user_ids(self, obj):
+        return obj.share_list_user_ids
+
     def set_from_post(self, post):
-        properties = ('interest_id', 'interest_name', 'text', 'image_url', 'video_url', 'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments', 'num_recent_comments', 'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo', 'user_profession_id', 'user_profession_text', 'user_profile_photo_small', 'video_thumb_url', 'topics', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location', 'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url', 'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work', 'boost_value', 'boost_datetime', 'brand', 'brand_logo_url')
+        properties = ('interest_id', 'interest_name', 'text', 'image_url', 'video_url',
+                      'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments',
+                      'num_recent_comments', 'user_firstname', 'user_lastname',
+                      'user_profile_photo', 'user_cover_photo', 'user_profession_id',
+                      'user_profession_text', 'user_profile_photo_small', 'video_thumb_url',
+                      'topics', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location',
+                      'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url',
+                      'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work',
+                      'boost_value', 'boost_datetime', 'brand', 'brand_logo_url',
+                      'visible_to', 'share_list_user_ids', 'allow_sharing',)
         for key in properties:
             method = 'prepare_%s' % key
             if hasattr(self, method):
