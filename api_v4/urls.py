@@ -5,6 +5,7 @@ from rest_framework import routers
 from userprofile.views import *
 from post.views import *
 from mnotifications.views import *
+from credits.views import CreditsListView
 
 router = routers.SimpleRouter()
 
@@ -56,6 +57,8 @@ urlpatterns = [
         UserPostUnLike.as_view(), name="post-unlike"),
     url(r'^user/(?P<user_id>[0-9]+)/user-topics/',
         UserTopicsListView.as_view(), name='user-topics'),
+    url(r'^user/(?P<user_id>[0-9]+)/credits/',
+        CreditsListView.as_view(), name='user-credits'),
     url(r'^story/(?P<story_id>[0-9]+)/',
         StoryDetail.as_view(), name='post-story'),
     url(r'^posts/', include('post.urls')),

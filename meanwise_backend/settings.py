@@ -115,6 +115,7 @@ INSTALLED_APPS = [
     'discussions.apps.DiscussionsConfig',
     'boost.apps.BoostConfig',
     'brands.apps.BrandsConfig',
+    'credits.apps.CreditsConfig',
     'django_crontab',
     'scarface',
     'analytics',

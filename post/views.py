@@ -39,6 +39,7 @@ from post.models import *
 from post.serializers import *
 from userprofile.models import UserFriend, Interest, UserInterestRelevance
 from mnotifications.models import Notification
+from credits.models import Credits, Critic
 
 from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
@@ -557,7 +558,23 @@ class UserPostLike(APIView):
         if user != request.user:
             raise PermissionDenied("You can only like a post as yourself")
 
+        if user not in post.liked_by.all():
+            skills = list(post.topics.all().values_list('text', flat=True))
+            critic = Critic.objects.create(from_user_id=user.id, to_user_id=post.poster.id,
+                                           post_id=post.id, user_credits=0, rating=3,
+                                           skills=skills, created_on=datetime.datetime.now())
+
+            for skill in (skills + ['overall']):
+                try:
+                    credits = Credits.objects.get(user_id=post.poster.id, skill=skill)
+                except Credits.DoesNotExist:
+                    credits = Credits.objects.create(user_id=post.poster.id, skilk=skill, credits=0)
+
+                credits.credits += 1
+                credits.save()
+
         post.liked_by.add(user)
+
         if post.poster.id != request.user.id:
             # Add notification
             up = user.userprofile
@@ -617,6 +634,18 @@ class UserPostUnLike(APIView):
 
         if user in post.liked_by.all():
             post.liked_by.remove(user)
+
+            critic = Critic.objects.filter(from_user_id=user.id, to_user_id=post.poster.id,
+                                           post_id=post.id).delete()
+
+            skills = list(post.topics.all().values_list('text', flat=True))
+            for skill in (skills + ['overall']):
+                try:
+                    credits = Credits.objects.get(user_id=post.poster.id, skill=skill)
+                    credits.credits -= 1
+                    credits.save()
+                except Credits.DoesNotExist:
+                    pass
             return Response(
                 {
                     "status": "success",

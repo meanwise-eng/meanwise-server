@@ -9,6 +9,7 @@ import ast
 
 from drf_haystack.serializers import HaystackSerializerMixin, HaystackSerializer
 
+from credits.models import Credits
 from userprofile.models import *
 from django.contrib.auth.models import User
 from userprofile.search_indexes import (ProfessionIndex,
@@ -59,6 +60,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     friend_request_status = serializers.SerializerMethodField(read_only=True)
     friends_url = serializers.SerializerMethodField(read_only=True)
     friend_count = serializers.SerializerMethodField(read_only=True)
+    credits = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = UserProfile
@@ -70,7 +72,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                   'profile_story_title', 'profile_story_description', 'city',
                   'profession_text', 'skills_list', 'profile_background_color',
                   'user_type', 'friend_request_status', 'friends_url',
-                  'friend_count',
+                  'friend_count', 'credits',
                   ]
 
     def get_user_id(self, obj):
@@ -161,6 +163,14 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 
         return friend_count.count()
 
+    def get_credits(self, obj):
+        try:
+            credits = Credits.objects.get(user_id=obj.user.id, skill='overall')
+        except Credits.DoesNotExist:
+            return 0
+
+        return credits.credits
+
     def update(self, obj, validated_data):
         super().update(obj, validated_data)
 
@@ -210,7 +220,7 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
                   'profile_story_title', 'profile_story_description',
                   'city', 'profession_text', 'skills_list', 'user_type',
                   'profile_background_color', 'friend_request_status',
-                  'friends_url', 'friend_count',
+                  'friends_url', 'friend_count', 'credits',
                   ]
 
 
