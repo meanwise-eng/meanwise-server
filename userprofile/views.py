@@ -1,5 +1,6 @@
 import math
 import datetime
+import sendgrid
 
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -1240,3 +1241,30 @@ class RemoveFriend(APIView):
             },
             status=status.HTTP_201_CREATED
         )
+
+
+class EarlyAccess(APIView):
+
+    def post(self, request):
+        email = request.data['email']
+
+        contact = { 'email': email }
+
+        sg = sendgrid.SendGridAPIClient(apikey=settings.SENDGRID_API_KEY)
+
+        response = sg.client.contactdb.recipients.post(request_body=[contact])
+        if response.status_code == 201:
+            list_id = '2494376'
+            res_body = json.loads(response.body.decode('utf-8'))
+            if len(res_body['persisted_recipients']) == 0:
+                return
+
+            recipient_id = res_body['persisted_recipients'][0]
+
+            response = sg.client.contactdb.lists._(list_id).recipients._(recipient_id).post()
+
+        return Response({
+            'status': 'success',
+            'error': None,
+            'results': None
+        }, status.HTTP_200_OK)
