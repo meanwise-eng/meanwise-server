@@ -80,6 +80,7 @@ urlpatterns = [
     url(r'^skill/$', SkillListView.as_view(), name="skills"),
     url(r'^interest/$', InterestListView.as_view(), name="interests"),
     url(r'^public-feed/$', PublicFeed.as_view(), name="public-feed"),
+    url(r'^subscribe/early-access/', EarlyAccess.as_view()),
     url(r'^me/', include('userprofile.me_urls')),
     url(r'^version/', include('appversion.urls')),
     url(r'^analytics/', include('analytics.urls')),

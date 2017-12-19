@@ -130,46 +130,30 @@ class AmazonNotificationAddDevice(APIView):
             Response({"status": "failed", "error": "No Platform found.",
                       "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            ASNSdevice.objects.filter(device__device_id=device_id).delete()
+        except Exception as e:
+            return Response(
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "results": "Could not delete existing ASNSdevice record"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         device = None
         # register device with platform and topic
         try:
-            device = Device.objects.get(device_id=device_id)
+            device = Device.objects.get(device_id=device_id, push_token=device_token,
+                                        platform=platform)
         except Device.DoesNotExist:
-            pass
-        ASNSdevice = None
-        try:
-            ASNSdevice = ASNSDevice.objects.get(device__device_id=device_id)
-        except ASNSDevice.DoesNotExist:
-            pass
-        if device:
-            try:
-                device.delete()
-            except Exception as e:
-                return Response(
-                    {
-                        "status": "failed",
-                        "error": str(e),
-                        "results": "Could not delete existing device record"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        if ASNSdevice:
-            try:
-                ASNSdevice.delete()
-            except Exception as e:
-                return Response(
-                    {
-                        "status": "failed",
-                        "error": str(e),
-                        "results": "Could not delete existing ASNSdevice record"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            Device.objects.filter(device_id=device_id, platform=platform).delete()
+            Device.objects.filter(push_token=device_token, platform=platform).delete()
+            device = Device.objects.create(device_id=device_id, push_token=device_token,
+                                           platform=platform)
 
         try:
-            device = Device.objects.create(
-                device_id=device_id, push_token=device_token, platform=platform)
             ASNSDevice.objects.create(device=device, user=user)
             device.register()
             topic.register_device(device)
