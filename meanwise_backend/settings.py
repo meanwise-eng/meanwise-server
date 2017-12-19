@@ -98,7 +98,6 @@ INSTALLED_APPS = [
     #'common',
     #'geography',
     'mnotifications',
-    'djcelery',
     'rest_framework.authtoken',
 
     # payment
@@ -154,7 +153,7 @@ DEVSERVER_AUTO_PROFILE = True
 
 # setting for S3 storage
 #DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'django_s3_storage.storage.S3Storage')
-#DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
+DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
 #THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
 
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-west-2')
@@ -164,10 +163,10 @@ AWS_SECRET_ACCESS_KEY = os.environ.get(
     'AWS_SECRET_ACCESS_KEY', 'aRR+qkRx7tsHzGQA8j1WBRaSmEnsMs8+PPr3N1f0')
 
 # The name of the bucket to store files in.
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', "mw-uploads")
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'mw-uploads-dev-1')
 AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH', False)
 AWS_S3_FILE_OVERWRITE = os.environ.get('AWS_S3_FILE_OVERWRITE', False)
-AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', 'dtl635379s21p.cloudfront.net')
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
 
 #AWS_REGION = os.environ.get('AWS_REGION', 'us-west-2')
 #AWS_S3_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME', "mw-uploads")
@@ -506,16 +505,16 @@ COVER_PHOTO_STUB = SITE_URL + '/client/images/coverPictureStub.jpg'
 
 # Celery Settings
 
-BROKER_URL = 'redis://%s/0' % REDIS_HOST
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-CELERYBEAT_SCHEDULE = {
-    'update-search-index-every-3hours': {
-        'task': 'search.tasks.update_search_index',
-        'schedule': timedelta(hours=3),
-        'kwargs': {'age': 3}
-    },
-}
-CELERY_ACCEPT_CONTENT = ['pickle', 'json', ]
+CELERY_BROKER_URL = 'redis://%s/0' % REDIS_HOST
+#CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+#CELERYBEAT_SCHEDULE = {
+#    'update-search-index-every-3hours': {
+#        'task': 'search.tasks.update_search_index',
+#        'schedule': timedelta(hours=3),
+#        'kwargs': {'age': 3}
+#    },
+#}
+#CELERY_ACCEPT_CONTENT = ['pickle', 'json', ]
 
 # Raven/Sentry Config
 # if not DEBUG:

@@ -19,10 +19,16 @@ from django.contrib.postgres.fields import JSONField as pgJSONField
 
 from PIL import Image
 from io import BytesIO
+import logging
+import tempfile
 
 from userprofile.models import Interest
 from boost.models import Boost
 from brands.models import Brand
+
+from .tasks import generate_video_thumbnail
+
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class Topic(models.Model):
     text = models.CharField(max_length=128, unique=True)
@@ -151,19 +157,26 @@ class Post(models.Model):
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
                 try:
-                    clip = VideoFileClip(self.video.path)
-                    thumbnail_path = os.path.join(os.path.dirname(self.video.path), os.path.splitext(
-                        os.path.basename(self.video.name))[0]) + ".jpg"
-                    clip.save_frame(thumbnail_path, t=1.00)
-                    _file = File(open(thumbnail_path, "rb"))
-                    self.video_thumbnail.save(
-                        (os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+                    filename = os.path.splitext(os.path.basename(self.video.name))[0]
+                    ext = os.path.splitext(os.path.basename(self.video.name))[-1]
+                    with tempfile.NamedTemporaryFile('r+b', suffix=ext) as vf:
+                        for chunk in self.video.chunks():
+                            vf.write(chunk)
+                        vf.seek(0)
+
+                        clip = VideoFileClip(vf.name)
+                        with tempfile.NamedTemporaryFile('r+b', suffix='.jpg') as tmp_thumb_file:
+                            clip.save_frame(tmp_thumb_file.name , t=1.00)
+                            _file = File(tmp_thumb_file)
+                            self.video_thumbnail.save((os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+
 
                     self.resolution = {
                         'height': self.video_thumbnail.height,
                         'width': self.video_thumbnail.width
                     }
                 except Exception as e:
+                    logger.exception(e)
                     print ("Error generating video thumb", e, str(e))
                 return
 
@@ -186,6 +199,9 @@ class Post(models.Model):
             }
 
         super(Post, self).save(*args, **kwargs)
+
+        #if self.video and not self.video_thumbnail:
+        #    generate_video_thumbnail.apply_async((self.id,), countdown=1)
 
         if inserting and self.poster.userprofile.post_boost:
             boost = Boost(
