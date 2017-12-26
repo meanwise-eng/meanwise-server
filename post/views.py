@@ -1497,13 +1497,26 @@ class PostSearchView(HaystackViewSet):
         return queryset.order_by('-created_on')
 
 
+class UserTopicParamSerializer(serializers.Serializer):
+    is_work = serializers.BooleanField()
+
 class UserTopicsListView(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request, user_id):
+        serializer = UserTopicParamSerializer(data=request.query_params)
+        if not serializer.is_valid():
+            return Response({'status': 'failed', 'error':serializer.errors, 'results':None},
+                            status.HTTP_400_BAD_REQUEST)
+        is_work = serializer.data['is_work']
+
         user_topics = UserTopic.objects.filter(user_id=user_id).order_by('-popularity', 'topic', 'interest')
+        if is_work:
+            user_topics = user_topics.filter(is_work=is_work)
+        else:
+            user_topics = user_topics.filter(is_work__isnull=True)
 
         serializer = UserTopicSerializer(user_topics, many=True)
 

@@ -273,3 +273,4 @@ class UserTopic(models.Model):
     interest = models.CharField(max_length=128)
     popularity = models.IntegerField()
     top_posts = pgJSONField()
+    is_work = models.NullBooleanField()
