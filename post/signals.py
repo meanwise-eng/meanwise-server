@@ -8,6 +8,7 @@ from boost.models import Boost
 
 from .models import Post, Comment, UserTopic, Topic
 from .documents import PostDocument
+from .serializers import PostSummarySerializer
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -106,15 +107,17 @@ def update_user_topic(sender, **kwargs):
                 user_topic.popularity = 1
 
             user_topic.popularity += popularity
-            user_topic.save()
 
         if kwargs['action'] == 'post_remove' and user_topic is not None:
             user_topic.popularity -= popularity
             if user_topic.popularity == 0:
                 user_topic.popularity = 0
 
-            user_topic.save()
+        posts = Post.objects.filter(topics__id=post_topic_id, poster=post.poster).order_by('-created_on')[:5]
+        serializer = PostSummarySerializer(posts, many=True)
 
+        user_topic.top_posts = serializer.data
+        user_topic.save()
 
 @receiver(post_delete, sender=Post, dispatch_uid='post.post_deleted_user_post')
 def reduce_topic_popularity(sender, **kwargs):

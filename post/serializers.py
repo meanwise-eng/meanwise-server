@@ -405,6 +405,12 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
 
 
+class PostSummarySerializer(PostSerializer):
+
+    class Meta(PostSerializer.Meta):
+        fields = ('id', 'text', 'post_thumbnail_url',)
+
+
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
@@ -758,4 +764,4 @@ class UserTopicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserTopic
-        fields = ('topic', 'interest', 'popularity',)
+        fields = ('topic', 'interest', 'popularity', 'top_posts',)
