@@ -252,7 +252,7 @@ class UserProfileDetail(APIView):
 
     def get(self, request, user_id):
         userprofile = self.get_object(user_id)
-        serializer = UserProfileSerializer(
+        serializer = UserProfileDetailSerializer(
             userprofile, context={'request': request})
         return Response(
             {

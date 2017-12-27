@@ -9,6 +9,8 @@ import ast
 
 from drf_haystack.serializers import HaystackSerializerMixin, HaystackSerializer
 
+from post.models import Post
+
 from credits.models import Credits
 from userprofile.models import *
 from django.contrib.auth.models import User
@@ -60,7 +62,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     friend_request_status = serializers.SerializerMethodField(read_only=True)
     friends_url = serializers.SerializerMethodField(read_only=True)
     friend_count = serializers.SerializerMethodField(read_only=True)
-    credits = serializers.SerializerMethodField(read_only=True)
+    total_credits = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = UserProfile
@@ -72,7 +74,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
                   'profile_story_title', 'profile_story_description', 'city',
                   'profession_text', 'skills_list', 'profile_background_color',
                   'user_type', 'friend_request_status', 'friends_url',
-                  'friend_count', 'credits',
+                  'friend_count', 'total_credits',
                   ]
 
     def get_user_id(self, obj):
@@ -163,7 +165,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 
         return friend_count.count()
 
-    def get_credits(self, obj):
+    def get_total_credits(self, obj):
         try:
             credits = Credits.objects.get(user_id=obj.user.id, skill='overall')
         except Credits.DoesNotExist:
@@ -220,8 +222,29 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
                   'profile_story_title', 'profile_story_description',
                   'city', 'profession_text', 'skills_list', 'user_type',
                   'profile_background_color', 'friend_request_status',
-                  'friends_url', 'friend_count', 'credits',
+                  'friends_url', 'friend_count', 'total_credits',
                   ]
+
+
+class UserProfileDetailSerializer(UserProfileUpdateSerializer):
+
+    total_posts = serializers.SerializerMethodField()
+
+    class Meta(UserProfileUpdateSerializer.Meta):
+        fields = ['id', 'user_id', 'email', 'username', 'user_username',
+                  'profile_photo', 'cover_photo', 'profile_photo_small',
+                  'first_name', 'last_name', 'bio', 'user_skills', 'skills',
+                  'profession', 'user_profession', 'interests',
+                  'user_interests', 'intro_video', 'phone', 'dob',
+                  'profile_story_title', 'profile_story_description',
+                  'city', 'profession_text', 'skills_list', 'user_type',
+                  'profile_background_color', 'friend_request_status',
+                  'friends_url', 'friend_count', 'total_credits', 'total_posts',
+                  ]
+
+
+    def get_total_posts(self, obj):
+        return Post.objects.filter(poster__id=obj.user.id).count()
 
 
 class UserSerializer(serializers.ModelSerializer):
