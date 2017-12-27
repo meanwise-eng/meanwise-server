@@ -11,6 +11,7 @@ from django.core import exceptions
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 
 import django.contrib.auth.password_validation as validators
 from django.core.mail import EmailMultiAlternatives
@@ -235,7 +236,7 @@ class UserProfileDetail(APIView):
                     "error": "User not found",
                     "results": ""
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_404_NOT_FOUND
             )
 
         except UserProfile.DoesNotExist:
@@ -245,7 +246,7 @@ class UserProfileDetail(APIView):
                     "error": "UserProfile not found",
                     "results": ""
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_404_NOT_FOUND
             )
 
         return userprofile
@@ -298,6 +299,34 @@ class UserProfileDetail(APIView):
                 "results": ""
             },
             status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class UserProfileDetailByUsername(APIView):
+    """
+    Edit a userprofile instance.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_object(self, username):
+        try:
+            userprofile = UserProfile.objects.get(user__username=username)
+        except UserProfile.DoesNotExist:
+            raise Http404()
+        return userprofile
+
+    def get(self, request, username):
+        userprofile = self.get_object(username)
+        serializer = UserProfileDetailSerializer(
+            userprofile, context={'request': request})
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
         )
 
 

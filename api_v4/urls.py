@@ -29,6 +29,8 @@ urlpatterns = [
     url(r'^', include(router.urls, namespace="route")),
     url(r'^user/userprofile/$', UserProfileList.as_view(),
         name="profile-list"),
+    url(r'^user/by-username/(?P<username>[^/]+)/userprofile/$',
+        UserProfileDetailByUsername.as_view(), name="profile-detail-by-username"),
     url(r'^user/(?P<user_id>[0-9]+)/userprofile/$',
         UserProfileDetail.as_view(), name="profile-detail"),
     url(r'^user/(?P<user_id>[0-9]+)/change/password/$',
