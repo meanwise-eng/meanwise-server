@@ -1277,6 +1277,9 @@ class PostExploreTrendingView(APIView):
         interest_name = request.query_params.get('interest_name', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
+        is_work = request.query_params.get('is_work', None)
+        if is_work is not None:
+            is_work = True if is_work == 'true' else False
         geo_location = request.query_params.get('geo_location', None)
         user_id = request.query_params.get('user_id', None)
         after = request.query_params.get('after', None)
@@ -1311,6 +1314,8 @@ class PostExploreTrendingView(APIView):
             must.append(query.Q('match', topics=topic_texts))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
+        if is_work is not None:
+            must.append(query.Q('term', is_work=is_work))
         if geo_location:
             functions.append(
                 query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
