@@ -81,10 +81,6 @@ def delete_post_index(sender, **kwargs):
 def update_user_topic(sender, **kwargs):
     post = kwargs['instance']
 
-    # credits only apply to work posts
-    if post.is_work == False:
-        return
-
     popularity = 1
     popularity += post.liked_by.count()
     popularity += post.comments.count()
