@@ -18,6 +18,15 @@ class BrandDocumentSerializer(DocumentSerializer):
                   'profile_image', 'profile_color', 'members', 'posts')
 
 
+class OrgDocumentSummarySerializer(serializers.Serializer):
+
+    id = serializers.CharField(source='_id')
+    name = serializers.CharField()
+    compact_display_image = serializers.CharField()
+    type = serializers.CharField()
+    url = serializers.CharField()
+
+
 class BrandSerializer(serializers.ModelSerializer):
 
     members = serializers.SerializerMethodField()

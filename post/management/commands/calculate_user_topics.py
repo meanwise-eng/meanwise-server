@@ -12,7 +12,7 @@ from post.serializers import PostSummarySerializer
 
 
 class Command(BaseCommand):
-    help = 'Regenerate the elasticsearch indexes'
+    help = 'Recalculate the user topics'
 
     def add_arguments(self, parser):
         pass

@@ -116,6 +116,8 @@ INSTALLED_APPS = [
     'boost.apps.BoostConfig',
     'brands.apps.BrandsConfig',
     'credits.apps.CreditsConfig',
+    'college.apps.CollegeConfig',
+    'follow.apps.FollowConfig',
     'django_crontab',
     'scarface',
     'analytics',

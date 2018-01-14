@@ -18,6 +18,13 @@ post.settings(
     number_of_replicas=0
 )
 
+org = Index('mw_explore_org')
+
+org.settings(
+    number_of_shards=1,
+    number_of_replicas=0
+)
+
 
 @post.doc_type
 class PostDocument(DocType):
@@ -316,3 +323,19 @@ class PostDocument(DocType):
             setattr(self, key, value)
 
         self._id = post.id
+
+
+@org.doc_type
+class ExploreOrgDocument(DocType):
+    name = String()
+    description = String(index='not_analyzed')
+    compact_display_image = String(index='not_analyzed')
+    type = String(index='not_analyzed')
+    url = String(index='not_analyzed')
+
+    skills = String(index='not_analyzed')
+
+    boost_value = Integer()
+    boost_datetime = Date()
+
+    created_on = Date()

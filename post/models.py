@@ -25,6 +25,7 @@ import tempfile
 from userprofile.models import Interest
 from boost.models import Boost
 from brands.models import Brand
+from college.models import College
 
 from .tasks import generate_video_thumbnail
 
@@ -109,6 +110,7 @@ class Post(models.Model):
 
     boosts = GenericRelation(Boost, related_query_name='post')
     brand = models.ForeignKey(Brand, null=True, related_name='posts')
+    college = models.ForeignKey(College, null=True, related_name='posts')
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -152,6 +154,10 @@ class Post(models.Model):
             self.brand = brand
         except Brand.DoesNotExist:
             pass
+
+        colleges = College.objects.filter(featured_students__student=self.poster)
+        if colleges.count() > 0:
+            self.college = colleges[0]
 
         if self.video:
             if not self.video_thumbnail:

@@ -6,6 +6,7 @@ from userprofile.views import *
 from post.views import *
 from mnotifications.views import *
 from credits.views import CreditsListView
+from brands.views import OrgListView
 
 router = routers.SimpleRouter()
 
@@ -86,10 +87,12 @@ urlpatterns = [
     url(r'^interest/$', InterestListView.as_view(), name="interests"),
     url(r'^public-feed/$', PublicFeed.as_view(), name="public-feed"),
     url(r'^subscribe/early-access/', EarlyAccess.as_view()),
+    url(r'^explore-orgs/$', OrgListView.as_view()),
     url(r'^me/', include('userprofile.me_urls')),
     url(r'^version/', include('appversion.urls')),
     url(r'^analytics/', include('analytics.urls')),
     url(r'^discussions/', include('discussions.urls')),
     url(r'^influencers/$', InfluencersListView.as_view()),
     url(r'^brands/', include('brands.urls')),
+    url(r'^college/', include('college.urls')),
 ]

@@ -40,6 +40,7 @@ class PostDocumentSerializer(serializers.Serializer):
     mentioned_users = serializers.ListField(serializers.DictField())
     brand = serializers.CharField()
     brand_logo_url = serializers.CharField()
+    college = serializers.CharField()
     post_type = serializers.CharField()
     panaroma_type = serializers.CharField()
     post_thumbnail_url = serializers.CharField()
@@ -218,7 +219,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
-                  'post_thumbnail_url', 'is_work',
+                  'post_thumbnail_url', 'is_work', 'college',
                   )
 
     def get_user_id(self, obj):

@@ -19,7 +19,9 @@ from post.serializers import PostSerializer
 
 from .models import Brand
 from .documents import BrandDocument
-from .serializers import BrandSerializer, BrandDocumentSerializer
+from .serializers import BrandSerializer, BrandDocumentSerializer, OrgDocumentSummarySerializer
+
+from post.documents import ExploreOrgDocument
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -83,6 +85,83 @@ class BrandListView(APIView):
 
         results = s.execute()
         serializer = BrandDocumentSerializer(results, many=True, context={'request': request})
+
+        total = results.hits.total
+
+        back_url = None
+        if total > section * item_count:
+            params = {'before': str(int(origin.timestamp() * 1000)), 'section': section + 1}
+            back_url = build_absolute_uri(request.get_full_path(), params=params)
+
+        return Response({
+            'status': 'success',
+            'error': None,
+            'results': serializer.data,
+            'forward': None,
+            'backward': back_url,
+            'total': total
+        }, status.HTTP_200_OK)
+
+
+class OrgListView(APIView):
+
+    def get(self, request):
+        interest_id = request.query_params.get('interest_id', None)
+        tag_name = request.query_params.get('tag_name', None)
+        topic_text = request.query_params.get('topic_text', None)
+        item_count = request.query_params.get('item_count', settings.REST_FRAMEWORK['PAGE_SIZE'])
+        section = request.query_params.get('section', 1)
+        before = request.query_params.get('before', None)
+        if before:
+            before = datetime.datetime.fromtimestamp(float(before) / 1000)
+
+        interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
+        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
+            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
+        skills_list = request.user.userprofile.skills_list
+
+        functions = []
+        filters = []
+        must = []
+        #if interest_id:
+        #    must.append(query.Q('term', interest_ids=interest_id))
+        # else:
+        #     filters.append(query.Q('bool', should=[
+        #         query.Q('terms', interest_ids=interest_ids),
+        #         query.Q('terms', user_id=friends_ids)
+        #     ]))
+        #if topic_text:
+        #    must.append(query.Q('match', topics=topic_text))
+        #if tag_name:
+        #    must.append(query.Q('match', tags=tag_name))
+
+        now = datetime.datetime.now()
+        origin = before if before else now
+
+        must.append(query.Q({'range': {'created_on': {'lt': origin}}}))
+
+        # manual boost
+        #functions.append(query.SF('exp', boost_datetime={
+        #    'origin': origin, 'scale': '1d', 'decay': 0.1},
+        #    weight=5))
+        #functions.append(query.SF('field_value_factor', field='boost_value',
+        #                          modifier='log1p', weight=30, missing=0))
+
+        s = ExploreOrgDocument.search()
+        q = query.Q(
+            'function_score',
+            query=query.Q('bool', must=must, filter=filters),
+            functions=functions,
+            score_mode='sum',
+            boost_mode='sum'
+        )
+        s = s.query(q)
+        logger.info(s.to_dict())
+        offset = (section - 1) * item_count
+        s = s[offset:offset + item_count]
+
+        results = s.execute()
+        serializer = OrgDocumentSummarySerializer(results, many=True, context={'request': request})
 
         total = results.hits.total
 
