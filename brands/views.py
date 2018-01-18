@@ -13,6 +13,9 @@ from common.api_helper import build_absolute_uri, TimeBasedPaginator
 
 from elasticsearch_dsl import query
 
+from django.contrib.contenttypes.models import ContentType
+from follow.models import Follow
+
 from userprofile.models import UserFriend, UserProfile
 from userprofile.serializers import UserProfileSerializer
 from post.serializers import PostSerializer
@@ -241,4 +244,44 @@ class BrandPostsView(APIView):
             'total': paginator.total,
             'forward': paginator.next_url,
             'backward': paginator.prev_url
+        }, status.HTTP_200_OK)
+
+
+class FollowBrandView(APIView):
+
+    def post(self, request, brand_id):
+        try:
+            brand = Brand.objects.get(pk=brand_id)
+        except Brand.DoesNotExist:
+            return Http404
+
+        follow = Follow(follower_object=request.user, followee_object=brand)
+        follow.save()
+
+        return Response({
+            'status': 'success',
+            'error': None,
+            'results': {'message': 'Succesfully followed'}
+        }, status.HTTP_200_OK)
+
+
+class UnfollowBrandView(APIView):
+
+    def post(self, request, brand_id):
+        try:
+            brand = Brand.objects.get(pk=brand_id)
+        except Brand.DoesNotExist:
+            return Http404
+
+        user_content_type = ContentType.objects.get_for_model(request.user.__class__)
+        brand_content_type = ContentType.objects.get_for_model(Brand)
+        follow = Follow.objects.filter(
+            follower_id=request.user.id, follower_content_type=user_content_type,
+            followee_id=brand.id, followee_content_type=brand_content_type)
+        follow.delete()
+
+        return Response({
+            'status': 'success',
+            'error': None,
+            'results': {'message': 'Succesfully unfollowed'}
         }, status.HTTP_200_OK)

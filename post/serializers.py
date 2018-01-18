@@ -40,7 +40,6 @@ class PostDocumentSerializer(serializers.Serializer):
     mentioned_users = serializers.ListField(serializers.DictField())
     brand = serializers.CharField()
     brand_logo_url = serializers.CharField()
-    college = serializers.CharField()
     post_type = serializers.CharField()
     panaroma_type = serializers.CharField()
     post_thumbnail_url = serializers.CharField()
@@ -63,6 +62,9 @@ class PostDocumentSerializer(serializers.Serializer):
     boost_datetime = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
+
+    brand_id = serializers.IntegerField()
+    college_id = serializers.CharField()
 
     def get_id(self, obj):
         return obj._id

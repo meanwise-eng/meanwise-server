@@ -74,6 +74,9 @@ class PostDocument(DocType):
     brand = String()
     brand_logo_url = String()
 
+    brand_id = Integer()
+    college_id= String()
+
     class Meta:
         index = 'mw_posts_2'
 
@@ -282,6 +285,18 @@ class PostDocument(DocType):
             return None
 
         return obj.brand.logo_thumbnail.url
+
+    def prepare_brand_id(self, obj):
+        if obj.brand is None:
+            return None
+
+        return obj.brand.id
+
+    def prepare_college_id(self, obj):
+        if obj.college is None:
+            return None
+
+        return obj.college.id
 
     def prepare_post_thumbnail_url(self, obj):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None

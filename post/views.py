@@ -35,6 +35,11 @@ from userprofile.serializers import UserProfileSerializer
 
 from post.permissions import IsOwnerOrReadOnly
 
+from django.contrib.contenttypes.models import ContentType
+from follow.models import Follow
+from brands.models import Brand
+from college.models import College
+
 from post.models import *
 from post.serializers import *
 from userprofile.models import UserFriend, Interest, UserInterestRelevance
@@ -1144,6 +1149,13 @@ class PostExploreView(APIView):
             query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
         functions.append(
             query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+        brand_content_type = ContentType.objects.get_for_model(Brand)
+        user_content_type = ContentType.objects.get_for_model(request.user.__class__)
+        brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
+            follower_content_type=user_content_type,
+            followee_content_type=brand_content_type).values_list('followee_id', flat=True))
+        functions.append(
+            query.SF({'filter': query.Q('terms', brand=brand_ids), 'weight': 1}))
 
         interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
         for relevance in interests_relevance:
@@ -1392,6 +1404,13 @@ class PostExploreTrendingView(APIView):
             query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
         functions.append(
             query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+        brand_content_type = ContentType.objects.get_for_model(Brand)
+        user_content_type = ContentType.objects.get_for_model(request.user.__class__)
+        brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
+            follower_content_type=user_content_type,
+            followee_content_type=brand_content_type).values_list('followee_id', flat=True))
+        functions.append(
+            query.SF({'filter': query.Q('terms', brand=brand_ids), 'weight': 1}))
 
         # manual boost
         functions.append(query.SF('exp', boost_datetime={
