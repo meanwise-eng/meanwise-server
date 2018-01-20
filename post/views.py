@@ -1098,11 +1098,13 @@ class PostExploreView(APIView):
                 query.Q('terms', user_id=friends_ids)
             ]))
         if topic_texts:
-            must.append(query.Q('match', topics=topic_texts))
+            must.append(query.Q('term', topics=topic_texts))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
         if is_work is not None:
             must.append(query.Q('term', is_work=is_work))
+
+        logger.info(topic_texts)
 
         if geo_location:
             functions.append(
@@ -1177,7 +1179,7 @@ class PostExploreView(APIView):
         s = s.sort('-created_on')
         offset = (section - 1) * item_count
         s = s[offset:offset + items_per_page]
-
+        logger.info(s.to_dict())
         results = s.execute()
         serializer = PostDocumentSerializer(results, many=True, context={'request': request})
 
