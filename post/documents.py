@@ -48,7 +48,7 @@ class PostDocument(DocType):
     user_profession_text = String()
     user_profile_photo_small = String()
     video_thumb_url = String()
-    topics = String()
+    topics = String(index='not_analyzed')
     num_seen = Integer()
     num_recent_seen = Integer()
     created_on = Date()
