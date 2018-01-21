@@ -1300,7 +1300,6 @@ class PostExploreTrendingView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        interest_name = request.query_params.get('interest_name', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
         is_work = request.query_params.get('is_work', None)
@@ -1321,7 +1320,6 @@ class PostExploreTrendingView(APIView):
 
         items_per_page = item_count
 
-        interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
         friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
             list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
         skills_list = request.user.userprofile.skills_list
@@ -1329,13 +1327,6 @@ class PostExploreTrendingView(APIView):
         functions = []
         filters = []
         must = []
-        if interest_name:
-            must.append(query.Q('term', interest_name=interest_name))
-        elif user_id is None:
-            must.append(query.Q('bool', should=[
-                query.Q('terms', interest_id=interest_ids),
-                query.Q('terms', user_id=friends_ids)
-            ]))
         if topic_texts:
             must.append(query.Q('match', topics=topic_texts))
         if tag_names:
@@ -1388,7 +1379,7 @@ class PostExploreTrendingView(APIView):
         functions.append(
             query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
         functions.append(
-            query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+            query.SF({'filter': query.Q('terms', terms=skills_list), 'weight': 1}))
         brand_content_type = ContentType.objects.get_for_model(Brand)
         user_content_type = ContentType.objects.get_for_model(request.user.__class__)
         brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
@@ -1403,14 +1394,6 @@ class PostExploreTrendingView(APIView):
             weight=5))
         functions.append(query.SF('field_value_factor', field='boost_value',
                                   modifier='log1p', weight=30, missing=0))
-
-        interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
-        for relevance in interests_relevance:
-            r = math.log1p(relevance.old_views + relevance.weekly_views)
-            functions.append(query.SF({
-                'filter': query.Q('term', interest_id=relevance.interest_id),
-                'weight': r
-            }))
 
         s = PostDocument.search()
         q = query.Q(
@@ -1527,7 +1510,6 @@ class PostRelatedView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, post_id):
-        interest_name = request.query_params.get('interest_name', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
         is_work = request.query_params.get('is_work', None)
@@ -1548,7 +1530,6 @@ class PostRelatedView(APIView):
 
         items_per_page = item_count
 
-        interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
         friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
             list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
         skills_list = request.user.userprofile.skills_list
@@ -1598,25 +1579,15 @@ class PostRelatedView(APIView):
         functions.append(
             query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
 
-        interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
-        for relevance in interests_relevance:
-            r = math.log1p(relevance.old_views + relevance.weekly_views)
-            functions.append(query.SF({
-                'filter': query.Q('term', interest_id=relevance.interest_id),
-                'weight': r
-            }))
-
         # relevance to post
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
             raise Http404()
 
-        post_interest = post.interest.name
         post_topics = [t.text for t in post.topics.all()]
         post_tags = [t.name for t in post.tags.all()]
 
-        functions.append(query.SF({'filter': query.Q('term', interest_name=post_interest), 'weight': 10}))
         functions.append(query.SF({'filter': query.Q('terms', topics=post_topics), 'weight': 10}))
         functions.append(query.SF({'filter': query.Q('terms', tags=post_tags), 'weight': 10}))
 
