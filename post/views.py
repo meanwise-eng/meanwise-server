@@ -1060,7 +1060,6 @@ class PostExploreView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        interest_name = request.query_params.get('interest_name', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
         is_work = request.query_params.get('is_work', None)
@@ -1089,14 +1088,6 @@ class PostExploreView(APIView):
         functions = []
         filters = []
         must = []
-        if interest_name:
-            self.update_interest_relevance(interest_name, request.user)
-            must.append(query.Q('term', interest_name=interest_name))
-        elif user_id is None:
-            must.append(query.Q('bool', should=[
-                query.Q('terms', interest_id=interest_ids),
-                query.Q('terms', user_id=friends_ids)
-            ]))
         if topic_texts:
             must.append(query.Q('term', topics=topic_texts))
         if tag_names:
@@ -1150,7 +1141,7 @@ class PostExploreView(APIView):
         functions.append(
             query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
         functions.append(
-            query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+            query.SF({'filter': query.Q('terms', topics=skills_list), 'weight': 1}))
         brand_content_type = ContentType.objects.get_for_model(Brand)
         user_content_type = ContentType.objects.get_for_model(request.user.__class__)
         brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
@@ -1158,14 +1149,6 @@ class PostExploreView(APIView):
             followee_content_type=brand_content_type).values_list('followee_id', flat=True))
         functions.append(
             query.SF({'filter': query.Q('terms', brand=brand_ids), 'weight': 1}))
-
-        interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
-        for relevance in interests_relevance:
-            r = math.log1p(relevance.old_views + relevance.weekly_views)
-            functions.append(query.SF({
-                'filter': query.Q('term', interest_id=relevance.interest_id),
-                'weight': r
-            }))
 
         s = PostDocument.search()
         q = query.Q(
