@@ -163,12 +163,6 @@ class PostDocument(DocType):
     def prepare_num_recent_likes(self, obj):
         return obj.liked_by.count()
 
-    def prepare_topics(self, obj):
-        return list(obj.topics.all().values_list('text', flat=True))
-
-    def prepare_tags(self, obj):
-        return list(obj.tags.all().values_list('name', flat=True))
-
     def prepare_num_comments(self, obj):
         return Comment.objects.filter(post=obj).filter(is_deleted=False)\
             .count()
@@ -307,7 +301,9 @@ class PostDocument(DocType):
         return [topic.text for topic in obj.topics.all()]
 
     def prepare_tags(self, obj):
-        return [tag.name for tag in obj.tags.all()]
+        if obj.tags.count() == 0:
+            return []
+        return list(obj.tags.all().values_list('name', flat=True))
 
     def prepare_share_list_id(self, obj):
         return obj.share_list.id if obj.share_list else None
