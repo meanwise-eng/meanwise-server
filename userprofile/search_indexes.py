@@ -1,6 +1,7 @@
 from django.utils import timezone
 from haystack import indexes
 from userprofile.models import UserProfile, Profession, Skill
+from post.models import Post
 
 
 class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
@@ -67,5 +68,16 @@ class SkillIndex(indexes.SearchIndex, indexes.Indexable):
 
     autocomplete = indexes.EdgeNgramField(model_attr='text')
 
+    image_url = indexes.CharField()
+
     def get_model(self):
         return Skill
+
+    def prepare_image_url(self, obj):
+        posts = Post.objects.filter(topics__text=obj.text).order_by('-created_on')
+
+        for post in posts:
+            if post.post_thumbnail() is not None:
+                return post.post_thumbnail().url
+
+        return None

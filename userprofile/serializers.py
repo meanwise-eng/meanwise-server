@@ -311,7 +311,7 @@ class SkillSearchSerializer(HaystackSerializer):
 
     class Meta:
         index_classes = [SkillIndex]
-        fields = ["skill_id", "text", "autocomplete"]
+        fields = ["skill_id", "text", "autocomplete", "image_url"]
         ignore_fields = ["autocomplete"]
 
         field_aliases = {
