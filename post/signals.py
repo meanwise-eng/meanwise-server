@@ -78,6 +78,22 @@ def delete_post_index(sender, **kwargs):
 
 
 @receiver(m2m_changed, sender=Post.topics.through, dispatch_uid='post.post_saved_user_post')
+def resave_post_docs_so_topic_is_saved(sender, **kwargs):
+    post = kwargs['instance']
+
+    if post.is_deleted:
+        return
+
+    try:
+        post_doc = PostDocument.get(id=post.id)
+    except elasticsearch.NotFoundError:
+        post_doc = PostDocument()
+
+    post_doc.set_from_post(post)
+    post_doc.save()
+
+
+@receiver(m2m_changed, sender=Post.topics.through, dispatch_uid='post.post_saved_user_post')
 def update_user_topic(sender, **kwargs):
     post = kwargs['instance']
 
