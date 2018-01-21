@@ -65,7 +65,9 @@ def add_interests_and_likes(sender, **kwargs):
     if kwargs['created']:
         post = kwargs['instance']
         influencer = Influencer.get_influencer(post.poster.id)
-        influencer.interests_weekly = '%s,%s' % (influencer.interests_weekly, post.interest.name)
+
+        for topic in post.topics.all():
+            influencer.interests_weekly = '%s,%s' % (influencer.interests_weekly, topic.text)
 
         influencer.save()
 

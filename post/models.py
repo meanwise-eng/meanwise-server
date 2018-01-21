@@ -75,7 +75,6 @@ class Post(models.Model):
 
     post_type = models.CharField(max_length=5, default=None, choices=POST_TYPES, null=True)
     panaroma_type = models.CharField(max_length=15, default=None, choices=PANAROMA_TYPES, null=True, blank=True)
-    interest = models.ForeignKey(Interest, db_index=True)
     image = models.ImageField(upload_to='post_images', null=True, blank=True)
     video = models.FileField(upload_to='post_videos', null=True, blank=True)
     text = models.CharField(max_length=200, null=True, blank=True)

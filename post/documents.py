@@ -29,8 +29,6 @@ org.settings(
 @post.doc_type
 class PostDocument(DocType):
 
-    interest_id = Integer()
-    interest_name = String(index='not_analyzed')
     text = String()
     image_url = String()
     video_url = String()
@@ -83,9 +81,6 @@ class PostDocument(DocType):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
 
-    def prepare_interest_id(self, obj):
-        return obj.interest.id
-
     def prepare_image(self, obj):
         if obj.image:
             return obj.image.url
@@ -93,9 +88,6 @@ class PostDocument(DocType):
     def prepare_user_id(self, obj):
         user_id = obj.poster.id
         return user_id
-
-    def prepare_interest_name(self, obj):
-        return obj.interest.name.lower()
 
     def prepare_user_firstname(self, obj):
         try:
@@ -312,7 +304,7 @@ class PostDocument(DocType):
         return obj.share_list_user_ids
 
     def set_from_post(self, post):
-        properties = ('interest_id', 'interest_name', 'text', 'image_url', 'video_url',
+        properties = ('text', 'image_url', 'video_url',
                       'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments',
                       'num_recent_comments', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profession_id',

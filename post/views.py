@@ -159,7 +159,10 @@ class UserPostList(APIView):
                     }
 
                     for device in devices:
-                        send_message_device(device, message_payload)
+                        try:
+                            send_message_device(device, message_payload)
+                        except Exception as e:
+                            logger.error(e)
 
             if post.parent is not None and post.parent.parent is not None:
                 raise Exception("Parent post should not be a child post.")
@@ -1767,9 +1770,11 @@ class UserTopicsListView(APIView):
             return Response({'status': 'failed', 'error':serializer.errors, 'results':None},
                             status.HTTP_400_BAD_REQUEST)
         is_work = serializer.data['is_work']
+        if is_work is not None:
+            is_work = True if is_work == 'true' else False
 
         user_topics = UserTopic.objects.filter(user_id=user_id).order_by('-popularity', 'topic')
-        if is_work:
+        if is_work is not None:
             user_topics = user_topics.filter(is_work=is_work)
         else:
             user_topics = user_topics.filter(is_work__isnull=True)

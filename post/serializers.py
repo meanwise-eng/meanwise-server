@@ -179,7 +179,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
     likes_url = serializers.SerializerMethodField()
     num_comments = serializers.SerializerMethodField()
-    interest_id = serializers.SerializerMethodField()
     user_firstname = serializers.SerializerMethodField()
     user_lastname = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
@@ -213,7 +212,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
+        fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments',
                   'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
@@ -227,9 +226,6 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_user_id(self, obj):
         user_id = obj.poster.id
         return user_id
-
-    def get_interest_id(self, obj):
-        return obj.interest.id
 
     def get_user_firstname(self, obj):
         try:
