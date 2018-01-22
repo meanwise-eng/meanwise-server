@@ -45,11 +45,18 @@ def delete_profile_boost(sender, **kwargs):
         return
 
     userprofile = boost.content_object
-    latest_boost = userprofile.profile_boosts.latest('boost_datetime')
+
+    try:
+        latest_boost = userprofile.profile_boosts.latest('boost_datetime')
+        boost_value = latest_boost.boost_value
+        boost_datetime = latest_boost.boost_datetime
+    except:
+        boost_value = None
+        boost_datetime = None
 
     influencer = Influencer.get_influencer(userprofile.user_id)
-    influencer.boost_value = latest_boost.boost_value
-    influencer.boost_datetime = latest_boost.boost_datetime
+    influencer.boost_value = boost_value
+    influencer.boost_datetime = boost_datetime
     influencer.save()
 
 
