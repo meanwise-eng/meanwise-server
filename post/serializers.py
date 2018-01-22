@@ -24,7 +24,6 @@ class PostDocumentSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
     num_comments = serializers.IntegerField()
     num_likes = serializers.IntegerField()
-    interest_id = serializers.IntegerField()
     user_firstname = serializers.CharField()
     user_lastname = serializers.CharField()
     user_profile_photo = serializers.CharField()
@@ -415,7 +414,6 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
     num_likes = serializers.SerializerMethodField()
     num_comments = serializers.SerializerMethodField()
-    interest_id = serializers.SerializerMethodField()
     user_firstname = serializers.SerializerMethodField()
     user_lastname = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
@@ -439,7 +437,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
+        fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments',
                   'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
@@ -451,9 +449,6 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_user_id(self, obj):
         user_id = obj.poster.id
         return user_id
-
-    def get_interest_id(self, obj):
-        return obj.interest.id
 
     def get_user_firstname(self, obj):
         try:
@@ -745,7 +740,7 @@ class ShareSerializer(serializers.ModelSerializer):
 
 class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
     class Meta(PostSerializer.Meta):
-        search_fields = ("text", "interest_name", "post_text",
+        search_fields = ("text", "post_text",
                          "created_on", "post_id", "topic_texts", "tag_names")
         field_aliases = {}
         exclude = tuple()
