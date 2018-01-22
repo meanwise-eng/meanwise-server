@@ -1576,8 +1576,6 @@ class PostRelatedView(APIView):
         functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
         functions.append(
             query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
-        functions.append(
-            query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
 
         # relevance to post
         try:
@@ -1770,7 +1768,7 @@ class UserTopicsListView(APIView):
                             status.HTTP_400_BAD_REQUEST)
         is_work = serializer.data['is_work']
 
-        user_topics = UserTopic.objects.filter(user_id=user_id).order_by('-popularity', 'topic', 'interest')
+        user_topics = UserTopic.objects.filter(user_id=user_id).order_by('-popularity', 'topic')
         if is_work:
             user_topics = user_topics.filter(is_work=is_work)
         else:
