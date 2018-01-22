@@ -1,7 +1,7 @@
 from django.utils import timezone
 from haystack import indexes
 from userprofile.models import UserProfile, Profession, Skill
-from post.models import Post
+from post.models import Post, Topic
 
 
 class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
@@ -72,6 +72,11 @@ class SkillIndex(indexes.SearchIndex, indexes.Indexable):
 
     def get_model(self):
         return Skill
+
+    def index_queryset(self, using=None):
+        return self.get_model().objects.filter(
+            text__in=Topic.objects.all().values_list('text')
+        )
 
     def prepare_image_url(self, obj):
         posts = Post.objects.filter(topics__text=obj.text).order_by('-created_on')
