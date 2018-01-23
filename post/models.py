@@ -101,6 +101,7 @@ class Post(models.Model):
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
     is_work = models.BooleanField()
+    thumbnail = models.ImageField(upload_to='post_thumbnails', null=True, blank=True)
 
     # privacy settings
     visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
@@ -119,7 +120,7 @@ class Post(models.Model):
 
     def post_thumbnail(self):
         if self.get_post_type() == Post.TYPE_IMAGE:
-            return self.image
+            return self.thumbnail
         if self.get_post_type() == Post.TYPE_VIDEO:
             return self.video_thumbnail
         if self.get_post_type() == Post.TYPE_PDF:
@@ -203,6 +204,16 @@ class Post(models.Model):
                 'height': self.image.height,
                 'width': self.image.width
             }
+
+            # targetting half of iPhone retina display
+            target_width = 750 * 0.5
+            scaling_ratio = target_width / im.width
+            thumb = im.resize((int(im.width*scaling_ratio), int(im.height*scaling_ratio)),
+                              Image.BICUBIC)
+            thumb_output = BytesIO()
+            thumb.save(thumb_output, format='JPEG', quality=95, optimize=True, progressive=True)
+            self.thumbnail = InMemoryUploadedFile(thumb_output, 'ImageField', self.image.name,
+                'image/jpeg', sys.getsizeof(thumb_output), None)
 
         super(Post, self).save(*args, **kwargs)
 
