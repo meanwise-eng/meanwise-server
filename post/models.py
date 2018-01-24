@@ -120,7 +120,10 @@ class Post(models.Model):
 
     def post_thumbnail(self):
         if self.get_post_type() == Post.TYPE_IMAGE:
-            return self.thumbnail
+            if self.thumbnail:
+                return self.thumbnail
+            else:
+                return self.image
         if self.get_post_type() == Post.TYPE_VIDEO:
             return self.video_thumbnail
         if self.get_post_type() == Post.TYPE_PDF:
