@@ -603,6 +603,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
     topics = serializers.SerializerMethodField()
     topic_names = serializers.CharField(
         required=False, max_length=100, allow_blank=True)
+    topic = serializers.CharField(required=False, allow_blank=False)
     geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
@@ -621,6 +622,23 @@ class PostSaveSerializer(serializers.ModelSerializer):
         if 'geo_location_lng' in data and 'geo_location_lat' not in data:
             raise serializers.ValidationError(
                 "You cannot submit geo_location_lng without geo_location_lat")
+
+        if 'topic_names' not in data:
+            data['topic_names'] = []
+        else:
+            data['topic_names'] = data['topic_names'].split(',')
+
+        if ('topic' not in data or data['topic'] is None or data['topic'] == '') and len(data['topic_names']) > 0:
+            data['topic'] = data['topic_names'][0]
+
+        if 'topic' not in data or data['topic'] is None or data['topic'] == '':
+            raise serializers.ValidationError(
+                "'topic' field is required"
+            )
+
+        if 'topic' in data and data['topic'] is not None and data['topic'] == '':
+            if len(data['topic_names']) == 0:
+                data['topic_names'].append(data['topic'])
 
         return data
 

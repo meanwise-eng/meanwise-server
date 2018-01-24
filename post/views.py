@@ -109,7 +109,6 @@ class UserPostList(APIView):
                     ts = serializer.validated_data.pop('tags')
             post = serializer.save(poster=request.user)
             if topic_names:
-                topic_names = topic_names.split(",")
                 for topic in topic_names:
                     try:
                         t = Topic.objects.get(text=topic)

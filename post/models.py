@@ -82,7 +82,7 @@ class Post(models.Model):
     poster = models.ForeignKey(User, related_name='poster')
     tags = TaggableManager(blank=True)
     topics = models.ManyToManyField(Topic, blank=True)
-    topic = models.CharField(max_length=100)
+    topic = models.CharField(max_length=100, blank=False, null=False)
     liked_by = models.ManyToManyField(User, related_name='liked_by', blank=True)
     is_deleted = models.BooleanField(default=False)
     video_height = models.IntegerField(null=True, blank=True)

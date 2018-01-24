@@ -16,7 +16,7 @@ def copy_first_item_from_topics_to_topic(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0023_copy_interest_to_topics'),
+        ('post', '0025_create_thumbnails'),
     ]
 
     operations = [
@@ -30,6 +30,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='post',
             name='topic',
-            field=models.CharField(max_length=100),
+            field=models.CharField(max_length=100, blank=False),
         ),
     ]
