@@ -1092,6 +1092,7 @@ class PostExploreView(APIView):
         filters = []
         must = []
         if topic_texts:
+            topic_texts = topic_texts.upper()
             must.append(query.Q('term', topics=topic_texts))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
@@ -1331,6 +1332,7 @@ class PostExploreTrendingView(APIView):
         filters = []
         must = []
         if topic_texts:
+            topic_texts = topic_texts.upper()
             must.append(query.Q('match', topics=topic_texts))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))

@@ -290,7 +290,7 @@ class PostDocument(DocType):
     def prepare_topics(self, obj):
         if obj.topics.count() == 0:
             return []
-        return [topic.text for topic in obj.topics.all()]
+        return [topic.text.upper() for topic in obj.topics.all()]
 
     def prepare_tags(self, obj):
         if obj.tags.count() == 0:
