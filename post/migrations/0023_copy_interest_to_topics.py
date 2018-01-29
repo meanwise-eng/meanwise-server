@@ -27,5 +27,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(copy_interest_to_topics),
+        migrations.RunPython(copy_interest_to_topics, migrations.RunPython.noop),
     ]

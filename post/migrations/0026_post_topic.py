@@ -9,8 +9,9 @@ def copy_first_item_from_topics_to_topic(apps, schema_editor):
     Post = apps.get_model('post', 'Post')
 
     for post in Post.objects.all():
-        post.topic = post.topics.all()[0].text
-        post.save()
+        if post.topics.all().count() > 0:
+            post.topic = post.topics.all()[0].text
+            post.save()
 
 
 class Migration(migrations.Migration):
