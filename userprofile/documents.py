@@ -25,8 +25,8 @@ influencers.analyzer(comma_analyzer)
 @influencers.doc_type
 class Influencer(DocType):
     user_id = Integer()
-    interests_weekly = String(analyzer=comma_analyzer)
-    interests_overall = String(analyzer=comma_analyzer)
+    topics_weekly = String(index='not_analyzed')
+    topics_overall = String(index='not_analyzed')
     popularity_weekly = Integer()
     popularity_overall = Integer()
     friends = Integer()
@@ -46,8 +46,8 @@ class Influencer(DocType):
         except elasticsearch.NotFoundError:
             influencer = Influencer()
             influencer.meta.id = user_id
-            influencer.interests_weekly = ''
-            influencer.interests_overall = ''
+            influencer.topics_weekly = []
+            influencer.topics_overall = []
             influencer.popularity_weekly = 0
             influencer.popularity_overall = 0
             influencer.friends = 0
@@ -56,11 +56,11 @@ class Influencer(DocType):
             influencer.boost_datetime = None
 
         if influencer.last_reset < (now - datetime.timedelta(weeks=1)):
-            influencer.interests_overall = '%s,%s' % (
-                influencer.interests_overall, influencer.interests_weekly)
+            influencer.topics_overall = '%s,%s' % (
+                influencer.topics_overall, influencer.topics_weekly)
             influencer.popularity_overall = influencer.popularity_overall \
                 + influencer.popularity_weekly
-            influencer.interests_weekly = ''
+            influencer.topics_weekly = []
             influencer.popularity_weekly = 0
             influencer.last_reset = now
 

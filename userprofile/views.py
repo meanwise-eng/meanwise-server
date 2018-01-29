@@ -760,6 +760,7 @@ class InfluencersListView(APIView):
 
     def get(self, request):
         interest_name = request.query_params.get('interest_name', None)
+        topic_text = request.query_params.get('topic_texts', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
         item_count = int(request.query_params.get('item_count', 30))
@@ -776,17 +777,12 @@ class InfluencersListView(APIView):
         now = datetime.datetime.now()
         origin = now
 
-        interest_names = list(request.user.userprofile.interests.all()
-                              .values_list('name', flat=True))
-        if interest_name:
+        user_skills = request.user.userprofile.skills_list
+
+        if topic_text:
             filters.append(query.Q('bool', should=[
-                query.Q('match', interests_weekly=interest_name),
-                query.Q('match', interests_overall=interest_name)
-            ]))
-        else:
-            filters.append(query.Q('bool', should=[
-                query.Q('match', interests_weekly=','.join(interest_names)),
-                query.Q('match', interests_overall=','.join(interest_names))
+                query.Q('term', topics_weekly=topic_text),
+                query.Q('term', topics_overall=topic_text),
             ]))
 
         functions.append(query.SF('field_value_factor',
