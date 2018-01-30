@@ -61,13 +61,11 @@ def delete_profile_boost(sender, **kwargs):
 
 
 @receiver(post_save, sender=Post, dispatch_uid='influencers.post_save')
-def add_interests_and_likes(sender, **kwargs):
+def add_topics_and_likes(sender, **kwargs):
     if kwargs['created']:
         post = kwargs['instance']
         influencer = Influencer.get_influencer(post.poster.id)
-
-        for topic in post.topics.all():
-            influencer.topics_weekly.append(topic.text)
+        influencer.topics_weekly.append(post.topic)
 
         influencer.save()
 
