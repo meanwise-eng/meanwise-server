@@ -113,7 +113,7 @@ class SkillListView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
-        skills = Skill.objects.all()
+        skills = Skill.objects.filter(image_url__isnull=False)
         paginator = Paginator(skills, settings.REST_FRAMEWORK['PAGE_SIZE'])
         page = request.GET.get('page', 1)
 

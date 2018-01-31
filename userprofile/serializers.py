@@ -29,7 +29,7 @@ class ProfessionSerializer(serializers.ModelSerializer):
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
-        fields = ('id', 'text')
+        fields = ('id', 'text', 'image_url')
 
 
 class InterestSerializer(TaggitSerializer, serializers.ModelSerializer):
