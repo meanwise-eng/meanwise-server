@@ -1758,7 +1758,7 @@ class PostSearchView(HaystackViewSet):
 
 
 class UserTopicParamSerializer(serializers.Serializer):
-    is_work = serializers.BooleanField()
+    is_work = serializers.NullBooleanField(default=None)
 
 class UserTopicsListView(APIView):
 
@@ -1771,8 +1771,6 @@ class UserTopicsListView(APIView):
             return Response({'status': 'failed', 'error':serializer.errors, 'results':None},
                             status.HTTP_400_BAD_REQUEST)
         is_work = serializer.data['is_work']
-        if is_work is not None:
-            is_work = True if is_work == 'true' else False
 
         user_topics = UserTopic.objects.filter(user_id=user_id).order_by('-popularity', 'topic')
         if is_work is not None:
