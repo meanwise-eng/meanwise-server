@@ -164,7 +164,7 @@ class Post(models.Model):
         if colleges.count() > 0:
             self.college = colleges[0]
 
-        if self.video:
+        if inserting and self.video:
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
                 try:
@@ -197,7 +197,7 @@ class Post(models.Model):
                     'width': self.video_thumbnail.width
                 }
 
-        if self.image:
+        if inserting and self.image:
             im = Image.open(self.image)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)

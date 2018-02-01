@@ -643,6 +643,8 @@ class PostSaveSerializer(serializers.ModelSerializer):
             if len(data['topic_names']) == 0:
                 data['topic_names'].append(data['topic'])
 
+        data['topic'] = data['topic'].upper()
+
         return data
 
     def validate_link_meta_data(self, data):
