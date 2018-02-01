@@ -311,7 +311,7 @@ class UserProfileDetailByUsername(APIView):
 
     def get_object(self, username):
         try:
-            userprofile = UserProfile.objects.get(user__username=username)
+            userprofile = UserProfile.objects.get(user__username__iexact=username)
         except UserProfile.DoesNotExist:
             raise Http404()
         return userprofile
