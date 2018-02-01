@@ -11,7 +11,8 @@ from credits.serializers import CreditsSerializer
 class CreditsListView(APIView):
 
     def get(self, request, user_id):
-        credits = Credits.objects.filter(user_id=user_id).exclude(skill='overall')
+        credits = Credits.objects.filter(user_id=user_id).exclude(skill='overall').order_by(
+            '-credits')
 
         serializer = CreditsSerializer(credits, many=True)
 
