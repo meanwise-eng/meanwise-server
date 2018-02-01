@@ -47,6 +47,7 @@ class PostDocument(DocType):
     user_profile_photo_small = String()
     video_thumb_url = String()
     topics = String(index='not_analyzed')
+    topic = String(index='not_analyzed')
     num_seen = Integer()
     num_recent_seen = Integer()
     created_on = Date()
@@ -292,6 +293,9 @@ class PostDocument(DocType):
             return []
         return [topic.text.upper() for topic in obj.topics.all()]
 
+    def prepare_topic(self, obj):
+        return obj.topic.upper()
+
     def prepare_tags(self, obj):
         if obj.tags.count() == 0:
             return []
@@ -309,7 +313,7 @@ class PostDocument(DocType):
                       'num_recent_comments', 'user_firstname', 'user_lastname',
                       'user_profile_photo', 'user_cover_photo', 'user_profession_id',
                       'user_profession_text', 'user_profile_photo_small', 'video_thumb_url',
-                      'topics', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location',
+                      'topics', 'topic', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location',
                       'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url',
                       'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work',
                       'boost_value', 'boost_datetime', 'brand', 'brand_logo_url',

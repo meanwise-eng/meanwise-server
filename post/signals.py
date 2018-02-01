@@ -93,7 +93,7 @@ def resave_post_docs_so_topic_is_saved(sender, **kwargs):
     post_doc.save()
 
 
-@receiver(m2m_changed, sender=Post.topics.through, dispatch_uid='post.post_saved_user_post')
+@receiver(post_save, sender=Post, dispatch_uid='post.post_saved_user_topic')
 def update_user_topic(sender, **kwargs):
     post = kwargs['instance']
 
@@ -101,59 +101,47 @@ def update_user_topic(sender, **kwargs):
     popularity += post.liked_by.count()
     popularity += post.comments.count()
 
-    if kwargs['reverse'] == True:
+    if kwargs['created'] == False:
         return
 
-    if kwargs['pk_set'] is None:
-        return
+    topic_text = post.topic
+    try:
+        user_topic = UserTopic.objects.get(user=post.poster, topic=topic_text, is_work=None)
+    except UserTopic.DoesNotExist:
+        user_topic = None
 
-    for post_topic_id in kwargs['pk_set']:
-        topic = Topic.objects.get(pk=post_topic_id)
-        try:
-            user_topic = UserTopic.objects.get(user=post.poster, topic=topic.text,
-                                               interest=post.interest.name, is_work=None)
-        except UserTopic.DoesNotExist:
-            user_topic = None
+    try:
+        user_topic_with_category = UserTopic.objects.get(user=post.poster, topic=topic_text,
+            is_work=post.is_work)
+    except UserTopic.DoesNotExist:
+        user_topic_with_category = None
 
-        try:
-            user_topic_with_category = UserTopic.objects.get(user=post.poster, topic=topic.text,
-                interest=post.interest.name, is_work=post.is_work)
-        except UserTopic.DoesNotExist:
-            user_topic_with_category = None
+    if user_topic is None:
+        user_topic = UserTopic(user=post.poster, topic=topic_text,
+                           interest=post.interest.name)
+        user_topic.popularity = 1
 
-        if kwargs['action'] == 'post_add':
-            if user_topic is None:
-                user_topic = UserTopic(user=post.poster, topic=topic.text,
-                                   interest=post.interest.name)
-                user_topic.popularity = 1
+    if user_topic_with_category is None:
+        user_topic_with_category = UserTopic(user=post.poster, topic=topic_text,
+                           interest=post.interest.name, is_work=post.is_work)
+        user_topic_with_category.popularity = 1
 
-            if user_topic_with_category is None:
-                user_topic_with_category = UserTopic(user=post.poster, topic=topic.text,
-                                   interest=post.interest.name, is_work=post.is_work)
-                user_topic_with_category.popularity = 1
+    user_topic.popularity += popularity
+    user_topic_with_category.popularity += popularity
 
-            user_topic.popularity += popularity
-            user_topic_with_category.popularity += popularity
+    if user_topic:
+        posts = Post.objects.filter(topic=topic_text, poster=post.poster).order_by('-created_on')[:5]
+        serializer = PostSummarySerializer(posts, many=True)
+        user_topic.top_posts = serializer.data
 
-        if kwargs['action'] == 'post_remove' and user_topic is not None:
-            user_topic.popularity -= popularity
-            if user_topic.popularity < 0:
-                user_topic.popularity = 0
-            if user_topic_with_category.popularity < 0:
-                user_topic_with_category.poplarity = 0
+    if user_topic_with_category:
+        posts_with_category = Post.objects.filter(topic=topic_text, poster=post.poster,
+                                                  is_work=post.is_work).order_by('-created_on')[:5]
+        serializer_with_category = PostSummarySerializer(posts_with_category, many=True)
+        user_topic_with_category.top_posts = serializer_with_category.data
 
-        if user_topic:
-            posts = Post.objects.filter(topics__id=post_topic_id, poster=post.poster).order_by('-created_on')[:5]
-            serializer = PostSummarySerializer(posts, many=True)
-            user_topic.top_posts = serializer.data
-            user_topic.save()
-
-        if user_topic_with_category:
-            posts_with_category = Post.objects.filter(topics__id=post_topic_id, poster=post.poster,
-                                                      is_work=post.is_work).order_by('-created_on')[:5]
-            serializer_with_category = PostSummarySerializer(posts_with_category, many=True)
-            user_topic_with_category.top_posts = serializer.data
-            user_topic_with_category.save()
+    user_topic.save()
+    user_topic_with_category.save()
 
 @receiver(post_delete, sender=Post, dispatch_uid='post.post_deleted_user_post')
 def reduce_topic_popularity(sender, **kwargs):
@@ -163,15 +151,38 @@ def reduce_topic_popularity(sender, **kwargs):
     popularity += post.liked_by.count()
     popularity += post.comments.count()
 
-    for topic in post.topics.all():
-        try:
-            user_topic = UserTopic.objects.get(user=post.poster, topic=topic.text,
-                                               interest=post.interest.name)
-        except UserTopic.DoesNotExist:
-            continue
+    topic_text = post.topic
+    try:
+        user_topic = UserTopic.objects.get(user=post.poster, topic=topic_text, is_work=None)
+    except UserTopic.DoesNotExist:
+        user_topic = None
 
-        user_topic.popularity -= popularity
-        if user_topic.popularity == 0:
-            user_topic.popularity = 0
+    try:
+        user_topic_with_category = UserTopic.objects.get(user=post.poster, topic=topic_text,
+            is_work=post.is_work)
+    except UserTopic.DoesNotExist:
+        user_topic_with_category = None
 
-        user_topic.save()
+    user_topic.popularity -= popularity
+    user_topic_with_category.popularity -= popularity
+    if user_topic.popularity < 0:
+        user_topic.popularity = 0
+    if user_topic_with_category.popularity < 0:
+        user_topic_with_category.popularity = 0
+
+    if user_topic:
+        posts = Post.objects.filter(
+            topic=topic_text, poster=post.poster, is_deleted=False
+        ).order_by('-created_on')[:5]
+        serializer = PostSummarySerializer(posts, many=True)
+        user_topic.top_posts = serializer.data
+
+    if user_topic_with_category:
+        posts_with_category = Post.objects.filter(topic=topic_text, poster=post.poster,
+                                                  is_deleted=False, is_work=post.is_work
+        ).order_by('-created_on')[:5]
+        serializer_with_category = PostSummarySerializer(posts_with_category, many=True)
+        user_topic_with_category.top_posts = serializer_with_category.data
+
+    user_topic.save()
+    user_topic_with_category.save()

@@ -53,6 +53,7 @@ class PostDocumentSerializer(serializers.Serializer):
     is_liked = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    topic = serializers.CharField()
     user_profession = serializers.SerializerMethodField()
     created_on = serializers.SerializerMethodField()
     likes_url = serializers.SerializerMethodField()
@@ -189,6 +190,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    topic = serializers.CharField()
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
     pdf_url = serializers.SerializerMethodField()
     audio_url = serializers.SerializerMethodField()
@@ -215,7 +217,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
-                  'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
+                  'tags', 'topics', 'topic', 'story', 'story_index', 'is_liked', 'likes_url',
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
@@ -426,6 +428,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    topic = serializers.CharField()
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
     queryset = Post.objects.filter(is_deleted=False)
     pdf_url = serializers.SerializerMethodField()
@@ -441,7 +444,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
-                  'created_on', 'tags', 'topics', 'story_index', 'mentioned_users',
+                  'created_on', 'tags', 'topics', 'topic', 'story_index', 'mentioned_users',
                   'pdf_url', 'pdf_thumb_url', 'link', 'audio_url', 'audio_thumb_url',
                   'link_meta_data', 'panaroma_type', 'is_work',
                   )

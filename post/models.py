@@ -291,7 +291,7 @@ class TrendingTopicsInterest(models.Model):
 class UserTopic(models.Model):
     user = models.ForeignKey(User)
     topic = models.CharField(max_length=128)
-    interest = models.CharField(max_length=128)
+    interest = models.CharField(max_length=128, null=True, blank=True)
     popularity = models.IntegerField()
     top_posts = pgJSONField()
     is_work = models.NullBooleanField()
