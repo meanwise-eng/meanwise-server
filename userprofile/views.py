@@ -1211,7 +1211,7 @@ class RemoveFriend(APIView):
         logger.info("RemoveFriend - POST [API / views.py /")
 
         if int(user_id) != request.user.id:
-            raise PermissionDenied("You can remove friend for another user")
+            raise PermissionDenied("You cannnot remove friend for another user")
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
