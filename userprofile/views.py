@@ -353,7 +353,7 @@ class LoggedInUserProfile(APIView):
 
     def get(self, request):
         userprofile = request.user.userprofile
-        serializer = UserProfileSerializer(userprofile)
+        serializer = UserProfileDetailSerializer(userprofile)
         return Response(
             {
                 "status": "success",

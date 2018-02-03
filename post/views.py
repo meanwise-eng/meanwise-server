@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q, F, When, Case, IntegerField, Count, Subquery, OuterRef, Value
+from django.db.models import Q, F, When, Case, IntegerField, Count, Subquery, OuterRef, Value, Sum
 from django.db.models.functions import Coalesce
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db import transaction
@@ -1029,28 +1029,15 @@ class TrendingTopics(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        interest_id = request.query_params.get('interest_id', None)
+        trending_topics = list(UserTopic.objects.values('topic').annotate(total_popularity=Sum('popularity')).order_by('-total_popularity')[:50].values_list('topic', flat=True))
 
-        tt = TrendingTopicsInterest.objects.all()
-
-        if interest_id:
-            tt = tt.filter(interest__id=interest_id)
-        else:
-            interest_ids = list(request.user.userprofile.interests.all()
-                                .values_list('id', flat=True))
-            tt = tt.filter(interest__id__in=interest_ids)
-
-        topics = []
-        for trending_topic in tt:
-            topics = topics + trending_topic.topics
-
-        topics = list(set(topics))
+        skills_list = request.user.userprofile.skills_list
 
         return Response(
             {
                 "status": "success",
                 "error": "",
-                "results": topics
+                "results": trending_topics
             },
             status=status.HTTP_201_CREATED
         )
