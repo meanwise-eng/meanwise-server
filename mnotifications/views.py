@@ -91,25 +91,25 @@ class AmazonNotificationAddDevice(APIView):
         try:
             app = Application.objects.get(name=settings.AMAZON_SNS_APP_NAME)
         except Application.DoesNotExist:
-            Response({"status": "failed", "error": "No Amazon sns app found.",
+            return Response({"status": "failed", "error": "No Amazon sns app found.",
                       "results": ""}, status=status.HTTP_400_BAD_REQUEST)
         try:
             topic = Topic.objects.get(name=settings.AMAZON_SNS_TOPIC_NAME)
         except Topic.DoesNotExist:
-            Response({"status": "failed", "error": "No Amazon sns topic found.",
+            return Response({"status": "failed", "error": "No Amazon sns topic found.",
                       "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
         device_id = request.data.get('device_id', '')
         if not device_id:
-            Response({"status": "failed", "error": "No device_id provided.",
+            return Response({"status": "failed", "error": "No device_id provided.",
                       "results": ""}, status=status.HTTP_400_BAD_REQUEST)
         device_token = request.data.get('device_token', '')
         if not device_token:
-            Response({"status": "failed", "error": "No device_token provided.",
+            return Response({"status": "failed", "error": "No device_token provided.",
                       "results": ""}, status=status.HTTP_400_BAD_REQUEST)
         user_id = request.data.get('user_id', '')
         if not user_id:
-            Response({"status": "failed", "error": "No user_id provided.",
+            return Response({"status": "failed", "error": "No user_id provided.",
                       "results": ""}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(id=int(user_id))
@@ -131,7 +131,7 @@ class AmazonNotificationAddDevice(APIView):
                       "results": ""}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            ASNSdevice.objects.filter(device__device_id=device_id).delete()
+            ASNSDevice.objects.filter(device__device_id=device_id).delete()
         except Exception as e:
             return Response(
                 {
