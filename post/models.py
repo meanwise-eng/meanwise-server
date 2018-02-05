@@ -104,6 +104,8 @@ class Post(models.Model):
     is_work = models.BooleanField()
     thumbnail = models.ImageField(upload_to='post_thumbnails', null=True, blank=True)
 
+    legacy_deleted = models.BooleanField(default=False)
+
     # privacy settings
     visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
     share_list = models.ForeignKey(ShareList, null=True, blank=True)
