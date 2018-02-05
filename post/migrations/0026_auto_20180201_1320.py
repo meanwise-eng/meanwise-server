@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0026_post_topic'),
+        ('post', '0025_create_thumbnails'),
     ]
 
     operations = [

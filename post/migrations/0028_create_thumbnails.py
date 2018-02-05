@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ('post', '0024_post_thumbnail'),
+        ('post', '0027_auto_20180201_1320'),
     ]
 
     operations = [

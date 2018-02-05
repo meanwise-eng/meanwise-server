@@ -17,7 +17,7 @@ def copy_first_item_from_topics_to_topic(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0025_create_thumbnails'),
+        ('post', '0024_post_thumbnail'),
     ]
 
     operations = [
