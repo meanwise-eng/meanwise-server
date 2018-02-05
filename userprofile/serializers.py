@@ -255,7 +255,7 @@ class UserProfileDetailSerializer(UserProfileUpdateSerializer):
 
 
     def get_total_posts(self, obj):
-        return Post.objects.filter(poster__id=obj.user.id).count()
+        return Post.objects.filter(is_deleted=False, poster__id=obj.user.id).count()
 
 
 class UserSerializer(serializers.ModelSerializer):
