@@ -226,6 +226,17 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
                   ]
 
 
+class UserProfileSummarySerializer(UserProfileUpdateSerializer):
+
+    class Meta(UserProfileUpdateSerializer.Meta):
+        fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo',
+                  'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
+                  'user_skills', 'skills', 'profession', 'profession_text', 'interests',
+                  'user_interests', 'phone', 'dob', 'profile_story_title',
+                  'profile_story_description', 'city', 'profession_text', 'skills_list',
+                  'user_type', 'profile_background_color',]
+
+
 class UserProfileDetailSerializer(UserProfileUpdateSerializer):
 
     total_posts = serializers.SerializerMethodField()

@@ -204,9 +204,9 @@ class UserProfileList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        userprofiles = UserProfile.objects.all()
+        userprofiles = UserProfile.objects.all()[:200]
 
-        serializer = UserProfileSerializer(
+        serializer = UserProfileSummarySerializer(
             userprofiles, many=True, context={'request': request})
         return Response(
             {

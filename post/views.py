@@ -243,7 +243,7 @@ class UserPostDetail(APIView):
 class PostDetails(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
     def get_object(self, pk):
         post = self.get_post(pk)
@@ -1046,9 +1046,10 @@ class TrendingTopics(APIView):
 class PostExploreView(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request):
+        search_text = request.query_params.get('search', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
         is_work = request.query_params.get('is_work', None)
@@ -1069,10 +1070,12 @@ class PostExploreView(APIView):
 
         items_per_page = item_count
 
-        interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
-        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
-            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
-        skills_list = request.user.userprofile.skills_list
+        user = request.user
+        if not user.is_anonymous:
+            interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
+            friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
+                list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
+            skills_list = request.user.userprofile.skills_list
 
         functions = []
         filters = []
@@ -1084,8 +1087,8 @@ class PostExploreView(APIView):
             must.append(query.Q('match', tags=tag_names))
         if is_work is not None:
             must.append(query.Q('term', is_work=is_work))
-
-        logger.info(topic_texts)
+        if search_text:
+            must.append(query.Q('match', post_document=search_text))
 
         if geo_location:
             functions.append(
@@ -1106,17 +1109,18 @@ class PostExploreView(APIView):
             must.append(query.Q({'range': {'created_on': {'lt': now}}}))
 
         # applying privacy
-        privacy_qs = []
-        privacy_qs.append(query.Q('term', visible_to='Public'))
-        privacy_qs.append(query.Q('bool', must=[
-            query.Q('term', visible_to='Friends'),
-            query.Q('terms', user_id=friends_ids)
-        ]))
-        privacy_qs.append(query.Q('bool', must=[
-            query.Q('term', visible_to='List'),
-            query.Q('term', share_list_user_ids=request.user.id)
-        ]))
-        must.append(query.Q('bool', should=privacy_qs))
+        if not user.is_anonymous:
+            privacy_qs = []
+            privacy_qs.append(query.Q('term', visible_to='Public'))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='Friends'),
+                query.Q('terms', user_id=friends_ids)
+            ]))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='List'),
+                query.Q('term', share_list_user_ids=request.user.id)
+            ]))
+            must.append(query.Q('bool', should=privacy_qs))
 
         # overall popularity
         functions.append(query.SF('field_value_factor',
@@ -1127,18 +1131,19 @@ class PostExploreView(APIView):
                                   field='num_seen', modifier='log1p', weight=1))
 
         # relevance to user
-        functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
-        functions.append(
-            query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
-        functions.append(
-            query.SF({'filter': query.Q('terms', topics=skills_list), 'weight': 1}))
-        brand_content_type = ContentType.objects.get_for_model(Brand)
-        user_content_type = ContentType.objects.get_for_model(request.user.__class__)
-        brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
-            follower_content_type=user_content_type,
-            followee_content_type=brand_content_type).values_list('followee_id', flat=True))
-        functions.append(
-            query.SF({'filter': query.Q('terms', brand=brand_ids), 'weight': 1}))
+        if not user.is_anonymous:
+            functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
+            functions.append(
+                query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+            functions.append(
+                query.SF({'filter': query.Q('terms', topics=skills_list), 'weight': 1}))
+            brand_content_type = ContentType.objects.get_for_model(Brand)
+            user_content_type = ContentType.objects.get_for_model(request.user.__class__)
+            brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
+                follower_content_type=user_content_type,
+                followee_content_type=brand_content_type).values_list('followee_id', flat=True))
+            functions.append(
+                query.SF({'filter': query.Q('terms', brand=brand_ids), 'weight': 1}))
 
         s = PostDocument.search()
         q = query.Q(
@@ -1498,7 +1503,7 @@ class PostExploreTrendingView(APIView):
 class PostRelatedView(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request, post_id):
         topic_texts = request.query_params.get('topic_texts', None)
@@ -1519,11 +1524,14 @@ class PostRelatedView(APIView):
         if item_count > 30:
             raise Exception("item_count greater than 30 is not allowed.")
 
+        user = request.user
+
         items_per_page = item_count
 
-        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
-            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
-        skills_list = request.user.userprofile.skills_list
+        if not user.is_anonymous:
+            friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
+                list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
+            skills_list = request.user.userprofile.skills_list
 
         functions = []
         filters = []
@@ -1543,17 +1551,18 @@ class PostRelatedView(APIView):
             must.append(query.Q({'range': {'created_on': {'lt': now}}}))
 
         # applying privacy
-        privacy_qs = []
-        privacy_qs.append(query.Q('term', visible_to='Public'))
-        privacy_qs.append(query.Q('bool', must=[
-            query.Q('term', visible_to='Friends'),
-            query.Q('terms', user_id=friends_ids)
-        ]))
-        privacy_qs.append(query.Q('bool', must=[
-            query.Q('term', visible_to='List'),
-            query.Q('term', share_list_user_ids=request.user.id)
-        ]))
-        must.append(query.Q('bool', should=privacy_qs))
+        if not user.is_anonymous:
+            privacy_qs = []
+            privacy_qs.append(query.Q('term', visible_to='Public'))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='Friends'),
+                query.Q('terms', user_id=friends_ids)
+            ]))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='List'),
+                query.Q('term', share_list_user_ids=request.user.id)
+            ]))
+            must.append(query.Q('bool', should=privacy_qs))
 
         # overall popularity
         functions.append(query.SF('field_value_factor',
@@ -1564,9 +1573,10 @@ class PostRelatedView(APIView):
                                   field='num_seen', modifier='log1p', weight=1))
 
         # relevance to user
-        functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
-        functions.append(
-            query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+        if not user.is_anonymous:
+            functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
+            functions.append(
+                query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
 
         # relevance to post
         try:

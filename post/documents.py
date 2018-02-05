@@ -40,6 +40,7 @@ class PostDocument(DocType):
     num_recent_comments = Integer()
     user_firstname = String()
     user_lastname = String()
+    user_username = String()
     user_profile_photo = String()
     user_cover_photo = String()
     user_profession_id = Integer()
@@ -71,10 +72,12 @@ class PostDocument(DocType):
     boost_datetime = Date()
 
     brand = String()
-    brand_logo_url = String()
+    brand_logo_url = String(index='not_analyzed')
 
     brand_id = Integer()
-    college_id= String()
+    college_id= String(index='not_analyzed')
+
+    post_document = String()
 
     class Meta:
         index = 'mw_posts_2'
@@ -103,6 +106,9 @@ class PostDocument(DocType):
         except UserProfile.DoesNotExist:
             return ""
         return up.last_name
+
+    def prepare_user_username(self, obj):
+        return obj.poster.username
 
     def prepare_user_profile_photo(self, obj):
         try:
@@ -307,17 +313,22 @@ class PostDocument(DocType):
     def prepare_share_list_user_ids(self, obj):
         return obj.share_list_user_ids
 
+    def prepare_post_document(self, obj):
+        texts = [obj.text, obj.topic]
+        document = " ".join(texts)
+        return document
+
     def set_from_post(self, post):
         properties = ('text', 'image_url', 'video_url',
                       'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments',
-                      'num_recent_comments', 'user_firstname', 'user_lastname',
+                      'num_recent_comments', 'user_firstname', 'user_lastname', 'user_username',
                       'user_profile_photo', 'user_cover_photo', 'user_profession_id',
                       'user_profession_text', 'user_profile_photo_small', 'video_thumb_url',
                       'topics', 'topic', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location',
                       'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url',
                       'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work',
                       'boost_value', 'boost_datetime', 'brand', 'brand_logo_url',
-                      'visible_to', 'share_list_user_ids', 'allow_sharing',)
+                      'visible_to', 'share_list_user_ids', 'allow_sharing', 'post_document',)
         for key in properties:
             method = 'prepare_%s' % key
             if hasattr(self, method):

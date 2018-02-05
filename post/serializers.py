@@ -26,6 +26,7 @@ class PostDocumentSerializer(serializers.Serializer):
     num_likes = serializers.IntegerField()
     user_firstname = serializers.CharField()
     user_lastname = serializers.CharField()
+    user_username = serializers.CharField()
     user_profile_photo = serializers.CharField()
     user_profile_photo_small = serializers.CharField()
     user_cover_photo = serializers.CharField()
@@ -181,6 +182,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     num_comments = serializers.SerializerMethodField()
     user_firstname = serializers.SerializerMethodField()
     user_lastname = serializers.SerializerMethodField()
+    user_username = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
     user_cover_photo = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
@@ -214,7 +216,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments',
-                  'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
+                  'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
                   'tags', 'topics', 'topic', 'story', 'story_index', 'is_liked', 'likes_url',
@@ -241,6 +243,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         except UserProfile.DoesNotExist:
             return ""
         return up.last_name
+
+    def get_user_username(self, obj):
+        return obj.poster.username
 
     def get_user_profile_photo(self, obj):
         try:
@@ -418,6 +423,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     num_comments = serializers.SerializerMethodField()
     user_firstname = serializers.SerializerMethodField()
     user_lastname = serializers.SerializerMethodField()
+    user_username = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
     user_cover_photo = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
@@ -441,7 +447,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments',
-                  'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
+                  'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
                   'created_on', 'tags', 'topics', 'topic', 'story_index', 'mentioned_users',
@@ -466,6 +472,9 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         except UserProfile.DoesNotExist:
             return ""
         return up.last_name
+
+    def get_user_username(self, obj):
+        return obj.poster.username
 
     def get_user_profile_photo(self, obj):
         try:
