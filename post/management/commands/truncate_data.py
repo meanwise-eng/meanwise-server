@@ -8,6 +8,7 @@ import elasticsearch
 
 from post.models import Post, UserTopic
 from userprofile.models import UserProfile
+from credits.models import Critic, Credits
 
 
 class Command(BaseCommand):
@@ -27,3 +28,6 @@ class Command(BaseCommand):
             userprofile.profile_boosts.all().delete()
 
         user_topics = UserTopic.objects.all().delete()
+
+        Critic.objects.all().delete()
+        Credits.objects.all().delete()
