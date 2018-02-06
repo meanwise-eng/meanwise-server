@@ -121,11 +121,11 @@ def update_user_topic(sender, **kwargs):
     user_topic.popularity += popularity
     user_topic_with_category.popularity += popularity
 
-    posts = Post.objects.filter(topic=topic_text, poster=post.poster).order_by('-created_on')[:5]
+    posts = Post.objects.filter(topic__iexact=topic_text, poster=post.poster).order_by('-created_on')[:5]
     serializer = PostSummarySerializer(posts, many=True)
     user_topic.top_posts = serializer.data
 
-    posts_with_category = Post.objects.filter(topic=topic_text, poster=post.poster,
+    posts_with_category = Post.objects.filter(topic__iexact=topic_text, poster=post.poster,
                                               is_work=post.is_work).order_by('-created_on')[:5]
     serializer_with_category = PostSummarySerializer(posts_with_category, many=True)
     user_topic_with_category.top_posts = serializer_with_category.data
@@ -159,7 +159,7 @@ def reduce_topic_popularity(sender, **kwargs):
         if user_topic.popularity < 0:
             user_topic.popularity = 0
             posts = Post.objects.filter(
-                topic=topic_text, poster=post.poster, is_deleted=False
+                topic__iexact=topic_text, poster=post.poster, is_deleted=False
             ).order_by('-created_on')[:5]
             serializer = PostSummarySerializer(posts, many=True)
             user_topic.top_posts = serializer.data
@@ -171,7 +171,7 @@ def reduce_topic_popularity(sender, **kwargs):
         if user_topic_with_category.popularity < 0:
             user_topic_with_category.popularity = 0
 
-            posts_with_category = Post.objects.filter(topic=topic_text, poster=post.poster,
+            posts_with_category = Post.objects.filter(topic__iexact=topic_text, poster=post.poster,
                                                       is_deleted=False, is_work=post.is_work
             ).order_by('-created_on')[:5]
             serializer_with_category = PostSummarySerializer(posts_with_category, many=True)

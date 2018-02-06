@@ -46,13 +46,13 @@ class Command(BaseCommand):
             user_topic_with_category.popularity += popularity
 
             posts = Post.objects.filter(
-                topic=topic_text, poster=post.poster, is_deleted=False
+                topic__iexact=topic_text, poster=post.poster, is_deleted=False
             ).order_by('-created_on')[:5]
             serializer = PostSummarySerializer(posts, many=True)
             user_topic.top_posts = serializer.data
             user_topic.save()
 
-            posts_with_category = Post.objects.filter(topic=topic_text, poster=post.poster,
+            posts_with_category = Post.objects.filter(topic__iexact=topic_text, poster=post.poster,
                                                       is_deleted=False, is_work=post.is_work
             ).order_by('-created_on')[:5]
             serializer_with_category = PostSummarySerializer(posts_with_category, many=True)
