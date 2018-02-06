@@ -1324,7 +1324,7 @@ class PostExploreTrendingView(APIView):
         must = []
         if topic_texts:
             topic_texts = topic_texts.upper()
-            must.append(query.Q('match', topics=topic_texts))
+            must.append(query.Q('term', topic=topic_texts))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
         if is_work is not None:
@@ -1586,7 +1586,7 @@ class PostRelatedView(APIView):
 
         post_tags = [t.name for t in post.tags.all()]
 
-        functions.append(query.SF({'filter': query.Q('terms', topic=post.topic), 'weight': 10}))
+        functions.append(query.SF({'filter': query.Q('term', topic=post.topic), 'weight': 10}))
         functions.append(query.SF({'filter': query.Q('terms', tags=post_tags), 'weight': 10}))
 
         s = PostDocument.search()
