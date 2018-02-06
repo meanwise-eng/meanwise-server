@@ -7,6 +7,7 @@ from post.views import *
 from mnotifications.views import *
 from credits.views import CreditsListView
 from brands.views import OrgListView
+from topics.views import TopicsListView
 
 router = routers.SimpleRouter()
 
@@ -83,7 +84,7 @@ urlpatterns = [
     url(r'^invite/code/valid/$',
         ValidateInviteCodeView.as_view(), name="validate-invite"),
     url(r'^profession/$', ProfessionListView.as_view(), name="profession"),
-    url(r'^skill/$', SkillListView.as_view(), name="skills"),
+    url(r'^skill/$', TopicsListView.as_view(), name="skills"),
     url(r'^interest/$', InterestListView.as_view(), name="interests"),
     url(r'^public-feed/$', PublicFeed.as_view(), name="public-feed"),
     url(r'^subscribe/early-access/', EarlyAccess.as_view()),

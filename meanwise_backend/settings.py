@@ -118,6 +118,7 @@ INSTALLED_APPS = [
     'credits.apps.CreditsConfig',
     'college.apps.CollegeConfig',
     'follow.apps.FollowConfig',
+    'topics.apps.TopicsConfig',
     'django_crontab',
     'scarface',
     'analytics',
