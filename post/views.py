@@ -1082,7 +1082,7 @@ class PostExploreView(APIView):
         must = []
         if topic_texts:
             topic_texts = topic_texts.upper()
-            must.append(query.Q('term', topics=topic_texts))
+            must.append(query.Q('term', topic=topic_texts))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
         if is_work is not None:
@@ -1136,7 +1136,7 @@ class PostExploreView(APIView):
             functions.append(
                 query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
             functions.append(
-                query.SF({'filter': query.Q('terms', topics=skills_list), 'weight': 1}))
+                query.SF({'filter': query.Q('terms', topic=skills_list), 'weight': 1}))
             brand_content_type = ContentType.objects.get_for_model(Brand)
             user_content_type = ContentType.objects.get_for_model(request.user.__class__)
             brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
@@ -1584,10 +1584,9 @@ class PostRelatedView(APIView):
         except Post.DoesNotExist:
             raise Http404()
 
-        post_topics = [t.text for t in post.topics.all()]
         post_tags = [t.name for t in post.tags.all()]
 
-        functions.append(query.SF({'filter': query.Q('terms', topics=post_topics), 'weight': 10}))
+        functions.append(query.SF({'filter': query.Q('terms', topic=post.topic), 'weight': 10}))
         functions.append(query.SF({'filter': query.Q('terms', tags=post_tags), 'weight': 10}))
 
         s = PostDocument.search()

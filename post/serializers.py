@@ -154,10 +154,7 @@ class PostDocumentSerializer(serializers.Serializer):
         return data
 
     def get_topics(self, obj):
-        if obj.topics:
-            return list(obj.topics)
-
-        return []
+        return [obj.topic]
 
     def get_tags(self, obj):
         if obj.tags:
@@ -325,7 +322,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return build_absolute_uri(reverse('post-likes', args=[obj.id]))
 
     def get_topics(self, obj):
-        return obj.topics.all().values_list('text', flat=True)
+        return [obj.topic]
 
     def get_tags(self, obj):
         return obj.tags.all().values_list('name', flat=True)
@@ -528,7 +525,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.liked_by.all().count()
 
     def get_topics(self, obj):
-        return obj.topics.all().values_list('text', flat=True)
+        return [obj.topic]
 
     def get_tags(self, obj):
         return obj.tags.all().values_list('name', flat=True)
