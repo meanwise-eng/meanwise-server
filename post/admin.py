@@ -8,7 +8,7 @@ from boost.admin import BoostInline
 
 class PostAdmin(admin.ModelAdmin):
     fields = ('interest', 'image', 'video', 'text', 'poster', 'tags',
-              'mentioned_users', 'panaroma_type', 'topics',
+              'mentioned_users', 'panaroma_type', 'topic', 'is_work',
     )
     inlines = [BoostInline,]
 

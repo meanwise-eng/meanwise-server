@@ -56,8 +56,7 @@ class Influencer(DocType):
             influencer.boost_datetime = None
 
         if influencer.last_reset < (now - datetime.timedelta(weeks=1)):
-            influencer.topics_overall = '%s,%s' % (
-                influencer.topics_overall, influencer.topics_weekly)
+            influencer.topics_overall = influencer.topics_overall + influencer.topics_weekly
             influencer.popularity_overall = influencer.popularity_overall \
                 + influencer.popularity_weekly
             influencer.topics_weekly = []

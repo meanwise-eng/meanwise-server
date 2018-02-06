@@ -110,7 +110,7 @@ class Post(models.Model):
     visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
     share_list = models.ForeignKey(ShareList, null=True, blank=True)
     share_list_user_ids = JSONField(blank=True, default=[])
-    allow_sharing = models.BooleanField()
+    allow_sharing = models.BooleanField(default=True)
 
     boosts = GenericRelation(Boost, related_query_name='post')
     brand = models.ForeignKey(Brand, null=True, related_name='posts')
