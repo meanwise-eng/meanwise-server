@@ -133,8 +133,11 @@ def send_welcome_email(sender, **kwargs):
 
             recipient_id = res_body['persisted_recipients'][0]
 
-            response = sg.client.contactdb.lists._(list_id).recipients._(recipient_id).post()
-            logger.debug("Contact added to list: %s" % (response.status_code))
+            try:
+                response = sg.client.contactdb.lists._(list_id).recipients._(recipient_id).post()
+                logger.debug("Contact added to list: %s" % (response.status_code))
+            except Exception as e:
+                logger.error(e)
 
         data = {
             'content': [{'type': 'text/html', 'value': 'dummy'}],
@@ -149,5 +152,8 @@ def send_welcome_email(sender, **kwargs):
             'template_id': '1431c751-060c-429c-80d5-7a312c81c698'
         }
 
-        response = sg.client.mail.send.post(request_body=data)
-        logger.debug("SG Response code: %s" % (response.status_code,))
+        try:
+            response = sg.client.mail.send.post(request_body=data)
+            logger.debug("SG Response code: %s" % (response.status_code,))
+        except Exception as e:
+            logger.error(e)
