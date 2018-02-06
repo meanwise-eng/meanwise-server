@@ -39,6 +39,7 @@ from django.contrib.contenttypes.models import ContentType
 from follow.models import Follow
 from brands.models import Brand
 from college.models import College
+from topics.models import Topic as Topic2
 
 from post.models import *
 from post.serializers import *
@@ -965,8 +966,7 @@ class AutocompleteTopic(APIView):
     def post(self, request):
         topic_text = request.data.get('topic', '')
         try:
-            topics = Topic.objects.filter(text__istartswith=topic_text).filter(
-                post__is_deleted=False).distinct().values_list('text', flat=True)
+            topics = Topic2.objects.filter(text__istartswith=topic_text).values_list('text', flat=True)
         except MultiValueDictKeyError:
             pass
 
