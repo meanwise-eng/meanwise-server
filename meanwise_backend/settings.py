@@ -315,7 +315,7 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
         'sentry': {
@@ -326,7 +326,7 @@ LOGGING = {
     'loggers': {
         'meanwise_backend': {
             'handlers': ['console', 'sentry',],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django': {
