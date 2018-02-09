@@ -150,8 +150,8 @@ MIDDLEWARE_CLASSES = [
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
     MIDDLEWARE_CLASSES = ['silk.middleware.SilkyMiddleware', ] + MIDDLEWARE_CLASSES
-else:
-    CORS_ORIGIN_WHITELIST = ('https://meanwise.com', 'https://www.meanwise.com',)
+
+CORS_ORIGIN_WHITELIST = ('meanwise.com', 'www.meanwise.com',)
 
 DEVSERVER_AUTO_PROFILE = True
 
@@ -396,16 +396,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 30,
     'EXCEPTION_HANDLER': 'meanwise_backend.utils.custom_exception_handler'
 }
-
-# CORS White listing
-CORS_ORIGIN_WHITELIST = (
-    'meanwise.com',
-    'client.meanwise.com'
-)
-CORS_ALLOW_CREDENTIALS = True
-if DEBUG:
-    CORS_ORIGIN_WHITELIST += ('local.meanwise.com', 'local.meanwise.com:3000')
-
 
 THUMBNAIL_ALIASES = {
     'account_profile.ProfileImage.image': {
