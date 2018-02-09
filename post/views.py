@@ -196,6 +196,7 @@ class UserPostList(APIView):
                 },
                 status=status.HTTP_201_CREATED
             )
+        logger.debug(serializer.errors)
         return Response(
             {
                 "status": "failed",

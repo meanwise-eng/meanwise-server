@@ -318,20 +318,24 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+        },
     },
     'loggers': {
         'meanwise_backend': {
-            'handlers': ['console'],
+            'handlers': ['console', 'sentry',],
             'level': 'INFO',
             'propagate': True,
         },
         'django': {
             'level': 'ERROR',
-            'handlers': ['console']
+            'handlers': ['console', 'sentry',]
         },
         'celery': {
             'level': 'DEBUG',
-            'handlers': ['console']
+            'handlers': ['console', 'sentry',]
         },
     },
 }
@@ -511,10 +515,10 @@ CELERY_BROKER_URL = 'redis://%s/0' % REDIS_HOST
 #CELERY_ACCEPT_CONTENT = ['pickle', 'json', ]
 
 # Raven/Sentry Config
-# if not DEBUG:
-#    RAVEN_CONFIG = {
-#        'dsn': 'https://e9630008d26c488d8b2955db4e97d3c8:a1b497ca107443858e4ed553ed42a8bc@app.getsentry.com/65196',
-#    }
+if not DEBUG:
+   RAVEN_CONFIG = {
+       'dsn': 'https://aabd4d35efa64ab4b7857f3deeed5ea2:db50721e1bcd4cd5ac39b2110a246ede@sentry.io/189459',
+   }
 
 # Taggit Config
 TAGGIT_CASE_INSENSITIVE = True
