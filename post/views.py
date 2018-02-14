@@ -118,7 +118,6 @@ class UserPostList(APIView):
                     post.topics.add(t)
 
             mentioned_users = serializer.validated_data.get('mentioned_users')
-            logger.info(mentioned_users)
             if type(mentioned_users) == str:
                 mentioned_users = ast.literal_eval(mentioned_users)
             if len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
