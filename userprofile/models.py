@@ -213,7 +213,7 @@ class UserProfile(models.Model):
                 sys.getsizeof(output), None
             )
 
-            thumbnail_size = (48, 48)
+            thumbnail_size = (96, 96)
             thumbnail_output = BytesIO()
             im.thumbnail(thumbnail_size)
             im.save(thumbnail_output, format='JPEG', quality=100, optimize=True)
