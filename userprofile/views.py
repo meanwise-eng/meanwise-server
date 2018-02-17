@@ -798,28 +798,42 @@ class InfluencersListView(APIView):
                                   modifier='log1p',
                                   weight=2))
 
+        shoulds = []
+        main_query = query.Q(
+            'function_score',
+            functions=functions,
+            score_mode='sum',
+        )
+        shoulds.append(main_query)
+
         # apply manual boost
-        functions.append(query.SF('gauss', boost_datetime={
+        manual_boost_functions = []
+        manual_boost_functions.append(query.SF('gauss', boost_datetime={
             'origin': origin,
+            'offset': '1d',
             'scale': '1d',
-            'decay': 0.1
-        }, weight=5))
-        functions.append(query.SF('field_value_factor',
+            'decay': 0.5
+        }, weight=1))
+        manual_boost_functions.append(query.SF('field_value_factor',
                                   field='boost_value',
                                   modifier='log1p',
                                   missing=0,
-                                  weight=30))
+                                  weight=1))
+        manual_boost_query = query.Q(
+            'function_score',
+            functions=manual_boost_functions,
+            score_mode='multiply',
+        )
+        shoulds.append(manual_boost_query)
 
         s = Influencer.search()
-        q = query.Q(
-            'function_score',
-            query=query.Q('bool', filter=filters),
-            functions=functions,
-            score_mode='sum',
-            boost_mode='sum'
+        main_bool = query.Q(
+            'bool',
+            should=shoulds,
+            must=[query.Q('bool', filter=filters)]
         )
-        s = s.query(q)
-        logger.info(s.to_dict())
+        s = s.query(main_bool)
+        #logger.debug(json.dumps(s.to_dict()))
         offset = (section - 1) * item_count
         s = s[offset:offset + item_count]
 

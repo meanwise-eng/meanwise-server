@@ -1,7 +1,6 @@
 import datetime
 import elasticsearch
-from django_elasticsearch_dsl import Integer, String, Date
-from elasticsearch_dsl import analyzer, tokenizer, Index, DocType
+from elasticsearch_dsl import (analyzer, tokenizer, Index, DocType, Integer, String, Date,)
 
 influencers = Index('mw_influencers')
 influencers.settings(
@@ -54,6 +53,11 @@ class Influencer(DocType):
             influencer.last_reset = now
             influencer.boost_value = None
             influencer.boost_datetime = None
+
+        if influencer.topics_weekly is None:
+            influencer.topics_weekly = []
+        if influencer.topics_overall is None:
+            influencer.topics_overall = []
 
         if influencer.last_reset < (now - datetime.timedelta(weeks=1)):
             if influencer.topics_overall is None:
