@@ -465,7 +465,7 @@ Request Payload
    Authorization: Token {token}
 
 Request Body
------------------------
+------------
 
 .. code-block:: javascript
 
@@ -547,6 +547,27 @@ Request Body
     * - thumbnail
       - A :ref:`media-id` that contains a thumbnail image that represents the post. Eg: ``/post_thumbnails/60db3238-1596-11e8-89bf-bf1ac5f21e9f.jpg``
       - media id
+
+Paths for the media
+~~~~~~~~~~~~~~~~~~~
+
+For uploading the post media through the Media API, use the below paths based on the post type.
+
+..  list-table:: paths
+    :header-rows: 1
+
+    * - Type
+      - Path
+    * - image
+      - post_images
+    * - video
+      - post_videos
+    * - pdf
+      - post_pdf
+    * - audio
+      - post_audio
+    * - thumbnail
+      - post_thumbnails
 
 Response Payload (JSON)
 -----------------------
