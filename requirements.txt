@@ -78,3 +78,4 @@ URLObject==2.4.3
 sendgrid==5.2.1
 sendgrid-django==4.0.4
 python-resize-image==1.1.11
+django-easy-select2
