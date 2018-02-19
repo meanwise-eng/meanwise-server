@@ -17,49 +17,6 @@ from boost.models import Boost
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 
-@receiver(post_save, sender=Boost, dispatch_uid='influencers.boost_save')
-def add_profile_boost(sender, **kwargs):
-    boost = kwargs['instance']
-
-    if boost.content_type.model_class() != UserProfile:
-        logger.debug("Boost type didn't match: %s != %s" % (boost.content_type.model_class(), UserProfile))
-        return
-
-    userprofile = boost.content_object
-    latest_boost = userprofile.profile_boosts.latest('boost_datetime')
-
-    if boost != latest_boost:
-        return
-
-    influencer = Influencer.get_influencer(userprofile.user_id)
-    influencer.boost_value = boost.boost_value
-    influencer.boost_datetime = boost.boost_datetime
-    influencer.save()
-
-
-@receiver(post_delete, sender=Boost, dispatch_uid='influencers.boost_delete')
-def delete_profile_boost(sender, **kwargs):
-    boost = kwargs['instance']
-    if boost.content_type.model_class() != UserProfile:
-        logger.debug("Boost type didn't match: %s != %s" % (boost.content_type.model_class(), UserProfile))
-        return
-
-    userprofile = boost.content_object
-
-    try:
-        latest_boost = userprofile.profile_boosts.latest('boost_datetime')
-        boost_value = latest_boost.boost_value
-        boost_datetime = latest_boost.boost_datetime
-    except:
-        boost_value = None
-        boost_datetime = None
-
-    influencer = Influencer.get_influencer(userprofile.user_id)
-    influencer.boost_value = boost_value
-    influencer.boost_datetime = boost_datetime
-    influencer.save()
-
-
 @receiver(post_save, sender=Post, dispatch_uid='influencers.post_save')
 def add_topics_and_likes(sender, **kwargs):
     if kwargs['created']:
