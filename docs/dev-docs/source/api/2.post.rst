@@ -84,6 +84,7 @@ Response Payload (JSON)
         "topics": [
           "legendofzelda"
         ],
+        "topic": "legendofzelda",
         "created_on": "2017-08-02T07:28:33.096Z",
         "is_liked": false,
         "likes_url": "http://localhost:8000/api/v4/posts/94/likes/",
@@ -100,6 +101,12 @@ Response Payload (JSON)
         "audio_url": "",
         "audio_thumb_url": "",
         "post_thumbnail_url": "http://localhost:8001/media/post_images/image.jpg",
+        "media_files": [
+            {
+                "type": "image",
+                "url": "https://mw-media-dev-1.s3.aws.amazonaws.com/post_images/f854530a-159c-11e8-95e1-dbbf80fcfda1.jpg"
+            }
+        ],
       }
     ]
   }
@@ -243,6 +250,15 @@ Response Payload (JSON)
     * - post_thumbnail_url
       - The thumbnail URL based on what type of post it is. i.e. If post is an image post it will
         the image thumbnail.
+      - url
+    * - media_files
+      - An array of media files objects.
+      - array
+    * - media_files.type
+      - The file type.
+      - string
+    * - media_files.url
+      - The URL of the file.
       - url
 
 Pagination
