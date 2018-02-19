@@ -427,6 +427,121 @@ Response Payload (JSON)
   }
 
 
+Create Post New
+===============
+
+New API for creating posts. The upload of files (image, video) has been separated. Refer to media
+API for details on how to upload files. The UUID for the files have to be added into the media_url
+field. Optionally, a thumbnail image can be generated for the post, and added to the thumbnail
+field. Previously used separate media fields; image, video, pdf, audio, has been removed.
+
+topics and topic_names field has been removed, and replaced with ``topic`` field.
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   PUT api/v2.0/posts/<post_id> HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Request Body
+-----------------------
+
+.. code-block:: javascript
+
+  {
+    "post_uuid": "79fd46d6-1562-11e8-95b5-f79db724f160",
+    "text": "Test post @username",
+    "interest": 1,
+    "tags": ["ttag1", "ttag3"],
+    "topic": "testtopic",
+    "mentioned_users": [3],
+    "geo_location_lat": 28.704059,
+    "geo_location_lng": 77.102490
+    "media_ids": ["post_images/89ed1954-1562-11e8-abe3-3b7e2dc10600.jpg"],
+    "post_type": "image",
+    "thumbnail": ["post_thumbnails/abe882b4-1562-11e8-8602-b7285e2b2797.jpg"]
+  }
+
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - post_uuid
+      - UUID generated on the front-end to ensure idempotency of the operation.
+      - uuid
+    * - text
+      - Text of the post.
+      - text
+    * - interest
+      - The id of the Interest that the post belongs to.
+      - Integer
+    * - topic
+      - The topic for this post.
+      - array(string)
+    * - resolution
+      - Object representing the resolution of the image or video.
+      - object
+    * - resolution.width
+      - The width of the video/image.
+      - integer
+    * - resolution.height
+      - The height of the video/image.
+      - integer
+    * - tags
+      - An array of tag names.
+      - array(string)
+    * - mentioned_users
+      - An array of `user_id` who are mentioned in the post.
+      - array(values)
+    * - geo_location_lat
+      - Geo location latitude.
+      - Decimal value
+    * - geo_location_lng
+      - Geo location longitude.
+      - Decimal value
+    * - post_type
+      - The type of the post. Allowed types are: image, video, text, audio, pdf, link.
+      - string
+    * - link
+      - The URL that will be linked to.
+      - url
+    * - link_meta_data
+      - Additional data about the link that will be used to display the link in app.
+      - object
+    * - link_meta_data.title
+      - Title of the link shared in a Post.
+      - string
+    * - link_meta_data.description
+      - Description of the link shared in a Post.
+      - string
+    * - link_meta_data.image
+      - URL of image thumbnail of the link shared in a Post.
+      - url
+    * - media_ids
+      - Array of :ref:`Media IDs<media-id>`. The media should match the post type (i.e. If post type is video, then the media should be video files.
+      - array
+    * - thumbnail
+      - A :ref:`media-id` that contains a thumbnail image that represents the post. Eg: ``/post_thumbnails/60db3238-1596-11e8-89bf-bf1ac5f21e9f.jpg``
+      - media id
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 201 Created
+  Content-Type: application/json
+  Location: /api/v2.0/posts/<post_id>
+
+
 Comment
 =======
 

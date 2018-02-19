@@ -1,0 +1,86 @@
+=====
+Media
+=====
+
+These APIs allows the Meanwise API to consolidate upload and download and handling of media. This
+allows the Meanwise API to support more optimized and different version of the media uploaded by
+user (eg. different thumbnail sizes, different video resolutions and codecs).
+
+Upload
+======
+
+You can use this API to upload media.
+
+.. code-block:: http
+
+   PUT api/v2.0/media/upload/<path>/<uuid>.<ext> HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: multipart/form-data; boundary=<boundary>
+   Authorization: Token {token}
+
+Path Parameters
+----------------
+
+..  list-table::
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+    * - path
+      - The path that the file should be uploaded to.
+    * - uuid
+      - A UUID to make sure the filename is unique.
+    * - ext
+      - The extension of the file.
+
+.. _media-id:
+
+Media ID
+~~~~~~~~
+
+The <path>/<uuid>.<ext> together makes up the unique identifier for the image. Therefore a file
+with the same <uuid> but different <path> or <ext> will be considered different. When passing
+the media to other APIs/systems, use the full identifier ``<path>/<uuid>.<ext>``. This will be
+called **Media ID** through out this documentation.
+
+You will send a PUT request with a UUID specifying the media ID. This will allow idempotence. If a
+file with the same ID exists, the hash of the two files are compared. If the files are same, the
+request will be successful. If the files are different, then an error is raised.
+
+Alternatively, the file hash can be appended as a Header, which will allow the server to compare file
+hashes before the file is fully uploaded. This allows to fail early in case of hash collision, but
+if an invalid hash is sent in the header, the file hash is still checked when the file is fully
+uploaded.
+
+.. code-block:: http
+
+  X-File-Hash: 8706a8da59595a3486708f529bda9e6e2d76485f
+
+Request Payload
+---------------
+
+The file field should be named ``media_file`` if the content type is ``multipart/form-data``. If
+uploading direct binary, then set the content type to the appropriate MIME type of the file.
+
+.. code-block:: http
+
+  Content-Type: image/jpeg
+
+**Note:** Direct binary upload is not available yet.
+
+Response
+--------
+
+.. code-block:: http
+
+  HTTP/1.1 201 Created
+  Content-Type: application/json
+  Location: https://<cloudfron_or_s3_or_other_host>/<path><media_id>.<ext>
+
+The final location of the created resource is returned.
+
+The system keeps metadata about the file. One important thing is it will be marked as an orphan
+file, which indicates that no other resource has claimed this file. Another resource should claim the
+file before the expiration duration set in the media API is reached (24 hours). Eg. When a post is
+created with this media file, the post API will make a request to the media API to claim the file.
