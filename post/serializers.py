@@ -212,7 +212,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments',
+        fields = ('id', 'post_type', 'post_uuid', 'text', 'user_id', 'num_likes', 'num_comments',
                   'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
@@ -220,7 +220,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
-                  'post_thumbnail_url', 'is_work', 'college',
+                  'post_thumbnail_url', 'is_work', 'college', 'media_ids',
                   )
 
     def get_user_id(self, obj):
@@ -443,7 +443,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments',
+        fields = ('id', 'post_uuid', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments',
                   'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
@@ -607,6 +607,43 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return Post.TYPE_TEXT
 
 
+class PostCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields = ('post_uuid', 'post_type', 'panaroma_type', 'text', 'tags', 'topic',
+                  'geo_location_lat', 'geo_location_lng', 'mentioned_users', 'link',
+                  'link_meta_data', 'parent', 'is_work', 'brand', 'college', 'media_ids',
+                  'thumbnail',
+        )
+
+    def create(self, validated_data):
+        media_ids = validated_data['media_ids']
+        post_type = validated_data['post_type']
+
+        post = Post(**validated_data)
+
+        allowed_types = ['image', 'video', 'pdf', 'audio']
+        if validated_data['post_type'] in allowed_types:
+            media = self._get_media(media_ids, post_type)
+            file_field = getattr(post, post_type)
+            file_field.name = media['media_id']
+
+        post.save()
+
+        return post
+
+    def _get_media(self, media_ids, post_type):
+        if type(media_ids) == list and len(media_ids) > 0:
+            for media in media_ids:
+                if media['type'] == post_type:
+                    return media
+
+    def _set_image(self, validated_data):
+        media = self._get_media(validated_data['media_ids'], validated_data['post_type'])
+        validated_data[validated_data['post_type']] = media['media_id']
+
+
 class PostSaveSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     topics = serializers.SerializerMethodField()
@@ -619,7 +656,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        read_only_fields = ('poster', 'brand', 'is_deleted',)
+        read_only_fields = ('poster', 'brand', 'is_deleted', 'media_ids',)
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)

@@ -254,9 +254,20 @@ class PostDetails(APIView):
 
     def get_post(self, pk):
         try:
-            return Post.objects.get(pk=pk, is_deleted=False)
-        except Post.DoesNotExist:
-            raise Http404
+            post_id = int(pk)
+            try:
+                return Post.objects.get(pk=pk, is_deleted=False)
+            except Post.DoesNotExist:
+                raise Http404
+        except ValueError:
+            try:
+                post_uuid = uuid.UUID(pk)
+                try:
+                    return Post.objects.get(post_uuid=post_uuid)
+                except Post.DoesNotExist:
+                    raise Http404
+            except ValueError:
+                raise ValidationError("Invalid post_id")
 
     def get(self, request, post_id):
         post = self.get_post(post_id)
@@ -270,6 +281,48 @@ class PostDetails(APIView):
                 "results": serializer.data
             },
             status=status.HTTP_200_OK
+        )
+
+    def put(self, request, post_id):
+        try:
+            post_uuid = uuid.UUID(post_id)
+        except ValueError:
+            raise Exception("Post ID should be a UUID.")
+
+        try:
+            post = Post.objects.get(post_uuid=post_id)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": { "message": "You cannot PUT the same post twice" },
+                    "results": None
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+        except Post.DoesNotExist:
+            pass
+
+        serializer = PostCreateSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "status": "failed",
+                    "error": serializer.errors,
+                    "results": None
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        post = serializer.save(post_uuid=post_id, poster=request.user)
+
+        return Response(
+            {
+                "status": "success",
+                "error": None,
+                "results": { "message": "Post created successfully" }
+            },
+            status.HTTP_201_CREATED
         )
 
     def patch(self, request, post_id):

@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import os
 import sys
+import uuid
 
 from django.db import models
 from django.conf import settings
@@ -73,28 +74,31 @@ class Post(models.Model):
     TYPE_TEXT = 'text'
     TYPE_LINK = 'link'
 
+    post_uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     post_type = models.CharField(max_length=5, default=None, choices=POST_TYPES, null=True)
     panaroma_type = models.CharField(max_length=15, default=None, choices=PANAROMA_TYPES, null=True, blank=True)
-    interest = models.ForeignKey(Interest, db_index=True, null=True, blank=True)
-    image = models.ImageField(upload_to='post_images', null=True, blank=True)
-    video = models.FileField(upload_to='post_videos', null=True, blank=True)
     text = models.CharField(max_length=200, null=True, blank=True)
-    poster = models.ForeignKey(User, related_name='poster')
     tags = TaggableManager(blank=True)
-    topics = models.ManyToManyField(Topic, blank=True)
     topic = models.CharField(max_length=100, blank=False, null=False)
     geo_location_lat = models.DecimalField(null=True, max_digits=9, decimal_places=6)
     geo_location_lng = models.DecimalField(null=True, max_digits=9, decimal_places=6)
     mentioned_users = models.ManyToManyField(User, related_name='mentioned_users', blank=True)
-    pdf = models.FileField(upload_to='post_pdf', null=True, blank=True)
-    audio = models.FileField(upload_to='post_audio', null=True, blank=True)
     link = models.URLField(max_length=1024, null=True, blank=True)
     link_meta_data = pgJSONField(blank=True, null=True)
     parent = models.ForeignKey('self', db_index=True, null=True)
     is_work = models.BooleanField()
-    boosts = GenericRelation(Boost, related_query_name='post')
     brand = models.ForeignKey(Brand, null=True, related_name='posts')
     college = models.ForeignKey(College, null=True, related_name='posts')
+    media_ids = pgJSONField()
+
+    interest = models.ForeignKey(Interest, db_index=True, null=True, blank=True)
+    image = models.ImageField(upload_to='post_images', null=True, blank=True)
+    video = models.FileField(upload_to='post_videos', null=True, blank=True)
+    poster = models.ForeignKey(User, related_name='poster')
+    topics = models.ManyToManyField(Topic, blank=True)
+    pdf = models.FileField(upload_to='post_pdf', null=True, blank=True)
+    audio = models.FileField(upload_to='post_audio', null=True, blank=True)
+    boosts = GenericRelation(Boost, related_query_name='post')
 
     # privacy settings
     visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
@@ -156,6 +160,9 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         inserting = self.pk is None
 
+        if self.post_uuid is None:
+            self.post_uuid = uuid.uuid4()
+
         try:
             brand = Brand.objects.get(members__user=self.poster)
             self.brand = brand
@@ -167,6 +174,9 @@ class Post(models.Model):
             self.college = colleges[0]
 
         if inserting and self.video:
+            if self.media_ids is None:
+                self.media_ids = [self.video.name]
+
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
                 try:
@@ -221,7 +231,20 @@ class Post(models.Model):
             self.thumbnail = InMemoryUploadedFile(thumb_output, 'ImageField', self.image.name,
                 'image/jpeg', sys.getsizeof(thumb_output), None)
 
+        media_ids_is_none = False
+        if self.media_ids is None:
+            media_ids_is_none = True
+            self.media_ids = []
+
         super(Post, self).save(*args, **kwargs)
+
+        if media_ids_is_none:
+            self.media_ids = [{
+                'media_id': "%s/%s" % (Post.image.field.upload_to, self.image.name),
+                'type': self.get_post_type()
+            }]
+
+        super(Post, self).save(*args, **dict(kwargs, update_fields=['media_ids'], force_insert=False))
 
         #if self.video and not self.video_thumbnail:
         #    generate_video_thumbnail.apply_async((self.id,), countdown=1)

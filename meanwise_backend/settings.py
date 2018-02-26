@@ -121,6 +121,7 @@ INSTALLED_APPS = [
     'follow.apps.FollowConfig',
     'topics.apps.TopicsConfig',
     'influencers.apps.InfluencersConfig',
+    'mwmedia.apps.MwmediaConfig',
     'django_crontab',
     'scarface',
     'analytics',
