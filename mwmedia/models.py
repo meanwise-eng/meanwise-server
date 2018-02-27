@@ -14,7 +14,7 @@ class MediaFile(models.Model):
         try:
             f = MediaFile.objects.get(filename=filename)
         except MediaFile.DoesNotExist:
-            raise Exception("File '%s' doesn't exist." % filename)
+            raise Exception("MediaFile '%s' doesn't exist." % filename)
 
         f.orphan = False
         f.save()

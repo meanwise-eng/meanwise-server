@@ -46,6 +46,7 @@ from post.serializers import *
 from userprofile.models import UserFriend, Interest, UserInterestRelevance
 from mnotifications.models import Notification
 from credits.models import Credits, Critic
+from mwmedia.models import MediaFile
 
 from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
@@ -287,6 +288,7 @@ class PostDetails(APIView):
             status=status.HTTP_200_OK
         )
 
+    @transaction.atomic()
     def put(self, request, post_id):
         try:
             post_uuid = uuid.UUID(post_id)
@@ -319,6 +321,10 @@ class PostDetails(APIView):
             )
 
         post = serializer.save(post_uuid=post_id, poster=request.user)
+
+        for media_id in post.media_ids:
+            MediaFile.claim(media_id['media_id'])
+
         location = build_absolute_uri(reverse('post-details', args=[post.post_uuid]))
 
         return Response(
