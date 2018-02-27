@@ -185,15 +185,19 @@ class UserPostList(APIView):
             for t in ts:
                 post.tags.add(t)
 
+            location = build_absolute_uri(reverse('post-details', args=[post.post_uuid]))
+
             return Response(
                 {
                     "status": "success",
                     "error": "",
                     "results": {
-                        "message": "Successfully created post"
+                        "message": "Successfully created post",
+                        "location": location,
                     }
                 },
-                status=status.HTTP_201_CREATED
+                status=status.HTTP_201_CREATED,
+                headers={ 'Location': location }
             )
         logger.debug(serializer.errors)
         return Response(
@@ -315,14 +319,21 @@ class PostDetails(APIView):
             )
 
         post = serializer.save(post_uuid=post_id, poster=request.user)
+        location = build_absolute_uri(reverse('post-details', args=[post.post_uuid]))
 
         return Response(
             {
                 "status": "success",
                 "error": None,
-                "results": { "message": "Post created successfully" }
+                "results": {
+                    "message": "Post created successfully",
+                    "location": location
+                }
             },
-            status.HTTP_201_CREATED
+            status.HTTP_201_CREATED,
+            headers={
+                'Location': location
+            }
         )
 
     def patch(self, request, post_id):
