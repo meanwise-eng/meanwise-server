@@ -11,6 +11,7 @@ urlpatterns = [
         PostCommentDetail.as_view(), name="comment-detail"),
     url(r'^(?P<post_id>[0-9]+)/likes/$', PostLikes.as_view(), name='post-likes'),
     url(r'^(?P<post_id>[0-9]+)/related/$', PostRelatedView.as_view(), name='post-related'),
+    url(r'^(?P<post_uuid>[a-z0-9-]+)/status/$', PostProcessingView.as_view(), name='post-status'),
     url(r'^(?P<post_id>[a-z0-9-]+)/$', PostDetails.as_view(), name='post-details'),
     url(r'^tags/autocomplete/$', AutocompleteTag.as_view()),
     url(r'^topics/autocomplete/$', AutocompleteTopic.as_view()),

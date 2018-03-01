@@ -99,6 +99,7 @@ class Post(models.Model):
     pdf = models.FileField(upload_to='post_pdf', null=True, blank=True)
     audio = models.FileField(upload_to='post_audio', null=True, blank=True)
     boosts = GenericRelation(Boost, related_query_name='post')
+    processed = models.BooleanField(default=True)
 
     # privacy settings
     visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
@@ -154,11 +155,17 @@ class Post(models.Model):
             return Post.TYPE_LINK
         return Post.TYPE_TEXT
 
+    def thumbnail_required(self):
+        if self.get_post_type() == Post.TYPE_TEXT:
+            return False
+
+        return True
+
     def __str__(self):
         return "Post id: " + str(self.id) + " poster: " + str(self.poster)
 
     def save(self, *args, **kwargs):
-        inserting = self.pk is None
+        inserting = self.post_uuid is None
 
         if self.post_uuid is None:
             self.post_uuid = uuid.uuid4()

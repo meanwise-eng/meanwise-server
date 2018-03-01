@@ -53,6 +53,7 @@ from post.search_indexes import PostIndex
 from common.api_helper import get_objects_paginated, TimeBasedPaginator, NormalPaginator,\
     build_absolute_uri
 from post.documents import PostDocument
+import post.tasks as tasks
 
 from common.push_message import *
 
@@ -308,7 +309,14 @@ class PostDetails(APIView):
         except Post.DoesNotExist:
             pass
 
-        serializer = PostCreateSerializer(data=request.data)
+
+        data = request.data.copy()
+        try:
+            thumbnail = data.pop('thumbnail')
+        except KeyError:
+            thumbnail = None
+
+        serializer = PostCreateSerializer(data=data)
 
         if not serializer.is_valid():
             return Response(
@@ -320,12 +328,28 @@ class PostDetails(APIView):
                 status.HTTP_400_BAD_REQUEST
             )
 
-        post = serializer.save(post_uuid=post_id, poster=request.user)
+        post = serializer.save(post_uuid=post_id, poster=request.user, processed=False)
 
+        if thumbnail is not None:
+            post.thumbnail.name = thumbnail
+
+        if thumbnail is None or post.get_post_type() == Post.TYPE_VIDEO:
+            tasks.generate_image_thumbnail.delay(post.id)
+
+        claimed = 0
         for media_id in post.media_ids:
-            MediaFile.claim(media_id['media_id'])
+            try:
+                MediaFile.claim(media_id['media_id'])
+                claimed += 1
+            except MediaFile.MediaFileDoesNotExist:
+                pass
 
-        location = build_absolute_uri(reverse('post-details', args=[post.post_uuid]))
+        if claimed == len(post.media_ids):
+            post.processed = True
+
+        post.save()
+
+        location = build_absolute_uri(reverse('post-status', args=[post.post_uuid]))
 
         return Response(
             {
@@ -336,7 +360,7 @@ class PostDetails(APIView):
                     "location": location
                 }
             },
-            status.HTTP_201_CREATED,
+            status.HTTP_202_ACCEPTED,
             headers={
                 'Location': location
             }
@@ -369,6 +393,61 @@ class PostDetails(APIView):
             }
         )
 
+
+class PostProcessingView(APIView):
+
+    def get(self, request, post_uuid):
+        try:
+            post = Post.objects.get(post_uuid=post_uuid)
+        except Post.DoesNotExist:
+            raise Http404()
+
+        post_type = post.get_post_type()
+
+        if post.processed:
+            processing_status = 'completed'
+        else:
+            processing_status = 'pending'
+
+            media_ids = list(post.media_ids)
+            if post.thumbnail:
+                media_ids.append({ 'media_id': post.thumbnail.name, 'type': 'image' })
+
+            claimed = 0
+            for media_id in media_ids:
+                try:
+                    media = MediaFile.objects.get(filename=media_id['media_id'])
+                except MediaFile.DoesNotExist:
+                    continue
+                if media.orphan == False:
+                    claimed += 1
+                else:
+                    media.orphan = False
+                    media.save()
+                    claimed += 1
+
+            thumbnail_ready = (not post.thumbnail_required()) or post.thumbnail
+            video_thumb_ready = post_type != Post.TYPE_VIDEO or post.video_thumbnail
+    
+            if claimed == len(media_ids) and thumbnail_ready and video_thumb_ready:
+                post.processed = True
+                post.save()
+                processing_status = 'completed'
+
+        location = build_absolute_uri(reverse('post-details', args=[post.post_uuid]))
+
+        return Response(
+            {
+                "status": "success",
+                "error": None,
+                "results": {
+                    "status": processing_status,
+                    "location": location
+                }
+            },
+            status.HTTP_200_OK,
+            headers={ 'Location': location }
+        )
 
 class UserFriendsPostList(APIView):
     """

@@ -478,7 +478,12 @@ Request Body
     "mentioned_users": [3],
     "geo_location_lat": 28.704059,
     "geo_location_lng": 77.102490
-    "media_ids": ["post_images/89ed1954-1562-11e8-abe3-3b7e2dc10600.jpg"],
+    "media_ids": [
+        {
+            "media_id": "post_images/89ed1954-1562-11e8-abe3-3b7e2dc10600.jpg",
+            "type": "image"
+        }
+    ],
     "post_type": "image",
     "thumbnail": ["post_thumbnails/abe882b4-1562-11e8-8602-b7285e2b2797.jpg"]
   }
@@ -542,8 +547,14 @@ Request Body
       - URL of image thumbnail of the link shared in a Post.
       - url
     * - media_ids
-      - Array of :ref:`Media IDs<media-id>`. The media should match the post type (i.e. If post type is video, then the media should be video files.
+      - Array of media_id objects.
       - array
+    * - media_ids.media_id
+      - A :ref:`Media IDs<media-id>`. The media should match the media type (i.e. If media type is video, then the media should be a video file.
+      - media id
+    * - media_ids.type
+      - The type of media: image, video, pdf, audio.
+      - string
     * - thumbnail
       - A :ref:`media-id` that contains a thumbnail image that represents the post. Eg: ``/post_thumbnails/60db3238-1596-11e8-89bf-bf1ac5f21e9f.jpg``
       - media id
@@ -576,8 +587,61 @@ Response Payload (JSON)
 
   HTTP/1.1 201 Created
   Content-Type: application/json
-  Location: /api/v2.0/posts/<post_id>
+  Location: /api/v2.0/posts/<post_id>/status/
 
+
+Check Post status
+=================
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   POST api/v2.0/posts/<post_id>/status/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Authorization: Token {token}
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "status": "success",
+    "error": "",
+    "results": {
+      "status": "pending",
+      "location": "http://localhost:8000/api/v4/posts/<post_id>/status/"
+    }
+  }
+
+..  list-table:: paths
+    :header-rows: 1
+
+    * - Field
+      - Description
+      - Type
+    * - status
+      - Status of the post processing. Either; pending, completed or error.
+      - string
+    * - location
+      - The location of the post, when it is ready.
+      - url
+    * - error_message
+      - Details of the error when something goes wrong while creating the post.
+      - string
+
+If the processing status is 'pending' then try again in a second (or more). If the status is
+completed, then you can consider the post created. The post will appear in other API output (eg.
+explore, portfolio, etc). If the status is 'error' then you will need to fix the issue that's
+mentioned in the error message.
 
 Comment
 =======
