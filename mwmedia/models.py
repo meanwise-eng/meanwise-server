@@ -15,6 +15,24 @@ class MediaFile(models.Model):
     orphan = models.BooleanField(default=True)
     uploaded_time = models.DateTimeField(auto_now_add=True)
 
+    def get_absolute_url(self):
+        if self.storage == self.STORAGE_S3:
+            return self.get_absolute_url_s3()
+
+        return self.filename
+
+    def get_absolute_url_s3(self):
+        custom_domain = settings.AWS_S3_CUSTOM_DOMAIN
+
+        if custom_domain:
+            return "https://%s/%s" % (custom_domain, self.filename)
+
+        bucket_name= settings.AWS_STORAGE_BUCKET_NAME
+        if bucket_name:
+            return "https://%s.s3.amazonaws.com/%s" % (bucket_name, self.filename)
+
+        return self.filename
+
     @classmethod
     def create(cls, the_file, filename):
         s3 = boto3.client('s3')

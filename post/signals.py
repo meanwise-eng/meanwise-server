@@ -51,7 +51,7 @@ def remove_boost_from_post_index(sender, **kwargs):
 def create_post_index(sender, **kwargs):
     post = kwargs['instance']
 
-    if post.is_deleted:
+    if post.is_deleted or post.processed == False:
         return
 
     try:

@@ -13,6 +13,7 @@ from userprofile.models import UserProfile, Profession
 from post.models import Post, Comment, Share, Story, UserTopic
 from post.documents import PostDocument
 from brands.models import Brand
+from mwmedia.models import MediaFile
 
 from drf_haystack.serializers import HaystackSerializerMixin
 from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
@@ -21,6 +22,7 @@ from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 class PostDocumentSerializer(serializers.Serializer):
 
+    post_uuid = serializers.CharField()
     user_id = serializers.IntegerField()
     num_comments = serializers.IntegerField()
     num_likes = serializers.IntegerField()
@@ -63,6 +65,7 @@ class PostDocumentSerializer(serializers.Serializer):
     boost_datetime = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
+    media_ids = serializers.SerializerMethodField()
 
     brand_id = serializers.IntegerField()
     college_id = serializers.CharField()
@@ -161,6 +164,15 @@ class PostDocumentSerializer(serializers.Serializer):
             return list(obj.tags)
 
         return []
+
+    def get_media_ids(self, obj):
+        post = self.get_post(obj)
+
+        def get_absolute_url(media_id):
+            media = MediaFile.objects.get(filename=media_id['media_id'])
+            return media.get_absolute_url()
+
+        return [get_absolute_url(m) for m in post.media_ids]
 
 
 class MentionedUserSerializer(serializers.ModelSerializer):

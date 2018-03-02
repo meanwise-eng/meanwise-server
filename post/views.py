@@ -57,7 +57,7 @@ import post.tasks as tasks
 
 from common.push_message import *
 
-post_qs = Post.objects.filter(is_deleted=False).filter(
+post_qs = Post.objects.filter(is_deleted=False, processed=True).filter(
     Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
