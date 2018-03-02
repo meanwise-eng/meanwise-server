@@ -65,7 +65,7 @@ class PostDocumentSerializer(serializers.Serializer):
     boost_datetime = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
-    media_ids = serializers.SerializerMethodField()
+    media_files = serializers.SerializerMethodField()
 
     brand_id = serializers.IntegerField()
     college_id = serializers.CharField()
@@ -165,12 +165,13 @@ class PostDocumentSerializer(serializers.Serializer):
 
         return []
 
-    def get_media_ids(self, obj):
+    def get_media_files(self, obj):
         post = self.get_post(obj)
 
         def get_absolute_url(media_id):
             media = MediaFile.objects.get(filename=media_id['media_id'])
-            return media.get_absolute_url()
+            media_id['media_id'] = media.get_absolute_url()
+            return media_id
 
         return [get_absolute_url(m) for m in post.media_ids]
 
@@ -212,6 +213,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     brand_logo_url = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     post_thumbnail_url = serializers.SerializerMethodField()
+    media_files = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -232,7 +234,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
-                  'post_thumbnail_url', 'is_work', 'college', 'media_ids',
+                  'post_thumbnail_url', 'is_work', 'college', 'media_files',
                   )
 
     def get_user_id(self, obj):
@@ -417,6 +419,14 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def get_post_thumbnail_url(self, obj):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
+
+    def get_media_files(self, obj):
+        def get_absolute_url(media_id):
+            media = MediaFile.objects.get(filename=media_id['media_id'])
+            media_id['media_id'] = media.get_absolute_url()
+            return media_id
+
+        return [get_absolute_url(m) for m in obj.media_ids]
 
 
 class PostSummarySerializer(PostSerializer):
