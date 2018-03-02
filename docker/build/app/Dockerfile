@@ -9,7 +9,7 @@ ADD ./code /app
 WORKDIR /app
 
 RUN apt-get update && \
-	apt-get install -y python3-dev libpq-dev libjpeg-dev && \
+	apt-get install -y python3-dev libpq-dev libjpeg-dev libcurl4-openssl-dev && \
 	pip install --no-cache-dir -r requirements.txt && \
     apt-get remove --purge -y python3-dev libpq-dev libjpeg-dev && \
     apt-get remove --purge -y $BUILD_PACKAGES && \
