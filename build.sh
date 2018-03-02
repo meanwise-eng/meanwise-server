@@ -7,3 +7,4 @@ rsync -az --exclude=.hypothesis --exclude=.ropeproject --exclude=*.pyc --exclude
 docker-compose -f docker-compose.build.yml build
 
 docker tag meanwisebuild_app meanwise/api:latest
+docker tag meanwisebuild_celery meanwise/celery:latest

@@ -1,4 +1,10 @@
 version: '2'
 services:
   app:
-    build: ./docker/build/app/
+    build: 
+      context: ./docker/build/app/
+      dockerfile: Dockerfile
+  celery:
+    build: 
+      context: ./docker/build/app/
+      dockerfile: Dockerfile.celery
