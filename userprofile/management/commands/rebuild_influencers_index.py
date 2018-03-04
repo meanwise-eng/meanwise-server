@@ -48,8 +48,8 @@ class Command(BaseCommand):
                 influencer.popularity_weeky = (weekly_comments_count * 5)
                 influencer.popularity_overall = (old_comments_count * 5) + (likes * 3)
 
-            influencer.topics_overall = list(posts.values_list('topic', flat=True))
-            influencer.topics_weekly = list(posts.values_list('topic', flat=True))
+            influencer.topics_overall = [t.upper() for t in posts.values_list('topic', flat=True)]
+            influencer.topics_weekly = [t.upper() for t in posts.values_list('topic', flat=True)]
 
             try:
                 boost = userprofile.profile_boosts.latest('boost_datetime')
