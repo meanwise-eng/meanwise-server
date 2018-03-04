@@ -23,9 +23,9 @@ def add_topics_and_likes(sender, **kwargs):
         post = kwargs['instance']
         influencer = Influencer.get_influencer(post.poster.id)
         try:
-            influencer.topics_weekly.append(post.topic)
+            influencer.topics_weekly.append(post.topic.upper())
         except AttributeError:
-            influencer.topics_weekly = [post.topic]
+            influencer.topics_weekly = [post.topic.upper()]
 
         influencer.save()
 
