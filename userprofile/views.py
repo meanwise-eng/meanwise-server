@@ -780,6 +780,7 @@ class InfluencersListView(APIView):
         user_skills = request.user.userprofile.skills_list
 
         if topic_text:
+            topic_text = topic_text.upper()
             filters.append(query.Q('bool', should=[
                 query.Q('term', topics_weekly=topic_text),
                 query.Q('term', topics_overall=topic_text),
