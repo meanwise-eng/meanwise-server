@@ -24,6 +24,7 @@ class DiscussionListView(APIView):
         interest_name = request.query_params.get('interest_name', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
+        user_id = request.query_params.get('user_id', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
         item_count = int(request.query_params.get('item_count', 30))
@@ -39,7 +40,7 @@ class DiscussionListView(APIView):
 
         if interest_name:
             discussions = discussions.filter(post__interest__name__iexact=interest_name)
-        else:
+        elif user_id is None:
             interest_names = list(request.user.userprofile.interests.all()
                                   .values_list('name', flat=True))
 
@@ -53,6 +54,9 @@ class DiscussionListView(APIView):
 
         if tag_names:
             discussions = discussions.filter(post__tags__name__iexact=tag_names)
+
+        if user_id:
+            discussions = discussions.filter(user=user_id)
 
         now = datetime.datetime.now()
 

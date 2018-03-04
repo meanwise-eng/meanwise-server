@@ -9,12 +9,9 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=False)
     post_text = indexes.CharField(model_attr="text", null=True)
     post_id = indexes.CharField(model_attr="id")
-    interest_name = indexes.MultiValueField()
-    interest_slug = indexes.MultiValueField()
     created_on = indexes.DateTimeField(model_attr='created_on')
     tag_names = indexes.MultiValueField()
     topic_texts = indexes.MultiValueField()
-    # interest =
 
     # autocomplete = indexes.EdgeNgramField()
 
@@ -31,8 +28,7 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
         return self.get_model().objects\
             .filter(created_on__lte=timezone.now())\
             .filter(is_deleted=False) \
-            .filter(Q(story__isnull=True) | Q(story_index=1)) \
-            .select_related('interest')
+            .filter(Q(story__isnull=True) | Q(story_index=1))
 
     def prepare_text(self, obj):
         if (obj.story):
@@ -43,17 +39,6 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_term(self, obj):
         return self.prepare_text(obj)
 
-    def prepare_interest_name(self, obj):
-        if obj.story:
-            return [post.interest.name for post in obj.story.posts.filter(is_deleted=False)]
-        else:
-            return [obj.interest.name]
-
-    def prepare_interest_slug(self, obj):
-        if obj.story:
-            return [post.interest.slug for post in obj.story.posts.filter(is_deleted=False)]
-        else:
-            return [obj.interest.slug]
 
     def prepare_topic_texts(self, obj):
         if (obj.story):

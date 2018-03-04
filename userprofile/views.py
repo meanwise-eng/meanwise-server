@@ -11,6 +11,7 @@ from django.core import exceptions
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 
 import django.contrib.auth.password_validation as validators
 from django.core.mail import EmailMultiAlternatives
@@ -112,7 +113,7 @@ class SkillListView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
-        skills = Skill.objects.all()
+        skills = Skill.objects.filter(image_url__isnull=False)
         paginator = Paginator(skills, settings.REST_FRAMEWORK['PAGE_SIZE'])
         page = request.GET.get('page', 1)
 
@@ -203,9 +204,9 @@ class UserProfileList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        userprofiles = UserProfile.objects.all()
+        userprofiles = UserProfile.objects.all()[:200]
 
-        serializer = UserProfileSerializer(
+        serializer = UserProfileSummarySerializer(
             userprofiles, many=True, context={'request': request})
         return Response(
             {
@@ -235,7 +236,7 @@ class UserProfileDetail(APIView):
                     "error": "User not found",
                     "results": ""
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_404_NOT_FOUND
             )
 
         except UserProfile.DoesNotExist:
@@ -245,14 +246,14 @@ class UserProfileDetail(APIView):
                     "error": "UserProfile not found",
                     "results": ""
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_404_NOT_FOUND
             )
 
         return userprofile
 
     def get(self, request, user_id):
         userprofile = self.get_object(user_id)
-        serializer = UserProfileSerializer(
+        serializer = UserProfileDetailSerializer(
             userprofile, context={'request': request})
         return Response(
             {
@@ -301,6 +302,34 @@ class UserProfileDetail(APIView):
         )
 
 
+class UserProfileDetailByUsername(APIView):
+    """
+    Edit a userprofile instance.
+    """
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_object(self, username):
+        try:
+            userprofile = UserProfile.objects.get(user__username__iexact=username)
+        except UserProfile.DoesNotExist:
+            raise Http404()
+        return userprofile
+
+    def get(self, request, username):
+        userprofile = self.get_object(username)
+        serializer = UserProfileDetailSerializer(
+            userprofile, context={'request': request})
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class LoggedInUserProfile(APIView):
     """
     Edit a userprofile instance.
@@ -324,7 +353,7 @@ class LoggedInUserProfile(APIView):
 
     def get(self, request):
         userprofile = request.user.userprofile
-        serializer = UserProfileSerializer(userprofile)
+        serializer = UserProfileDetailSerializer(userprofile)
         return Response(
             {
                 "status": "success",
@@ -731,6 +760,7 @@ class InfluencersListView(APIView):
 
     def get(self, request):
         interest_name = request.query_params.get('interest_name', None)
+        topic_text = request.query_params.get('topic_texts', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
         item_count = int(request.query_params.get('item_count', 30))
@@ -747,17 +777,13 @@ class InfluencersListView(APIView):
         now = datetime.datetime.now()
         origin = now
 
-        interest_names = list(request.user.userprofile.interests.all()
-                              .values_list('name', flat=True))
-        if interest_name:
+        user_skills = request.user.userprofile.skills_list
+
+        if topic_text:
+            topic_text = topic_text.upper()
             filters.append(query.Q('bool', should=[
-                query.Q('match', interests_weekly=interest_name),
-                query.Q('match', interests_overall=interest_name)
-            ]))
-        else:
-            filters.append(query.Q('bool', should=[
-                query.Q('match', interests_weekly=','.join(interest_names)),
-                query.Q('match', interests_overall=','.join(interest_names))
+                query.Q('term', topics_weekly=topic_text),
+                query.Q('term', topics_overall=topic_text),
             ]))
 
         functions.append(query.SF('field_value_factor',
@@ -773,28 +799,42 @@ class InfluencersListView(APIView):
                                   modifier='log1p',
                                   weight=2))
 
+        shoulds = []
+        main_query = query.Q(
+            'function_score',
+            functions=functions,
+            score_mode='sum',
+        )
+        shoulds.append(main_query)
+
         # apply manual boost
-        functions.append(query.SF('gauss', boost_datetime={
+        manual_boost_functions = []
+        manual_boost_functions.append(query.SF('gauss', boost_datetime={
             'origin': origin,
+            'offset': '1d',
             'scale': '1d',
-            'decay': 0.1
-        }, weight=5))
-        functions.append(query.SF('field_value_factor',
+            'decay': 0.5
+        }, weight=1))
+        manual_boost_functions.append(query.SF('field_value_factor',
                                   field='boost_value',
                                   modifier='log1p',
                                   missing=0,
-                                  weight=30))
+                                  weight=1))
+        manual_boost_query = query.Q(
+            'function_score',
+            functions=manual_boost_functions,
+            score_mode='multiply',
+        )
+        shoulds.append(manual_boost_query)
 
         s = Influencer.search()
-        q = query.Q(
-            'function_score',
-            query=query.Q('bool', filter=filters),
-            functions=functions,
-            score_mode='sum',
-            boost_mode='sum'
+        main_bool = query.Q(
+            'bool',
+            should=shoulds,
+            must=[query.Q('bool', filter=filters)]
         )
-        s = s.query(q)
-        logger.info(s.to_dict())
+        s = s.query(main_bool)
+        #logger.debug(json.dumps(s.to_dict()))
         offset = (section - 1) * item_count
         s = s[offset:offset + item_count]
 
@@ -1186,7 +1226,7 @@ class RemoveFriend(APIView):
         logger.info("RemoveFriend - POST [API / views.py /")
 
         if int(user_id) != request.user.id:
-            raise PermissionDenied("You can remove friend for another user")
+            raise PermissionDenied("You cannnot remove friend for another user")
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:

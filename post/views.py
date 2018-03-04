@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q, F, When, Case, IntegerField, Count, Subquery, OuterRef, Value
+from django.db.models import Q, F, When, Case, IntegerField, Count, Subquery, OuterRef, Value, Sum
 from django.db.models.functions import Coalesce
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db import transaction
@@ -35,10 +35,17 @@ from userprofile.serializers import UserProfileSerializer
 
 from post.permissions import IsOwnerOrReadOnly
 
+from django.contrib.contenttypes.models import ContentType
+from follow.models import Follow
+from brands.models import Brand
+from college.models import College
+from topics.models import Topic as Topic2
+
 from post.models import *
 from post.serializers import *
 from userprofile.models import UserFriend, Interest, UserInterestRelevance
 from mnotifications.models import Notification
+from credits.models import Credits, Critic
 
 from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
@@ -103,7 +110,6 @@ class UserPostList(APIView):
                     ts = serializer.validated_data.pop('tags')
             post = serializer.save(poster=request.user)
             if topic_names:
-                topic_names = topic_names.split(",")
                 for topic in topic_names:
                     try:
                         t = Topic.objects.get(text=topic)
@@ -112,7 +118,6 @@ class UserPostList(APIView):
                     post.topics.add(t)
 
             mentioned_users = serializer.validated_data.get('mentioned_users')
-            logger.info(mentioned_users)
             if type(mentioned_users) == str:
                 mentioned_users = ast.literal_eval(mentioned_users)
             if len(mentioned_users) > 0 and type(mentioned_users[0]) == str and mentioned_users[0].find('[') != -1:
@@ -153,7 +158,10 @@ class UserPostList(APIView):
                     }
 
                     for device in devices:
-                        send_message_device(device, message_payload)
+                        try:
+                            send_message_device(device, message_payload)
+                        except Exception as e:
+                            logger.error(e)
 
             if post.parent is not None and post.parent.parent is not None:
                 raise Exception("Parent post should not be a child post.")
@@ -187,6 +195,7 @@ class UserPostList(APIView):
                 },
                 status=status.HTTP_201_CREATED
             )
+        logger.debug(serializer.errors)
         return Response(
             {
                 "status": "failed",
@@ -235,7 +244,7 @@ class UserPostDetail(APIView):
 class PostDetails(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
     def get_object(self, pk):
         post = self.get_post(pk)
@@ -557,7 +566,23 @@ class UserPostLike(APIView):
         if user != request.user:
             raise PermissionDenied("You can only like a post as yourself")
 
+        if user not in post.liked_by.all():
+            skills = list(post.topics.all().values_list('text', flat=True))
+            critic = Critic.objects.create(from_user_id=user.id, to_user_id=post.poster.id,
+                                           post_id=post.id, user_credits=0, rating=3,
+                                           skills=skills, created_on=datetime.datetime.now())
+
+            for skill in (skills + ['overall']):
+                try:
+                    credits = Credits.objects.get(user_id=post.poster.id, skill=skill)
+                except Credits.DoesNotExist:
+                    credits = Credits.objects.create(user_id=post.poster.id, skill=skill, credits=0)
+
+                credits.credits += 1
+                credits.save()
+
         post.liked_by.add(user)
+
         if post.poster.id != request.user.id:
             # Add notification
             up = user.userprofile
@@ -617,6 +642,18 @@ class UserPostUnLike(APIView):
 
         if user in post.liked_by.all():
             post.liked_by.remove(user)
+
+            critic = Critic.objects.filter(from_user_id=user.id, to_user_id=post.poster.id,
+                                           post_id=post.id).delete()
+
+            skills = list(post.topics.all().values_list('text', flat=True))
+            for skill in (skills + ['overall']):
+                try:
+                    credits = Credits.objects.get(user_id=post.poster.id, skill=skill)
+                    credits.credits -= 1
+                    credits.save()
+                except Credits.DoesNotExist:
+                    pass
             return Response(
                 {
                     "status": "success",
@@ -929,8 +966,7 @@ class AutocompleteTopic(APIView):
     def post(self, request):
         topic_text = request.data.get('topic', '')
         try:
-            topics = Topic.objects.filter(text__istartswith=topic_text).filter(
-                post__is_deleted=False).distinct().values_list('text', flat=True)
+            topics = Topic2.objects.filter(text__istartswith=topic_text).values_list('text', flat=True)
         except MultiValueDictKeyError:
             pass
 
@@ -993,28 +1029,15 @@ class TrendingTopics(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        interest_id = request.query_params.get('interest_id', None)
+        trending_topics = list(UserTopic.objects.values('topic').annotate(total_popularity=Sum('popularity')).order_by('-total_popularity')[:50].values_list('topic', flat=True))
 
-        tt = TrendingTopicsInterest.objects.all()
-
-        if interest_id:
-            tt = tt.filter(interest__id=interest_id)
-        else:
-            interest_ids = list(request.user.userprofile.interests.all()
-                                .values_list('id', flat=True))
-            tt = tt.filter(interest__id__in=interest_ids)
-
-        topics = []
-        for trending_topic in tt:
-            topics = topics + trending_topic.topics
-
-        topics = list(set(topics))
+        skills_list = request.user.userprofile.skills_list
 
         return Response(
             {
                 "status": "success",
                 "error": "",
-                "results": topics
+                "results": trending_topics
             },
             status=status.HTTP_201_CREATED
         )
@@ -1023,12 +1046,16 @@ class TrendingTopics(APIView):
 class PostExploreView(APIView):
 
     authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request):
-        interest_name = request.query_params.get('interest_name', None)
+        search_text = request.query_params.get('search', None)
         topic_texts = request.query_params.get('topic_texts', None)
         tag_names = request.query_params.get('tag_names', None)
+        is_work = request.query_params.get('is_work', None)
+        if is_work is not None:
+            is_work = True if is_work == 'true' else False
+        user_id = request.query_params.get('user_id', None)
         geo_location = request.query_params.get('geo_location', None)
         after = request.query_params.get('after', None)
         before = request.query_params.get('before', None)
@@ -1043,31 +1070,33 @@ class PostExploreView(APIView):
 
         items_per_page = item_count
 
-        interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
-        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
-            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
-        skills_list = request.user.userprofile.skills_list
+        user = request.user
+        if not user.is_anonymous:
+            interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
+            friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
+                list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
+            skills_list = request.user.userprofile.skills_list
 
         functions = []
         filters = []
         must = []
-        if interest_name:
-            self.update_interest_relevance(interest_name, request.user)
-            must.append(query.Q('term', interest_name=interest_name))
-        else:
-            must.append(query.Q('bool', should=[
-                query.Q('terms', interest_id=interest_ids),
-                query.Q('terms', user_id=friends_ids)
-            ]))
         if topic_texts:
-            must.append(query.Q('match', topics=topic_texts))
+            topic_texts = topic_texts.upper()
+            must.append(query.Q('term', topic=topic_texts))
         if tag_names:
             must.append(query.Q('match', tags=tag_names))
+        if is_work is not None:
+            must.append(query.Q('term', is_work=is_work))
+        if search_text:
+            must.append(query.Q('match', post_document=search_text))
+
         if geo_location:
             functions.append(
                 query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
             functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
                 ','), 'scale': '1km', 'decay': 0.9}, weight=1))
+        if user_id:
+            must.append(query.Q('term', user_id=user_id))
 
         now = datetime.datetime.now()
         origin = before if before else now
@@ -1079,7 +1108,261 @@ class PostExploreView(APIView):
         else:
             must.append(query.Q({'range': {'created_on': {'lt': now}}}))
 
+        # applying privacy
+        if not user.is_anonymous:
+            privacy_qs = []
+            privacy_qs.append(query.Q('term', visible_to='Public'))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='Friends'),
+                query.Q('terms', user_id=friends_ids)
+            ]))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='List'),
+                query.Q('term', share_list_user_ids=request.user.id)
+            ]))
+            must.append(query.Q('bool', should=privacy_qs))
+
         # overall popularity
+        functions.append(query.SF('field_value_factor',
+                                  field='num_likes', modifier='log1p', weight=2))
+        functions.append(query.SF('field_value_factor',
+                                  field='num_comments', modifier='log1p', weight=3))
+        functions.append(query.SF('field_value_factor',
+                                  field='num_seen', modifier='log1p', weight=1))
+
+        # relevance to user
+        if not user.is_anonymous:
+            functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
+            functions.append(
+                query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+            functions.append(
+                query.SF({'filter': query.Q('terms', topic=skills_list), 'weight': 1}))
+            brand_content_type = ContentType.objects.get_for_model(Brand)
+            user_content_type = ContentType.objects.get_for_model(request.user.__class__)
+            brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
+                follower_content_type=user_content_type,
+                followee_content_type=brand_content_type).values_list('followee_id', flat=True))
+            functions.append(
+                query.SF({'filter': query.Q('terms', brand=brand_ids), 'weight': 1}))
+
+        s = PostDocument.search()
+        q = query.Q(
+            'function_score',
+            query=query.Q('bool', must=must, filter=filters),
+            functions=functions,
+            score_mode='sum',
+            boost_mode='sum'
+        )
+        s = s.query(q)
+        s = s.sort('-created_on')
+        offset = (section - 1) * item_count
+        s = s[offset:offset + items_per_page]
+        logger.info(s.to_dict())
+        results = s.execute()
+        serializer = PostDocumentSerializer(results, many=True, context={'request': request})
+
+        query_params = dict(request.query_params)
+
+        def get_biggest_date(date1, date2):
+            if date1 > date2:
+                return date1
+
+            return date2
+
+        def get_smallest_date(date1, date2):
+            if date1 < date2:
+                return date1
+
+            return date2
+
+        if after and results.hits.total > item_count:
+            max_created_on = reduce(get_biggest_date, [result.created_on for result in results])
+            min_created_on = reduce(get_smallest_date, [result.created_on for result in results])
+
+            ps = PostDocument.search()
+            must.append(query.Q({
+                'range': {'created_on': {'gte': min_created_on, 'lte': max_created_on}}
+            }))
+            q = query.Q('bool', must=must, filter=filters)
+            ps = ps.query(q)
+            time_total = ps.count() - ((section - 1) * item_count)
+
+        new_params = {}
+        if after and results.hits.total > item_count:
+            if time_total > item_count:
+                after_date = after
+                new_params['section'] = section + 1
+            else:
+                after_date = max_created_on
+        elif before:
+            if section > 1:
+                before_timestamp = before
+                new_params['section'] = section - 1
+                after_date = None
+            else:
+                after_date = before
+                new_params['section'] = 1
+        else:
+            after_date = now
+            new_params['section'] = 1
+
+        try:
+            new_params['after'] = str(int(after_date.timestamp() * 1000))
+        except Exception:
+            pass
+        try:
+            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
+        except Exception:
+            pass
+
+        next_url_params = {k: p[0] for k, p in query_params.copy().items()}
+        if 'before' in next_url_params:
+            del next_url_params['before']
+        next_url_params.update(new_params)
+        next_url = build_absolute_uri(
+            reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
+
+        new_params = {}
+        if after:
+            before_timestamp = after
+            new_params['section'] = 1
+        elif results.hits.total > (section * item_count):
+            before_timestamp = before if before else now
+            new_params['section'] = section + 1
+        else:
+            before_timestamp = None
+        if before_timestamp:
+            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
+            prev_url_params = {k: p[0] for k, p in query_params.copy().items()}
+            if 'after' in prev_url_params:
+                del prev_url_params['after']
+            prev_url_params.update(new_params)
+            prev_url = build_absolute_uri(
+                reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
+        else:
+            prev_url = None
+
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "count": results.hits.total,
+                # in haystack view next will go backwards. Deprecated. New clients should
+                # use forward and backward.
+                "next": prev_url,
+                # in haystack view previous will go forwards. Deprecated. New clients should
+                # use forward and backward.
+                "previous": next_url,
+                "forward": next_url,
+                "backward": prev_url,
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    def update_interest_relevance(self, interest_name, user):
+        try:
+            interest = Interest.objects.get(name=interest_name)
+        except Interest.DoesNotExist:
+            return
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        try:
+            relevance = UserInterestRelevance.objects.get(interest=interest, user=user)
+        except UserInterestRelevance.DoesNotExist:
+            relevance = UserInterestRelevance.objects.create(
+                interest=interest,
+                user=user,
+                last_reset=now,
+                weekly_views=0,
+                old_views=0,
+            )
+
+        if relevance.last_reset < (now - datetime.timedelta(weeks=1)):
+            decay = 0.5
+            relevance.last_reset = now
+            relevance.old_views = int(relevance.old_views * decay) + relevance.weekly_views
+            relevance.weekly_views = 0
+
+        relevance.weekly_views += 1
+
+        relevance.save()
+
+
+class PostExploreTrendingView(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        topic_texts = request.query_params.get('topic_texts', None)
+        tag_names = request.query_params.get('tag_names', None)
+        is_work = request.query_params.get('is_work', None)
+        if is_work is not None:
+            is_work = True if is_work == 'true' else False
+        geo_location = request.query_params.get('geo_location', None)
+        user_id = request.query_params.get('user_id', None)
+        after = request.query_params.get('after', None)
+        before = request.query_params.get('before', None)
+        item_count = int(request.query_params.get('item_count', 30))
+        section = int(request.query_params.get('section', 1))
+        if after:
+            after = datetime.datetime.fromtimestamp(float(after) / 1000)
+        if before:
+            before = datetime.datetime.fromtimestamp(float(before) / 1000)
+        if item_count > 30:
+            raise Exception("item_count greater than 30 is not allowed.")
+
+        items_per_page = item_count
+
+        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
+            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
+        skills_list = request.user.userprofile.skills_list
+
+        functions = []
+        filters = []
+        must = []
+        if topic_texts:
+            topic_texts = topic_texts.upper()
+            must.append(query.Q('term', topic=topic_texts))
+        if tag_names:
+            must.append(query.Q('match', tags=tag_names))
+        if is_work is not None:
+            must.append(query.Q('term', is_work=is_work))
+        if geo_location:
+            functions.append(
+                query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
+            functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
+                ','), 'scale': '1km', 'decay': 0.9}, weight=1))
+        if user_id:
+            must.append(query.Q('term', user_id=user_id))
+
+        now = datetime.datetime.now()
+        origin = before if before else now
+
+        if after:
+            must.append(query.Q({'range': {'created_on': {'gt': after}}}))
+        if before:
+            must.append(query.Q({'range': {'created_on': {'lt': before}}}))
+        else:
+            must.append(query.Q({'range': {'created_on': {'lt': now}}}))
+
+        # applying privacy
+        privacy_qs = []
+        privacy_qs.append(query.Q('term', visible_to='Public'))
+        privacy_qs.append(query.Q('bool', must=[
+            query.Q('term', visible_to='Friends'),
+            query.Q('terms', user_id=friends_ids)
+        ]))
+        privacy_qs.append(query.Q('bool', must=[
+            query.Q('term', visible_to='List'),
+            query.Q('term', share_list_user_ids=request.user.id)
+        ]))
+        must.append(query.Q('bool', should=privacy_qs))
+
+        # overall popularity
+        functions.append(query.SF('exp', created_on={
+                         'origin': origin, 'offset': '7d', 'scale': '7d', 'decay': 0.9}, weight=30))
         functions.append(query.SF('field_value_factor',
                                   field='num_likes', modifier='log1p', weight=2))
         functions.append(query.SF('field_value_factor',
@@ -1092,20 +1375,224 @@ class PostExploreView(APIView):
         functions.append(
             query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
         functions.append(
-            query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
+            query.SF({'filter': query.Q('terms', terms=skills_list), 'weight': 1}))
+        brand_content_type = ContentType.objects.get_for_model(Brand)
+        user_content_type = ContentType.objects.get_for_model(request.user.__class__)
+        brand_ids = list(Follow.objects.filter(follower_id=request.user.id,
+            follower_content_type=user_content_type,
+            followee_content_type=brand_content_type).values_list('followee_id', flat=True))
+        functions.append(
+            query.SF({'filter': query.Q('terms', brand=brand_ids), 'weight': 1}))
 
-        interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
-        for relevance in interests_relevance:
-            r = math.log1p(relevance.old_views + relevance.weekly_views)
-            functions.append(query.SF({
-                'filter': query.Q('term', interest_id=relevance.interest_id),
-                'weight': r
-            }))
+        # manual boost
+        functions.append(query.SF('exp', boost_datetime={
+            'origin': origin, 'scale': '1d', 'decay': 0.1},
+            weight=5))
+        functions.append(query.SF('field_value_factor', field='boost_value',
+                                  modifier='log1p', weight=30, missing=0))
 
         s = PostDocument.search()
         q = query.Q(
             'function_score',
             query=query.Q('bool', must=must, filter=filters),
+            functions=functions,
+            score_mode='sum',
+            boost_mode='sum'
+        )
+        s = s.query(q)
+        offset = (section - 1) * item_count
+        s = s[offset:offset + items_per_page]
+
+        results = s.execute()
+        serializer = PostDocumentSerializer(results, many=True, context={'request': request})
+
+        query_params = dict(request.query_params)
+
+        def get_biggest_date(date1, date2):
+            if date1 > date2:
+                return date1
+
+            return date2
+
+        def get_smallest_date(date1, date2):
+            if date1 < date2:
+                return date1
+
+            return date2
+
+        if after and results.hits.total > item_count:
+            max_created_on = reduce(get_biggest_date, [result.created_on for result in results])
+            min_created_on = reduce(get_smallest_date, [result.created_on for result in results])
+
+            ps = PostDocument.search()
+            must.append(query.Q({
+                'range': {'created_on': {'gte': min_created_on, 'lte': max_created_on}}
+            }))
+            q = query.Q('bool', must=must, filter=filters)
+            ps = ps.query(q)
+            time_total = ps.count() - ((section - 1) * item_count)
+
+        new_params = {}
+        if after and results.hits.total > item_count:
+            if time_total > item_count:
+                after_date = after
+                new_params['section'] = section + 1
+            else:
+                after_date = max_created_on
+        elif before:
+            if section > 1:
+                before_timestamp = before
+                new_params['section'] = section - 1
+                after_date = None
+            else:
+                after_date = before
+                new_params['section'] = 1
+        else:
+            after_date = now
+            new_params['section'] = 1
+
+        try:
+            new_params['after'] = str(int(after_date.timestamp() * 1000))
+        except Exception:
+            pass
+        try:
+            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
+        except Exception:
+            pass
+
+        next_url_params = {k: p[0] for k, p in query_params.copy().items()}
+        if 'before' in next_url_params:
+            del next_url_params['before']
+        next_url_params.update(new_params)
+        next_url = build_absolute_uri(
+            reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
+
+        new_params = {}
+        if after:
+            before_timestamp = after
+            new_params['section'] = 1
+        elif results.hits.total > (section * item_count):
+            before_timestamp = before if before else now
+            new_params['section'] = section + 1
+        else:
+            before_timestamp = None
+        if before_timestamp:
+            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
+            prev_url_params = {k: p[0] for k, p in query_params.copy().items()}
+            if 'after' in prev_url_params:
+                del prev_url_params['after']
+            prev_url_params.update(new_params)
+            prev_url = build_absolute_uri(
+                reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
+        else:
+            prev_url = None
+
+        return Response(
+            {
+                "status": "success",
+                "error": "",
+                "count": results.hits.total,
+                "forward": next_url,
+                "backward": prev_url,
+                "results": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class PostRelatedView(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request, post_id):
+        topic_texts = request.query_params.get('topic_texts', None)
+        tag_names = request.query_params.get('tag_names', None)
+        is_work = request.query_params.get('is_work', None)
+        if is_work is not None:
+            is_work = True if is_work == 'true' else False
+        user_id = request.query_params.get('user_id', None)
+        geo_location = request.query_params.get('geo_location', None)
+        after = request.query_params.get('after', None)
+        before = request.query_params.get('before', None)
+        item_count = int(request.query_params.get('item_count', 30))
+        section = int(request.query_params.get('section', 1))
+        if after:
+            after = datetime.datetime.fromtimestamp(float(after) / 1000)
+        if before:
+            before = datetime.datetime.fromtimestamp(float(before) / 1000)
+        if item_count > 30:
+            raise Exception("item_count greater than 30 is not allowed.")
+
+        user = request.user
+
+        items_per_page = item_count
+
+        if not user.is_anonymous:
+            friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
+                list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
+            skills_list = request.user.userprofile.skills_list
+
+        functions = []
+        filters = []
+        must = []
+        must_not = []
+
+        must_not.append(query.Q('term', _id=post_id))
+
+        now = datetime.datetime.now()
+        origin = before if before else now
+
+        if after:
+            must.append(query.Q({'range': {'created_on': {'gt': after}}}))
+        if before:
+            must.append(query.Q({'range': {'created_on': {'lt': before}}}))
+        else:
+            must.append(query.Q({'range': {'created_on': {'lt': now}}}))
+
+        # applying privacy
+        if not user.is_anonymous:
+            privacy_qs = []
+            privacy_qs.append(query.Q('term', visible_to='Public'))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='Friends'),
+                query.Q('terms', user_id=friends_ids)
+            ]))
+            privacy_qs.append(query.Q('bool', must=[
+                query.Q('term', visible_to='List'),
+                query.Q('term', share_list_user_ids=request.user.id)
+            ]))
+            must.append(query.Q('bool', should=privacy_qs))
+
+        # overall popularity
+        functions.append(query.SF('field_value_factor',
+                                  field='num_likes', modifier='log1p', weight=2))
+        functions.append(query.SF('field_value_factor',
+                                  field='num_comments', modifier='log1p', weight=3))
+        functions.append(query.SF('field_value_factor',
+                                  field='num_seen', modifier='log1p', weight=1))
+
+        # relevance to user
+        if not user.is_anonymous:
+            functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
+            functions.append(
+                query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
+
+        # relevance to post
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            raise Http404()
+
+        post_tags = [t.name for t in post.tags.all()]
+
+        functions.append(query.SF({'filter': query.Q('term', topic=post.topic), 'weight': 10}))
+        functions.append(query.SF({'filter': query.Q('terms', tags=post_tags), 'weight': 10}))
+
+        s = PostDocument.search()
+        q = query.Q(
+            'function_score',
+            query=query.Q('bool', must=must, filter=filters, must_not=must_not),
             functions=functions,
             score_mode='sum',
             boost_mode='sum'
@@ -1246,205 +1733,6 @@ class PostExploreView(APIView):
         relevance.save()
 
 
-class PostExploreTrendingView(APIView):
-
-    authentication_classes = (authentication.TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request):
-        interest_name = request.query_params.get('interest_name', None)
-        topic_texts = request.query_params.get('topic_texts', None)
-        tag_names = request.query_params.get('tag_names', None)
-        geo_location = request.query_params.get('geo_location', None)
-        after = request.query_params.get('after', None)
-        before = request.query_params.get('before', None)
-        item_count = int(request.query_params.get('item_count', 30))
-        section = int(request.query_params.get('section', 1))
-        if after:
-            after = datetime.datetime.fromtimestamp(float(after) / 1000)
-        if before:
-            before = datetime.datetime.fromtimestamp(float(before) / 1000)
-        if item_count > 30:
-            raise Exception("item_count greater than 30 is not allowed.")
-
-        items_per_page = item_count
-
-        interest_ids = list(request.user.userprofile.interests.all().values_list('id', flat=True))
-        friends_ids = list(UserFriend.objects.filter(Q(user_id=request.user.id)).all().values_list('friend_id', flat=True)) + \
-            list(UserFriend.objects.filter(Q(friend_id=request.user.id)).all().values_list('user_id', flat=True))
-        skills_list = request.user.userprofile.skills_list
-
-        functions = []
-        filters = []
-        must = []
-        if interest_name:
-            must.append(query.Q('term', interest_name=interest_name))
-        else:
-            must.append(query.Q('bool', should=[
-                query.Q('terms', interest_id=interest_ids),
-                query.Q('terms', user_id=friends_ids)
-            ]))
-        if topic_texts:
-            must.append(query.Q('match', topics=topic_texts))
-        if tag_names:
-            must.append(query.Q('match', tags=tag_names))
-        if geo_location:
-            functions.append(
-                query.SF({'filter': query.Q('exists', field='geo_location'), 'weight': 1}))
-            functions.append(query.SF('exp', geo_location={'origin': '%s,%s' % geo_location.split(
-                ','), 'scale': '1km', 'decay': 0.9}, weight=1))
-
-        now = datetime.datetime.now()
-        origin = before if before else now
-
-        if after:
-            must.append(query.Q({'range': {'created_on': {'gt': after}}}))
-        if before:
-            must.append(query.Q({'range': {'created_on': {'lt': before}}}))
-        else:
-            must.append(query.Q({'range': {'created_on': {'lt': now}}}))
-
-        # overall popularity
-        functions.append(query.SF('exp', created_on={
-                         'origin': origin, 'offset': '7d', 'scale': '7d', 'decay': 0.9}, weight=30))
-        functions.append(query.SF('field_value_factor',
-                                  field='num_likes', modifier='log1p', weight=2))
-        functions.append(query.SF('field_value_factor',
-                                  field='num_comments', modifier='log1p', weight=3))
-        functions.append(query.SF('field_value_factor',
-                                  field='num_seen', modifier='log1p', weight=1))
-
-        # relevance to user
-        functions.append(query.SF({'filter': query.Q('terms', user_id=friends_ids), 'weight': 1}))
-        functions.append(
-            query.SF({'filter': query.Q('match', tags=" ".join(skills_list)), 'weight': 1}))
-        functions.append(
-            query.SF({'filter': query.Q('terms', interest_id=interest_ids), 'weight': 1}))
-
-        # manual boost
-        functions.append(query.SF('exp', boost_datetime={
-            'origin': origin, 'scale': '1d', 'decay': 0.1},
-            weight=5))
-        functions.append(query.SF('field_value_factor', field='boost_value',
-                                  modifier='log1p', weight=30, missing=0))
-
-        interests_relevance = UserInterestRelevance.objects.filter(user=request.user)
-        for relevance in interests_relevance:
-            r = math.log1p(relevance.old_views + relevance.weekly_views)
-            functions.append(query.SF({
-                'filter': query.Q('term', interest_id=relevance.interest_id),
-                'weight': r
-            }))
-
-        s = PostDocument.search()
-        q = query.Q(
-            'function_score',
-            query=query.Q('bool', must=must, filter=filters),
-            functions=functions,
-            score_mode='sum',
-            boost_mode='sum'
-        )
-        s = s.query(q)
-        offset = (section - 1) * item_count
-        s = s[offset:offset + items_per_page]
-
-        results = s.execute()
-        serializer = PostDocumentSerializer(results, many=True, context={'request': request})
-
-        query_params = dict(request.query_params)
-
-        def get_biggest_date(date1, date2):
-            if date1 > date2:
-                return date1
-
-            return date2
-
-        def get_smallest_date(date1, date2):
-            if date1 < date2:
-                return date1
-
-            return date2
-
-        if after and results.hits.total > item_count:
-            max_created_on = reduce(get_biggest_date, [result.created_on for result in results])
-            min_created_on = reduce(get_smallest_date, [result.created_on for result in results])
-
-            ps = PostDocument.search()
-            must.append(query.Q({
-                'range': {'created_on': {'gte': min_created_on, 'lte': max_created_on}}
-            }))
-            q = query.Q('bool', must=must, filter=filters)
-            ps = ps.query(q)
-            time_total = ps.count() - ((section - 1) * item_count)
-
-        new_params = {}
-        if after and results.hits.total > item_count:
-            if time_total > item_count:
-                after_date = after
-                new_params['section'] = section + 1
-            else:
-                after_date = max_created_on
-        elif before:
-            if section > 1:
-                before_timestamp = before
-                new_params['section'] = section - 1
-                after_date = None
-            else:
-                after_date = before
-                new_params['section'] = 1
-        else:
-            after_date = now
-            new_params['section'] = 1
-
-        try:
-            new_params['after'] = str(int(after_date.timestamp() * 1000))
-        except Exception:
-            pass
-        try:
-            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
-        except Exception:
-            pass
-
-        next_url_params = {k: p[0] for k, p in query_params.copy().items()}
-        if 'before' in next_url_params:
-            del next_url_params['before']
-        next_url_params.update(new_params)
-        next_url = build_absolute_uri(
-            reverse('post-explore')) + '?' + urllib.parse.urlencode(next_url_params)
-
-        new_params = {}
-        if after:
-            before_timestamp = after
-            new_params['section'] = 1
-        elif results.hits.total > (section * item_count):
-            before_timestamp = before if before else now
-            new_params['section'] = section + 1
-        else:
-            before_timestamp = None
-        if before_timestamp:
-            new_params['before'] = str(int(before_timestamp.timestamp() * 1000))
-            prev_url_params = {k: p[0] for k, p in query_params.copy().items()}
-            if 'after' in prev_url_params:
-                del prev_url_params['after']
-            prev_url_params.update(new_params)
-            prev_url = build_absolute_uri(
-                reverse('post-explore')) + '?' + urllib.parse.urlencode(prev_url_params)
-        else:
-            prev_url = None
-
-        return Response(
-            {
-                "status": "success",
-                "error": "",
-                "count": results.hits.total,
-                "forward": next_url,
-                "backward": prev_url,
-                "results": serializer.data
-            },
-            status=status.HTTP_200_OK
-        )
-
-
 class PostHSerializer(HaystackSerializer):
     user_id = serializers.SerializerMethodField()
 
@@ -1463,3 +1751,35 @@ class PostSearchView(HaystackViewSet):
         queryset = super(PostSearchView, self).filter_queryset(
             self.get_queryset())
         return queryset.order_by('-created_on')
+
+
+class UserTopicParamSerializer(serializers.Serializer):
+    is_work = serializers.NullBooleanField(default=None)
+
+class UserTopicsListView(APIView):
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get(self, request, user_id):
+        serializer = UserTopicParamSerializer(data=request.query_params)
+        if not serializer.is_valid():
+            return Response({'status': 'failed', 'error':serializer.errors, 'results':None},
+                            status.HTTP_400_BAD_REQUEST)
+        is_work = serializer.data['is_work']
+
+        user_topics = UserTopic.objects.filter(user_id=user_id).order_by('-popularity', 'topic')
+        if is_work is not None:
+            user_topics = user_topics.filter(is_work=is_work)
+        else:
+            user_topics = user_topics.filter(is_work__isnull=True)
+
+        serializer = UserTopicSerializer(user_topics, many=True)
+
+        return Response({
+            'status': 'success',
+            'error': None,
+            'results': {
+                'user_topics': serializer.data
+            }
+        })

@@ -19,10 +19,17 @@ from django.contrib.postgres.fields import JSONField as pgJSONField
 
 from PIL import Image
 from io import BytesIO
+import logging
+import tempfile
 
 from userprofile.models import Interest
 from boost.models import Boost
 from brands.models import Brand
+from college.models import College
+
+from .tasks import generate_video_thumbnail
+
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class Topic(models.Model):
     text = models.CharField(max_length=128, unique=True)
@@ -45,6 +52,17 @@ PANAROMA_TYPES = (
     ('', 'None'),
     ('equirectangular', 'Equirectangular'),
 )
+VISIBILITY_CHOICES = (
+    ('Public', 'Public'),
+    ('Friends', 'Friends'),
+    ('List', 'List'),
+)
+
+
+class ShareList(models.Model):
+
+    user = models.ForeignKey(User)
+    share_with = JSONField()
 
 
 class Post(models.Model):
@@ -57,13 +75,14 @@ class Post(models.Model):
 
     post_type = models.CharField(max_length=5, default=None, choices=POST_TYPES, null=True)
     panaroma_type = models.CharField(max_length=15, default=None, choices=PANAROMA_TYPES, null=True, blank=True)
-    interest = models.ForeignKey(Interest, db_index=True)
+    interest = models.ForeignKey(Interest, db_index=True, null=True, blank=True)
     image = models.ImageField(upload_to='post_images', null=True, blank=True)
     video = models.FileField(upload_to='post_videos', null=True, blank=True)
     text = models.CharField(max_length=200, null=True, blank=True)
     poster = models.ForeignKey(User, related_name='poster')
     tags = TaggableManager(blank=True)
     topics = models.ManyToManyField(Topic, blank=True)
+    topic = models.CharField(max_length=100, blank=False, null=False)
     liked_by = models.ManyToManyField(User, related_name='liked_by', blank=True)
     is_deleted = models.BooleanField(default=False)
     video_height = models.IntegerField(null=True, blank=True)
@@ -83,9 +102,19 @@ class Post(models.Model):
     story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
     story_index = models.IntegerField(null=True)
     is_work = models.BooleanField()
+    thumbnail = models.ImageField(upload_to='post_thumbnails', null=True, blank=True)
+
+    legacy_deleted = models.BooleanField(default=False)
+
+    # privacy settings
+    visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
+    share_list = models.ForeignKey(ShareList, null=True, blank=True)
+    share_list_user_ids = JSONField(blank=True, default=[])
+    allow_sharing = models.BooleanField(default=True)
 
     boosts = GenericRelation(Boost, related_query_name='post')
     brand = models.ForeignKey(Brand, null=True, related_name='posts')
+    college = models.ForeignKey(College, null=True, related_name='posts')
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -94,7 +123,10 @@ class Post(models.Model):
 
     def post_thumbnail(self):
         if self.get_post_type() == Post.TYPE_IMAGE:
-            return self.image
+            if self.thumbnail:
+                return self.thumbnail
+            else:
+                return self.image
         if self.get_post_type() == Post.TYPE_VIDEO:
             return self.video_thumbnail
         if self.get_post_type() == Post.TYPE_PDF:
@@ -130,23 +162,34 @@ class Post(models.Model):
         except Brand.DoesNotExist:
             pass
 
-        if self.video:
+        colleges = College.objects.filter(featured_students__student=self.poster)
+        if colleges.count() > 0:
+            self.college = colleges[0]
+
+        if inserting and self.video:
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
                 try:
-                    clip = VideoFileClip(self.video.path)
-                    thumbnail_path = os.path.join(os.path.dirname(self.video.path), os.path.splitext(
-                        os.path.basename(self.video.name))[0]) + ".jpg"
-                    clip.save_frame(thumbnail_path, t=1.00)
-                    _file = File(open(thumbnail_path, "rb"))
-                    self.video_thumbnail.save(
-                        (os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+                    filename = os.path.splitext(os.path.basename(self.video.name))[0]
+                    ext = os.path.splitext(os.path.basename(self.video.name))[-1]
+                    with tempfile.NamedTemporaryFile('r+b', suffix=ext) as vf:
+                        for chunk in self.video.chunks():
+                            vf.write(chunk)
+                        vf.seek(0)
+
+                        clip = VideoFileClip(vf.name)
+                        with tempfile.NamedTemporaryFile('r+b', suffix='.jpg') as tmp_thumb_file:
+                            clip.save_frame(tmp_thumb_file.name , t=1.00)
+                            _file = File(tmp_thumb_file)
+                            self.video_thumbnail.save((os.path.splitext(os.path.basename(self.video.name))[0] + ".jpg"), _file, save=True)
+
 
                     self.resolution = {
                         'height': self.video_thumbnail.height,
                         'width': self.video_thumbnail.width
                     }
                 except Exception as e:
+                    logger.exception(e)
                     print ("Error generating video thumb", e, str(e))
                 return
 
@@ -156,7 +199,7 @@ class Post(models.Model):
                     'width': self.video_thumbnail.width
                 }
 
-        if self.image:
+        if inserting and self.image:
             im = Image.open(self.image)
             output = BytesIO()
             im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
@@ -168,7 +211,20 @@ class Post(models.Model):
                 'width': self.image.width
             }
 
+            # targetting half of iPhone retina display
+            target_width = 750 * 0.5
+            scaling_ratio = target_width / im.width
+            thumb = im.resize((int(im.width*scaling_ratio), int(im.height*scaling_ratio)),
+                              Image.BICUBIC)
+            thumb_output = BytesIO()
+            thumb.save(thumb_output, format='JPEG', quality=95, optimize=True, progressive=True)
+            self.thumbnail = InMemoryUploadedFile(thumb_output, 'ImageField', self.image.name,
+                'image/jpeg', sys.getsizeof(thumb_output), None)
+
         super(Post, self).save(*args, **kwargs)
+
+        #if self.video and not self.video_thumbnail:
+        #    generate_video_thumbnail.apply_async((self.id,), countdown=1)
 
         if inserting and self.poster.userprofile.post_boost:
             boost = Boost(
@@ -199,7 +255,7 @@ class Story(models.Model):
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, db_index=True)
+    post = models.ForeignKey(Post, db_index=True, related_name='comments')
     commented_by = models.ForeignKey(User)
     comment_text = models.CharField(max_length=200)
     is_deleted = models.BooleanField(default=False)
@@ -232,3 +288,12 @@ class TrendingTopicsInterest(models.Model):
 
     def __str__(self):
         return "Interest name: " + str(self.interest.name) + " topics: " + str(self.topics)
+
+
+class UserTopic(models.Model):
+    user = models.ForeignKey(User)
+    topic = models.CharField(max_length=128)
+    interest = models.CharField(max_length=128, null=True, blank=True)
+    popularity = models.IntegerField()
+    top_posts = pgJSONField()
+    is_work = models.NullBooleanField()

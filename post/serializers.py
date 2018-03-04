@@ -10,7 +10,7 @@ from common.api_helper import build_absolute_uri
 
 from django.contrib.auth.models import User
 from userprofile.models import UserProfile, Profession
-from post.models import Post, Comment, Share, Story
+from post.models import Post, Comment, Share, Story, UserTopic
 from post.documents import PostDocument
 from brands.models import Brand
 
@@ -24,9 +24,9 @@ class PostDocumentSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
     num_comments = serializers.IntegerField()
     num_likes = serializers.IntegerField()
-    interest_id = serializers.IntegerField()
     user_firstname = serializers.CharField()
     user_lastname = serializers.CharField()
+    user_username = serializers.CharField()
     user_profile_photo = serializers.CharField()
     user_profile_photo_small = serializers.CharField()
     user_cover_photo = serializers.CharField()
@@ -54,6 +54,7 @@ class PostDocumentSerializer(serializers.Serializer):
     is_liked = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    topic = serializers.CharField()
     user_profession = serializers.SerializerMethodField()
     created_on = serializers.SerializerMethodField()
     likes_url = serializers.SerializerMethodField()
@@ -62,6 +63,9 @@ class PostDocumentSerializer(serializers.Serializer):
     boost_datetime = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
+
+    brand_id = serializers.IntegerField()
+    college_id = serializers.CharField()
 
     def get_id(self, obj):
         return obj._id
@@ -150,10 +154,7 @@ class PostDocumentSerializer(serializers.Serializer):
         return data
 
     def get_topics(self, obj):
-        if obj.topics:
-            return list(obj.topics)
-
-        return []
+        return [obj.topic]
 
     def get_tags(self, obj):
         if obj.tags:
@@ -176,9 +177,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
     likes_url = serializers.SerializerMethodField()
     num_comments = serializers.SerializerMethodField()
-    interest_id = serializers.SerializerMethodField()
     user_firstname = serializers.SerializerMethodField()
     user_lastname = serializers.SerializerMethodField()
+    user_username = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
     user_cover_photo = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
@@ -188,6 +189,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     video_thumb_url = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    topic = serializers.CharField()
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
     pdf_url = serializers.SerializerMethodField()
     audio_url = serializers.SerializerMethodField()
@@ -210,23 +212,20 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
-                  'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
+        fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments',
+                  'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
-                  'tags', 'topics', 'story', 'story_index', 'is_liked', 'likes_url',
+                  'tags', 'topics', 'topic', 'story', 'story_index', 'is_liked', 'likes_url',
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
-                  'post_thumbnail_url', 'is_work',
+                  'post_thumbnail_url', 'is_work', 'college',
                   )
 
     def get_user_id(self, obj):
         user_id = obj.poster.id
         return user_id
-
-    def get_interest_id(self, obj):
-        return obj.interest.id
 
     def get_user_firstname(self, obj):
         try:
@@ -241,6 +240,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         except UserProfile.DoesNotExist:
             return ""
         return up.last_name
+
+    def get_user_username(self, obj):
+        return obj.poster.username
 
     def get_user_profile_photo(self, obj):
         try:
@@ -320,7 +322,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return build_absolute_uri(reverse('post-likes', args=[obj.id]))
 
     def get_topics(self, obj):
-        return obj.topics.all().values_list('text', flat=True)
+        return [obj.topic]
 
     def get_tags(self, obj):
         return obj.tags.all().values_list('name', flat=True)
@@ -405,14 +407,20 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
 
 
+class PostSummarySerializer(PostSerializer):
+
+    class Meta(PostSerializer.Meta):
+        fields = ('id', 'text', 'post_thumbnail_url',)
+
+
 class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
     num_likes = serializers.SerializerMethodField()
     num_comments = serializers.SerializerMethodField()
-    interest_id = serializers.SerializerMethodField()
     user_firstname = serializers.SerializerMethodField()
     user_lastname = serializers.SerializerMethodField()
+    user_username = serializers.SerializerMethodField()
     user_profile_photo = serializers.SerializerMethodField()
     user_cover_photo = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
@@ -423,6 +431,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     video_thumb_url = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
+    topic = serializers.CharField()
     mentioned_users = MentionedUserSerializer(many=True, read_only=True)
     queryset = Post.objects.filter(is_deleted=False)
     pdf_url = serializers.SerializerMethodField()
@@ -434,11 +443,11 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments', 'interest_id',
-                  'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo',
+        fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments',
+                  'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
-                  'created_on', 'tags', 'topics', 'story_index', 'mentioned_users',
+                  'created_on', 'tags', 'topics', 'topic', 'story_index', 'mentioned_users',
                   'pdf_url', 'pdf_thumb_url', 'link', 'audio_url', 'audio_thumb_url',
                   'link_meta_data', 'panaroma_type', 'is_work',
                   )
@@ -446,9 +455,6 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_user_id(self, obj):
         user_id = obj.poster.id
         return user_id
-
-    def get_interest_id(self, obj):
-        return obj.interest.id
 
     def get_user_firstname(self, obj):
         try:
@@ -463,6 +469,9 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         except UserProfile.DoesNotExist:
             return ""
         return up.last_name
+
+    def get_user_username(self, obj):
+        return obj.poster.username
 
     def get_user_profile_photo(self, obj):
         try:
@@ -516,7 +525,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.liked_by.all().count()
 
     def get_topics(self, obj):
-        return obj.topics.all().values_list('text', flat=True)
+        return [obj.topic]
 
     def get_tags(self, obj):
         return obj.tags.all().values_list('name', flat=True)
@@ -603,8 +612,10 @@ class PostSaveSerializer(serializers.ModelSerializer):
     topics = serializers.SerializerMethodField()
     topic_names = serializers.CharField(
         required=False, max_length=100, allow_blank=True)
+    topic = serializers.CharField(required=False, allow_blank=False)
     geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
+    share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
 
     class Meta:
         model = Post
@@ -621,6 +632,25 @@ class PostSaveSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "You cannot submit geo_location_lng without geo_location_lat")
 
+        if 'topic_names' not in data:
+            data['topic_names'] = []
+        else:
+            data['topic_names'] = data['topic_names'].split(',')
+
+        if ('topic' not in data or data['topic'] is None or data['topic'] == '') and len(data['topic_names']) > 0:
+            data['topic'] = data['topic_names'][0]
+
+        if 'topic' not in data or data['topic'] is None or data['topic'] == '':
+            raise serializers.ValidationError(
+                "'topic' field is required"
+            )
+
+        if 'topic' in data and data['topic'] is not None and data['topic'] == '':
+            if len(data['topic_names']) == 0:
+                data['topic_names'].append(data['topic'])
+
+        data['topic'] = data['topic'].upper()
+
         return data
 
     def validate_link_meta_data(self, data):
@@ -631,9 +661,11 @@ class PostSaveSerializer(serializers.ModelSerializer):
 
 class PostUpdateSerializer(serializers.ModelSerializer):
 
+    share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
+
     class Meta:
         model = Post
-        fields = ('is_work',)
+        fields = ('is_work', 'share_list_user_ids', 'visible_to', 'allow_sharing')
 
 class StorySerializer(serializers.ModelSerializer):
     posts = serializers.SerializerMethodField()
@@ -737,7 +769,7 @@ class ShareSerializer(serializers.ModelSerializer):
 
 class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
     class Meta(PostSerializer.Meta):
-        search_fields = ("text", "interest_name", "post_text",
+        search_fields = ("text", "post_text",
                          "created_on", "post_id", "topic_texts", "tag_names")
         field_aliases = {}
         exclude = tuple()
@@ -749,3 +781,10 @@ class PostSearchSerializer(HaystackSerializerMixin, PostSerializer):
 #         fields = ("text", "post_text", "post_id", "interest_name", "interest_slug", "created_on", 'tag_names', 'topic_texts', 'term')
 #         field_aliases = {}
 #         exclude = {}
+
+
+class UserTopicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserTopic
+        fields = ('topic', 'interest', 'popularity', 'top_posts',)

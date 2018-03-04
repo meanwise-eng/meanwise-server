@@ -91,6 +91,7 @@ class Skill(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     searchable = models.BooleanField(default=True)
+    image_url = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return "Skill id:" + str(self.id) + " text:" + str(self.text)
@@ -212,7 +213,7 @@ class UserProfile(models.Model):
                 sys.getsizeof(output), None
             )
 
-            thumbnail_size = (48, 48)
+            thumbnail_size = (96, 96)
             thumbnail_output = BytesIO()
             im.thumbnail(thumbnail_size)
             im.save(thumbnail_output, format='JPEG', quality=100, optimize=True)

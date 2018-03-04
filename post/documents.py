@@ -18,12 +18,17 @@ post.settings(
     number_of_replicas=0
 )
 
+org = Index('mw_explore_org')
+
+org.settings(
+    number_of_shards=1,
+    number_of_replicas=0
+)
+
 
 @post.doc_type
 class PostDocument(DocType):
 
-    interest_id = Integer()
-    interest_name = String(index='not_analyzed')
     text = String()
     image_url = String()
     video_url = String()
@@ -35,13 +40,15 @@ class PostDocument(DocType):
     num_recent_comments = Integer()
     user_firstname = String()
     user_lastname = String()
+    user_username = String()
     user_profile_photo = String()
     user_cover_photo = String()
     user_profession_id = Integer()
     user_profession_text = String()
     user_profile_photo_small = String()
     video_thumb_url = String()
-    topics = String()
+    topics = String(index='not_analyzed')
+    topic = String(index='not_analyzed')
     num_seen = Integer()
     num_recent_seen = Integer()
     created_on = Date()
@@ -56,20 +63,27 @@ class PostDocument(DocType):
     post_thumbnail_url = String()
     is_work = Boolean()
 
+    visible_to = String(index='not_analyzed')
+    share_list_id = Integer()
+    share_list_user_ids = Integer()
+    allow_sharing = Boolean()
+
     boost_value = Integer()
     boost_datetime = Date()
 
     brand = String()
-    brand_logo_url = String()
+    brand_logo_url = String(index='not_analyzed')
+
+    brand_id = Integer()
+    college_id= String(index='not_analyzed')
+
+    post_document = String()
 
     class Meta:
         index = 'mw_posts_2'
 
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
-
-    def prepare_interest_id(self, obj):
-        return obj.interest.id
 
     def prepare_image(self, obj):
         if obj.image:
@@ -78,9 +92,6 @@ class PostDocument(DocType):
     def prepare_user_id(self, obj):
         user_id = obj.poster.id
         return user_id
-
-    def prepare_interest_name(self, obj):
-        return obj.interest.name.lower()
 
     def prepare_user_firstname(self, obj):
         try:
@@ -95,6 +106,9 @@ class PostDocument(DocType):
         except UserProfile.DoesNotExist:
             return ""
         return up.last_name
+
+    def prepare_user_username(self, obj):
+        return obj.poster.username
 
     def prepare_user_profile_photo(self, obj):
         try:
@@ -147,12 +161,6 @@ class PostDocument(DocType):
 
     def prepare_num_recent_likes(self, obj):
         return obj.liked_by.count()
-
-    def prepare_topics(self, obj):
-        return list(obj.topics.all().values_list('text', flat=True))
-
-    def prepare_tags(self, obj):
-        return list(obj.tags.all().values_list('name', flat=True))
 
     def prepare_num_comments(self, obj):
         return Comment.objects.filter(post=obj).filter(is_deleted=False)\
@@ -271,19 +279,56 @@ class PostDocument(DocType):
 
         return obj.brand.logo_thumbnail.url
 
+    def prepare_brand_id(self, obj):
+        if obj.brand is None:
+            return None
+
+        return obj.brand.id
+
+    def prepare_college_id(self, obj):
+        if obj.college is None:
+            return None
+
+        return obj.college.id
+
     def prepare_post_thumbnail_url(self, obj):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
 
     def prepare_topics(self, obj):
         if obj.topics.count() == 0:
             return []
-        return [topic.text for topic in obj.topics.all()]
+        return [topic.text.upper() for topic in obj.topics.all()]
+
+    def prepare_topic(self, obj):
+        return obj.topic.upper()
 
     def prepare_tags(self, obj):
-        return [tag.name for tag in obj.tags.all()]
+        if obj.tags.count() == 0:
+            return []
+        return list(obj.tags.all().values_list('name', flat=True))
+
+    def prepare_share_list_id(self, obj):
+        return obj.share_list.id if obj.share_list else None
+
+    def prepare_share_list_user_ids(self, obj):
+        return obj.share_list_user_ids
+
+    def prepare_post_document(self, obj):
+        texts = [obj.text, obj.topic]
+        document = " ".join(texts)
+        return document
 
     def set_from_post(self, post):
-        properties = ('interest_id', 'interest_name', 'text', 'image_url', 'video_url', 'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments', 'num_recent_comments', 'user_firstname', 'user_lastname', 'user_profile_photo', 'user_cover_photo', 'user_profession_id', 'user_profession_text', 'user_profile_photo_small', 'video_thumb_url', 'topics', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location', 'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url', 'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work', 'boost_value', 'boost_datetime', 'brand', 'brand_logo_url')
+        properties = ('text', 'image_url', 'video_url',
+                      'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments',
+                      'num_recent_comments', 'user_firstname', 'user_lastname', 'user_username',
+                      'user_profile_photo', 'user_cover_photo', 'user_profession_id',
+                      'user_profession_text', 'user_profile_photo_small', 'video_thumb_url',
+                      'topics', 'topic', 'num_seen', 'num_recent_seen', 'created_on', 'geo_location',
+                      'pdf_url', 'audio_url', 'link', 'pdf_thumb_url', 'audio_thumb_url',
+                      'post_type', 'panaroma_type', 'post_thumbnail_url', 'is_work',
+                      'boost_value', 'boost_datetime', 'brand', 'brand_logo_url',
+                      'visible_to', 'share_list_user_ids', 'allow_sharing', 'post_document',)
         for key in properties:
             method = 'prepare_%s' % key
             if hasattr(self, method):
@@ -296,3 +341,19 @@ class PostDocument(DocType):
             setattr(self, key, value)
 
         self._id = post.id
+
+
+@org.doc_type
+class ExploreOrgDocument(DocType):
+    name = String()
+    description = String(index='not_analyzed')
+    compact_display_image = String(index='not_analyzed')
+    type = String(index='not_analyzed')
+    url = String(index='not_analyzed')
+
+    skills = String(index='not_analyzed')
+
+    boost_value = Integer()
+    boost_datetime = Date()
+
+    created_on = Date()

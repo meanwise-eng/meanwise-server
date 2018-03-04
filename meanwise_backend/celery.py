@@ -1,7 +1,8 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import os
 
+from celery import Celery
 import celery
 import raven
 from raven.contrib.celery import register_signal, register_logger_signal
@@ -28,5 +29,5 @@ app = Celery('meanwise_backend')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
-app.config_from_object('django.conf:settings')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)

@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'raven.contrib.django.raven_compat',
+    'easy_select2',
     'haystack',
     'restless',
     'rest_framework',
@@ -98,7 +99,6 @@ INSTALLED_APPS = [
     #'common',
     #'geography',
     'mnotifications',
-    'djcelery',
     'rest_framework.authtoken',
 
     # payment
@@ -116,10 +116,14 @@ INSTALLED_APPS = [
     'discussions.apps.DiscussionsConfig',
     'boost.apps.BoostConfig',
     'brands.apps.BrandsConfig',
+    'credits.apps.CreditsConfig',
+    'college.apps.CollegeConfig',
+    'follow.apps.FollowConfig',
+    'topics.apps.TopicsConfig',
+    'influencers.apps.InfluencersConfig',
     'django_crontab',
     'scarface',
     'analytics',
-    'django_elasticsearch_dsl',
 ]
 
 if DEBUG:
@@ -151,11 +155,13 @@ if DEBUG:
 else:
     CORS_ORIGIN_WHITELIST = ('meanwise.com', 'www.meanwise.com',)
 
+CORS_ORIGIN_WHITELIST = ('meanwise.com', 'www.meanwise.com',)
+
 DEVSERVER_AUTO_PROFILE = True
 
 # setting for S3 storage
 #DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'django_s3_storage.storage.S3Storage')
-#DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
+DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
 #THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
 
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-west-2')
@@ -165,10 +171,10 @@ AWS_SECRET_ACCESS_KEY = os.environ.get(
     'AWS_SECRET_ACCESS_KEY', 'aRR+qkRx7tsHzGQA8j1WBRaSmEnsMs8+PPr3N1f0')
 
 # The name of the bucket to store files in.
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', "mw-uploads")
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'mw-uploads-dev-1')
 AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH', False)
 AWS_S3_FILE_OVERWRITE = os.environ.get('AWS_S3_FILE_OVERWRITE', False)
-AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', 'dtl635379s21p.cloudfront.net')
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
 
 #AWS_REGION = os.environ.get('AWS_REGION', 'us-west-2')
 #AWS_S3_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME', "mw-uploads")
@@ -313,23 +319,27 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+        },
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
         },
     },
     'loggers': {
         'meanwise_backend': {
-            'handlers': ['console'],
-            'level': 'INFO',
+            'handlers': ['console', 'sentry',],
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django': {
             'level': 'ERROR',
-            'handlers': ['console']
+            'handlers': ['console', 'sentry',]
         },
         'celery': {
             'level': 'DEBUG',
-            'handlers': ['console']
+            'handlers': ['console', 'sentry',]
         },
     },
 }
@@ -394,16 +404,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 30,
     'EXCEPTION_HANDLER': 'meanwise_backend.utils.custom_exception_handler'
 }
-
-# CORS White listing
-CORS_ORIGIN_WHITELIST = (
-    'meanwise.com',
-    'client.meanwise.com'
-)
-CORS_ALLOW_CREDENTIALS = True
-if DEBUG:
-    CORS_ORIGIN_WHITELIST += ('local.meanwise.com', 'local.meanwise.com:3000')
-
 
 THUMBNAIL_ALIASES = {
     'account_profile.ProfileImage.image': {
@@ -507,22 +507,22 @@ COVER_PHOTO_STUB = SITE_URL + '/client/images/coverPictureStub.jpg'
 
 # Celery Settings
 
-BROKER_URL = 'redis://%s/0' % REDIS_HOST
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-CELERYBEAT_SCHEDULE = {
-    'update-search-index-every-3hours': {
-        'task': 'search.tasks.update_search_index',
-        'schedule': timedelta(hours=3),
-        'kwargs': {'age': 3}
-    },
-}
-CELERY_ACCEPT_CONTENT = ['pickle', 'json', ]
+CELERY_BROKER_URL = 'redis://%s/0' % REDIS_HOST
+#CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+#CELERYBEAT_SCHEDULE = {
+#    'update-search-index-every-3hours': {
+#        'task': 'search.tasks.update_search_index',
+#        'schedule': timedelta(hours=3),
+#        'kwargs': {'age': 3}
+#    },
+#}
+#CELERY_ACCEPT_CONTENT = ['pickle', 'json', ]
 
 # Raven/Sentry Config
-# if not DEBUG:
-#    RAVEN_CONFIG = {
-#        'dsn': 'https://e9630008d26c488d8b2955db4e97d3c8:a1b497ca107443858e4ed553ed42a8bc@app.getsentry.com/65196',
-#    }
+if not DEBUG:
+   RAVEN_CONFIG = {
+       'dsn': 'https://aabd4d35efa64ab4b7857f3deeed5ea2:db50721e1bcd4cd5ac39b2110a246ede@sentry.io/189459',
+   }
 
 # Taggit Config
 TAGGIT_CASE_INSENSITIVE = True

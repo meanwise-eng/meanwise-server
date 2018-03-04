@@ -5,6 +5,9 @@ from rest_framework import routers
 from userprofile.views import *
 from post.views import *
 from mnotifications.views import *
+from credits.views import CreditsListView
+from brands.views import OrgListView
+from topics.views import TopicsListView
 
 router = routers.SimpleRouter()
 
@@ -28,6 +31,8 @@ urlpatterns = [
     url(r'^', include(router.urls, namespace="route")),
     url(r'^user/userprofile/$', UserProfileList.as_view(),
         name="profile-list"),
+    url(r'^user/by-username/(?P<username>[^/]+)/userprofile/$',
+        UserProfileDetailByUsername.as_view(), name="profile-detail-by-username"),
     url(r'^user/(?P<user_id>[0-9]+)/userprofile/$',
         UserProfileDetail.as_view(), name="profile-detail"),
     url(r'^user/(?P<user_id>[0-9]+)/change/password/$',
@@ -54,6 +59,10 @@ urlpatterns = [
         UserPostLike.as_view(), name="post-like"),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/unlike/$',
         UserPostUnLike.as_view(), name="post-unlike"),
+    url(r'^user/(?P<user_id>[0-9]+)/user-topics/',
+        UserTopicsListView.as_view(), name='user-topics'),
+    url(r'^user/(?P<user_id>[0-9]+)/credits/',
+        CreditsListView.as_view(), name='user-credits'),
     url(r'^story/(?P<story_id>[0-9]+)/',
         StoryDetail.as_view(), name='post-story'),
     url(r'^posts/', include('post.urls')),
@@ -75,14 +84,16 @@ urlpatterns = [
     url(r'^invite/code/valid/$',
         ValidateInviteCodeView.as_view(), name="validate-invite"),
     url(r'^profession/$', ProfessionListView.as_view(), name="profession"),
-    url(r'^skill/$', SkillListView.as_view(), name="skills"),
+    url(r'^skill/$', TopicsListView.as_view(), name="skills"),
     url(r'^interest/$', InterestListView.as_view(), name="interests"),
     url(r'^public-feed/$', PublicFeed.as_view(), name="public-feed"),
     url(r'^subscribe/early-access/', EarlyAccess.as_view()),
+    url(r'^explore-orgs/$', OrgListView.as_view()),
     url(r'^me/', include('userprofile.me_urls')),
     url(r'^version/', include('appversion.urls')),
     url(r'^analytics/', include('analytics.urls')),
     url(r'^discussions/', include('discussions.urls')),
     url(r'^influencers/$', InfluencersListView.as_view()),
     url(r'^brands/', include('brands.urls')),
+    url(r'^college/', include('college.urls')),
 ]

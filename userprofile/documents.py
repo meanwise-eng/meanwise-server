@@ -1,7 +1,6 @@
 import datetime
 import elasticsearch
-from django_elasticsearch_dsl import Integer, String, Date
-from elasticsearch_dsl import analyzer, tokenizer, Index, DocType
+from elasticsearch_dsl import (analyzer, tokenizer, Index, DocType, Integer, String, Date,)
 
 influencers = Index('mw_influencers')
 influencers.settings(
@@ -25,8 +24,8 @@ influencers.analyzer(comma_analyzer)
 @influencers.doc_type
 class Influencer(DocType):
     user_id = Integer()
-    interests_weekly = String(analyzer=comma_analyzer)
-    interests_overall = String(analyzer=comma_analyzer)
+    topics_weekly = String(index='not_analyzed')
+    topics_overall = String(index='not_analyzed')
     popularity_weekly = Integer()
     popularity_overall = Integer()
     friends = Integer()
@@ -46,8 +45,8 @@ class Influencer(DocType):
         except elasticsearch.NotFoundError:
             influencer = Influencer()
             influencer.meta.id = user_id
-            influencer.interests_weekly = ''
-            influencer.interests_overall = ''
+            influencer.topics_weekly = []
+            influencer.topics_overall = []
             influencer.popularity_weekly = 0
             influencer.popularity_overall = 0
             influencer.friends = 0
@@ -55,12 +54,18 @@ class Influencer(DocType):
             influencer.boost_value = None
             influencer.boost_datetime = None
 
+        if influencer.topics_weekly is None:
+            influencer.topics_weekly = []
+        if influencer.topics_overall is None:
+            influencer.topics_overall = []
+
         if influencer.last_reset < (now - datetime.timedelta(weeks=1)):
-            influencer.interests_overall = '%s,%s' % (
-                influencer.interests_overall, influencer.interests_weekly)
+            if influencer.topics_overall is None:
+                influencer.topics_overall = []
+            influencer.topics_overall = list(influencer.topics_overall) + list(influencer.topics_weekly)
             influencer.popularity_overall = influencer.popularity_overall \
                 + influencer.popularity_weekly
-            influencer.interests_weekly = ''
+            influencer.topics_weekly = []
             influencer.popularity_weekly = 0
             influencer.last_reset = now
 

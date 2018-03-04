@@ -23,6 +23,9 @@ class BrandDocument(DocType):
     profile_image = fields.StringField(index='not_analyzed')
     compact_display_image = fields.StringField(index='not_analyzed')
 
+    type = fields.StringField(index='not_analyzed')
+    url = fields.StringField(inidex='not_analyzed')
+
     boost_value = fields.IntegerField()
     boost_datetime = fields.DateField()
 
