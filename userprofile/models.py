@@ -191,43 +191,6 @@ class UserProfile(models.Model):
     def fullname(self):
         return '%s %s' % (self.first_name, self.last_name)
 
-    def save(self, *args, **kwargs):
-
-        if self.cover_photo:
-            im = Image.open(self.cover_photo)
-            output = BytesIO()
-            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.cover_photo = InMemoryUploadedFile(
-                output, 'models.ImageField',
-                self.cover_photo.name, 'image/jpeg',
-                sys.getsizeof(output), None
-            )
-
-        if self.profile_photo:
-            im = Image.open(self.profile_photo)
-            output = BytesIO()
-            im.save(output, format='JPEG', quality=100, optimize=True, progressive=True)
-            self.profile_photo = InMemoryUploadedFile(
-                output, 'models.ImageField',
-                self.profile_photo.name, 'image/jpeg',
-                sys.getsizeof(output), None
-            )
-
-            thumbnail_size = (96, 96)
-            thumbnail_output = BytesIO()
-            im.thumbnail(thumbnail_size)
-            im.save(thumbnail_output, format='JPEG', quality=100, optimize=True)
-            self.profile_photo_thumbnail = InMemoryUploadedFile(
-                thumbnail_output,
-                'models.ImageField',
-                self.profile_photo.name,
-                'image/jpeg',
-                sys.getsizeof(thumbnail_output),
-                None
-            )
-
-        super(UserProfile, self).save(*args, **kwargs)
-
     def __str__(self):
         return 'user profile id %s - %s %s %s' % (str(self.id),
                                                   self.first_name,

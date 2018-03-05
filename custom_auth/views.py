@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from custom_auth.serializers import *
+import userprofile.tasks as tasks
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -38,6 +39,9 @@ class RegisterUserView(APIView):
             response_user_data['userprofile'] = user_profile.id
             response_data = {'status': 'success', 'error': '', 'results': response_user_data}
             logger.info("RegisterUserView - POST - Finished ")
+
+            tasks.optimize_cover_photo(user.id)
+            tasks.optimize_and_generate_thumbnail_for_profile_photo(user.id)
 
             return Response(response_data, status=status.HTTP_201_CREATED)
 
