@@ -169,7 +169,11 @@ class PostDocumentSerializer(serializers.Serializer):
         post = self.get_post(obj)
 
         def get_absolute_url(media_id):
-            media = MediaFile.objects.get(filename=media_id['media_id'])
+            try:
+                media = MediaFile.objects.get(filename=media_id['media_id'])
+            except MediaFile.DoesNotExist:
+                return media_id
+
             media_id['media_id'] = media.get_absolute_url()
             return media_id
 
@@ -422,7 +426,11 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def get_media_files(self, obj):
         def get_absolute_url(media_id):
-            media = MediaFile.objects.get(filename=media_id['media_id'])
+            try:
+                media = MediaFile.objects.get(filename=media_id['media_id'])
+            except MediaFile.DoesNotExist:
+                return media_id
+
             media_id['media_id'] = media.get_absolute_url()
             return media_id
 
