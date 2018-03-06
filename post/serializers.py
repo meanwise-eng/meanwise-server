@@ -168,6 +168,9 @@ class PostDocumentSerializer(serializers.Serializer):
     def get_media_files(self, obj):
         post = self.get_post(obj)
 
+        if post.media_ids is None:
+            return None
+
         def get_absolute_url(media_id):
             try:
                 media = MediaFile.objects.get(filename=media_id['media_id'])
@@ -425,6 +428,9 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
 
     def get_media_files(self, obj):
+        if obj.media_ids is None:
+            return None
+
         def get_absolute_url(media_id):
             try:
                 media = MediaFile.objects.get(filename=media_id['media_id'])
