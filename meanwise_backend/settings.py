@@ -507,6 +507,10 @@ COVER_PHOTO_STUB = SITE_URL + '/client/images/coverPictureStub.jpg'
 # Celery Settings
 
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://%s/0' % REDIS_HOST)
+CELERY_BROKER_QUEUE_NAME_PREFIX = os.environ.get('CELERY_BROKER_QUEUE_NAME_PREFIX', 'celery-')
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'queue_name_prefix': CELERY_BROKER_QUEUE_NAME_PREFIX,
+}
 #CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 #CELERYBEAT_SCHEDULE = {
 #    'update-search-index-every-3hours': {

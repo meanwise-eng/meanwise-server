@@ -645,6 +645,8 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 class PostCreateSerializer(serializers.ModelSerializer):
 
+    post_type = serializers.CharField(required=True, allow_null=False)
+
     class Meta:
         model = Post
         fields = ('post_uuid', 'post_type', 'panaroma_type', 'text', 'tags', 'topic',
@@ -689,6 +691,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
     geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
+    post_type = serializers.CharField(required=True, allow_null=False)
 
     class Meta:
         model = Post
