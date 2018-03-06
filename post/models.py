@@ -90,7 +90,7 @@ class Post(models.Model):
     is_work = models.BooleanField()
     brand = models.ForeignKey(Brand, null=True, related_name='posts')
     college = models.ForeignKey(College, null=True, related_name='posts')
-    media_ids = pgJSONField()
+    media_ids = pgJSONField(null=True)
 
     interest = models.ForeignKey(Interest, db_index=True, null=True, blank=True)
     image = models.ImageField(upload_to='post_images', null=True, blank=True)
@@ -235,14 +235,9 @@ class Post(models.Model):
             self.thumbnail = InMemoryUploadedFile(thumb_output, 'ImageField', self.image.name,
                 'image/jpeg', sys.getsizeof(thumb_output), None)
 
-        media_ids_is_none = False
-        if self.media_ids is None:
-            media_ids_is_none = True
-            self.media_ids = []
-
         super(Post, self).save(*args, **kwargs)
 
-        if media_ids_is_none:
+        if post.media_ids is None:
             media_id = None
             if self.get_post_type() == Post.TYPE_VIDEO:
                 media_id = "%s/%s" % (Post.video.field.upload_to, self.video.name)
@@ -258,7 +253,7 @@ class Post(models.Model):
                 media = MediaFile(filename=media_id, storage=MediaFile.STORAGE_S3, orphan=False)
                 media.save()
 
-        super(Post, self).save(*args, **dict(kwargs, update_fields=['media_ids'], force_insert=False))
+                super(Post, self).save(*args, **dict(kwargs, update_fields=['media_ids'], force_insert=False))
 
         #if self.video and not self.video_thumbnail:
         #    generate_video_thumbnail.apply_async((self.id,), countdown=1)
