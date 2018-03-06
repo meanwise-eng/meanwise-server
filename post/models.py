@@ -23,6 +23,7 @@ from io import BytesIO
 import logging
 import tempfile
 
+from mwmedia.models import MediaFile
 from userprofile.models import Interest
 from boost.models import Boost
 from brands.models import Brand
@@ -145,7 +146,7 @@ class Post(models.Model):
             return self.post_type
         if self.image:
             return Post.TYPE_IMAGE
-        if self.video_thumbnail:
+        if self.video:
             return Post.TYPE_VIDEO
         if self.pdf_thumbnail:
             return Post.TYPE_PDF
@@ -181,9 +182,6 @@ class Post(models.Model):
             self.college = colleges[0]
 
         if inserting and self.video:
-            if self.media_ids is None:
-                self.media_ids = [self.video.name]
-
             if not self.video_thumbnail:
                 super(Post, self).save(*args, **kwargs)
                 try:
@@ -208,7 +206,6 @@ class Post(models.Model):
                 except Exception as e:
                     logger.exception(e)
                     print ("Error generating video thumb", e, str(e))
-                return
 
             if self.video_thumbnail:
                 self.resolution = {
@@ -246,10 +243,20 @@ class Post(models.Model):
         super(Post, self).save(*args, **kwargs)
 
         if media_ids_is_none:
-            self.media_ids = [{
-                'media_id': "%s/%s" % (Post.image.field.upload_to, self.image.name),
-                'type': self.get_post_type()
-            }]
+            media_id = None
+            if self.get_post_type() == Post.TYPE_VIDEO:
+                media_id = "%s/%s" % (Post.video.field.upload_to, self.video.name)
+            elif self.get_post_type() == Post.TYPE_IMAGE:
+                media_id = "%s/%s" % (Post.image.field.upload_to, self.image.name)
+
+            if media_id:
+                self.media_ids = [{
+                    'media_id': media_id,
+                    'type': self.get_post_type()
+                }]
+
+                media = MediaFile(filename=media_id, storage=MediaFile.STORAGE_S3, orphan=False)
+                media.save()
 
         super(Post, self).save(*args, **dict(kwargs, update_fields=['media_ids'], force_insert=False))
 
