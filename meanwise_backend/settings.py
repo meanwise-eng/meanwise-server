@@ -480,19 +480,19 @@ RESET_PASSWORD_URL = SITE_URL + '/reset_password/'
 PASSWORD_RESET_EXPIRY_DAYS = 7
 
 # Cache Settings
-# CACHES = {
-#    'default': {
-#        'BACKEND': 'django_redis.cache.RedisCache',
-#        'LOCATION': 'redis://' + REDIS_HOST,
-#        'OPTIONS': {
-#            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
-#            "SERIALIZER": "django_redis.serializers.json.JSONSerializer"
-#        }
-#    }
-#}
-#CACHE_KEY_PREFIX = 'cc'
-# CACHE_TIMEOUT = 1  # in hours
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://' + REDIS_HOST,
+        'OPTIONS': {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+            "SERIALIZER": "django_redis.serializers.json.JSONSerializer"
+        }
+    }
+}
+CACHE_KEY_PREFIX = 'djcache-%s' % (ENVIRONMENT.lower(),)
+CACHE_TIMEOUT = 1  # in hours
 
 # Google API Key for Places Auto complete
 GOOGLE_LOCATION_API_KEY = 'AIzaSyBPU3h4lDlKHZW17pci_bUZ5LVgimdlTYk'
