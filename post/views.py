@@ -335,16 +335,17 @@ class PostDetails(APIView):
 
         tasks.generate_image_thumbnail.delay(post.id)
 
-        claimed = 0
-        for media_id in post.media_ids:
-            try:
-                MediaFile.claim(media_id['media_id'])
-                claimed += 1
-            except MediaFile.MediaFileDoesNotExist:
-                pass
+        if post.media_ids is not None:
+            claimed = 0
+            for media_id in post.media_ids:
+                try:
+                    MediaFile.claim(media_id['media_id'])
+                    claimed += 1
+                except MediaFile.MediaFileDoesNotExist:
+                    pass
 
-        if claimed == len(post.media_ids):
-            post.processed = True
+            if claimed == len(post.media_ids):
+                post.processed = True
 
         post.save()
 
@@ -701,11 +702,16 @@ class UserPostLike(APIView):
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get_object(self, pk):
+    def get_object(self, id):
         try:
+            pk = int(id)
             return Post.objects.get(pk=pk)
-        except Post.DoesNotExist:
-            raise Http404
+        except (ValueError, Post.DoesNotExist):
+            try:
+                post_uuid = uuid.UUID(id)
+                return Post.objects.get(post_uuid=post_uuid)
+            except (ValueError, Post.DoesNotExist):
+                raise Http404
 
     def post(self, request, user_id, post_id):
         post = self.get_object(post_id)
@@ -729,7 +735,8 @@ class UserPostLike(APIView):
                 credits.credits += 1
                 credits.save()
 
-        post.liked_by.add(user)
+        post.like(user)
+        post.save()
 
         if post.poster.id != request.user.id:
             # Add notification

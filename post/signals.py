@@ -1,12 +1,14 @@
 import logging
-from django.db.models.signals import post_save, m2m_changed, post_delete
+from django.db.models.signals import post_save, m2m_changed, post_delete, post_init
 from django.dispatch import receiver
 
 import elasticsearch
 
+from meanwise_backend.eventsourced import EventStoreClient, event_converter
+
 from boost.models import Boost
 
-from .models import Post, Comment, UserTopic, Topic
+from .models import Post, Comment, UserTopic, Topic, PostLiked, PostCreated
 from .documents import PostDocument
 from .serializers import PostSummarySerializer
 
@@ -185,3 +187,34 @@ def reduce_topic_popularity(sender, **kwargs):
             user_topic_with_category.delete()
         else:
             user_topic_with_category.save()
+
+
+@receiver(post_save, sender=Post, dispatch_uid='post.save_events')
+def save_events(sender, **kwargs):
+    post = kwargs['instance']
+
+    events = post.get_uncommitted_events()
+    logger.info(events)
+    if len(events) == 0:
+        logger.info("No events to save")
+        return
+
+    eventstore = EventStoreClient.get_default_instance()
+    stream = 'mw_post_post-%s' % (post.post_uuid,)
+    logger.info("Saving %d events" % len(events))
+    eventstore.save(events, stream)
+
+
+@receiver(post_init, sender=Post, dispatch_uid='post.load_events')
+def load_events(sender, **kwargs):
+    post = kwargs['instance']
+    eventstore = EventStoreClient.get_default_instance()
+    events = eventstore.get_all_events('mw_post_post-%s' % post.post_uuid)
+    def create_post_events(event):
+        classes = {
+            'PostLiked': PostLiked,
+            'PostCreated': PostCreated
+        }
+        return classes[event['eventType']]
+
+    post._inject_events(event_converter(events, create_post_events))
