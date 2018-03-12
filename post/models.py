@@ -237,7 +237,7 @@ class Post(models.Model):
 
         super(Post, self).save(*args, **kwargs)
 
-        if post.media_ids is None:
+        if self.media_ids is None:
             media_id = None
             if self.get_post_type() == Post.TYPE_VIDEO:
                 media_id = "%s/%s" % (Post.video.field.upload_to, self.video.name)
