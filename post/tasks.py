@@ -92,6 +92,12 @@ def generate_image_thumbnail(post_id):
     else:
         im = Image.open(p.image)
 
+    if not p.resolution:
+        p.resolution = {
+            'width': im.width,
+            'height': im.height,
+        }
+
     if p.thumbnail:
         logger.info("Thumbnail already exists")
         p.save()

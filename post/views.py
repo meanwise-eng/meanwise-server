@@ -333,8 +333,7 @@ class PostDetails(APIView):
         if thumbnail is not None:
             post.thumbnail.name = thumbnail
 
-        if thumbnail is None or post.get_post_type() == Post.TYPE_VIDEO:
-            tasks.generate_image_thumbnail.delay(post.id)
+        tasks.generate_image_thumbnail.delay(post.id)
 
         claimed = 0
         for media_id in post.media_ids:
