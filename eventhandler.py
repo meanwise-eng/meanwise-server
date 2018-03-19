@@ -1,6 +1,6 @@
 #!/usr/bin/env python
+import time
 import os
-import logging
 import django
 import asyncio
 import functools
@@ -16,7 +16,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'meanwise_backend.settings'
 
 django.setup()
 
-logger = logging.getLogger('mw.eventhandler')
+import logging
+logger = logging.getLogger('meanwise_backend.%s' % __name__)
 logger.setLevel(logging.DEBUG)
 
 loop = asyncio.get_event_loop()
@@ -30,17 +31,18 @@ for signame in ('SIGINT', 'SIGTERM'):
                             functools.partial(ask_exit, signame))
 
 for app_conf in apps.get_app_configs():
-    try:
+    spec = importlib.util.find_spec('%s.eventhandlers' % app_conf.name)
+
+    if spec is not None:
         mod = importlib.import_module('%s.eventhandlers' % app_conf.name)
-        print("Loaded %s.eventhandlers" % app_conf.name)
-    except ImportError:
-        print("No eventhandlers for module %s" % app_conf.name)
-        continue
+        logger.info("Loaded %s.eventhandlers" % app_conf.name)
 
 eventbus = EventBus.get_default_instance()
 
 logger.info("Eventhandler running, press Ctrl+C to interrupt.")
 logger.info("pid %s: send SIGINT or SIGTERM to exit." % os.getpid())
+logger.info("Will start processing events in 3 seconds")
+time.sleep(3)
 
 try:
     loop.run_until_complete(eventbus.run(loop))

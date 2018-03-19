@@ -4,7 +4,7 @@ from django.dispatch import receiver
 
 import elasticsearch
 
-from meanwise_backend.eventsourced import EventStoreClient, event_converter
+from meanwise_backend.eventsourced import EventStoreClient, Event
 
 from boost.models import Boost
 
@@ -202,19 +202,13 @@ def save_events(sender, **kwargs):
     eventstore = EventStoreClient.get_default_instance()
     stream = 'mw_post_post-%s' % (post.post_uuid,)
     logger.info("Saving %d events" % len(events))
-    eventstore.save(events, stream)
+    eventstore.save(events, stream, post._aggregate_version)
 
 
 @receiver(post_init, sender=Post, dispatch_uid='post.load_events')
 def load_events(sender, **kwargs):
     post = kwargs['instance']
     eventstore = EventStoreClient.get_default_instance()
-    events = eventstore.get_all_events('mw_post_post-%s' % post.post_uuid)
-    def create_post_events(event):
-        classes = {
-            'PostLiked': PostLiked,
-            'PostCreated': PostCreated
-        }
-        return classes[event['eventType']]
+    events = [Event.load(event) for event in eventstore.get_all_events('mw_post_post-%s' % post.post_uuid)]
 
-    post._inject_events(event_converter(events, create_post_events))
+    post._inject_events(events)

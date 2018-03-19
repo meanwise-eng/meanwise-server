@@ -17,6 +17,7 @@ squelo_backend/uwsgi.dev.ini
 
 # tmp files from libraries
 /.hypothesis
+/.mypy_cache
 
 # docs
 /docs/dev-docs/build

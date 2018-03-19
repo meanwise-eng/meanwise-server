@@ -4,8 +4,9 @@ import requests
 import json
 import uuid
 import asyncio
+import datetime
 from time import sleep
-from typing import List, Type
+from typing import List, Type, Dict
 from functools import wraps
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
@@ -13,46 +14,75 @@ logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 class Event():
 
-    def __init__(self, id, type, data={}, metadata=None):
+    def __init__(self, id, data:Dict={}, metadata:Dict={}):
         self.id = id
-        self.type = type
+        self.type = self.__class__.__name__
         self.data = data
         self.metadata = metadata
+        self.metadata['timestamp'] = datetime.datetime.now()
+
+    @classmethod
+    def load(cls, data):
+        event = Event(data['metadata']['aggregateId'], data['data'], data['metadata'])
+        event.type = data['eventType']
+        return event
 
 
 def event_from_dict(event_dict, create_event_class):
-    logger.info(event_dict)
+    logger.info("Event: %s", event_dict['eventType'])
     e = create_event_class(event_dict)(event_dict['eventId'], event_dict['eventType'], event_dict['data'])
     return e
 
 
 def event_converter(events: List[Event], create_event_class):
+    events_converted = []
     for event in events:
-        yield event_from_dict(event, create_event_class)
+        print("Events")
+        print(events)
+        print(event)
+        events_converted.append(event_from_dict(event, create_event_class))
 
 
-class EventEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, uuid.UUID):
-            return str(obj)
+class Storage():
 
-        return json.JSONEncoder.default(self, obj)
+    def __init__(self):
+        self.data = {}
+
+    def get(self, key):
+        if key in self.data:
+           return self.data[key]
+
+    def set(self, key, value):
+        self.data[key] = value
 
 
 class EventStoreClient():
 
     url = 'http://eventstore:2113'
 
+    def __init__(self, storage):
+        self.storage = storage
+
     @classmethod
     def get_default_instance(cls):
-        return EventStoreClient()
+        storage = Storage()
+        return EventStoreClient(storage=storage)
+
+    class EventEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, datetime.datetime):
+                return str(obj)
+
+            if isinstance(obj, uuid.UUID):
+                return str(obj)
+            return json.JSONEncoder.default(self, obj)
 
     def _request(self, path, headers):
         if not headers:
             headers = self._get_headers()
         r = requests.get(path, headers=headers)
         if r.status_code < 200 or r.status_code > 300:
-            raise EventStoreClient.Exception("Error returned by server")
+            raise EventStoreClient.EventStoreException("Error returned by server")
 
         return r
 
@@ -72,11 +102,10 @@ class EventStoreClient():
         if status_code >= 400:
             raise Exception("Error sending data to server")
 
-    def save(self, events: List[Event], stream) -> None:
+    def save(self, events: List[Event], stream, aggregate_version) -> None:
         headers = self._get_headers()
         url = '{}/streams/{}/'.format(self.url, stream)
 
-        logger.info(events)
         prepped_events = []
         for event in events:
             prepped_events.append({
@@ -91,10 +120,14 @@ class EventStoreClient():
         headers = self._get_headers()
         headers['Accept'] = 'application/json'
         headers['Content-Type'] = 'application/vnd.eventstore.events+json'
-        headers['ES-ExpectedVersion'] = '-2'
+        expected_version = aggregate_version - 1
+        if expected_version == 0:
+            expected_version = -2
+        headers['ES-ExpectedVersion'] = '%d' % (expected_version,)
+
         response = requests.post(
             url,
-            data=json.dumps(prepped_events, cls=EventEncoder),
+            data=json.dumps(prepped_events, cls=EventStoreClient.EventEncoder),
             headers=headers
         )
 
@@ -124,9 +157,17 @@ class EventStoreClient():
         if 'links' in d.feed:
             for link in d.feed.links:
                 if link.rel == 'previous':
-                    yield from self._get_previous(link.href, False)
+                    yield from self._get_previous(link.href, wait=False, store_state=False)
 
     def get_new_events(self, stream, wait=True):
+        storage_key = 'previous-link-%s' % stream
+        previous_link = self.storage.get(storage_key)
+        if previous_link:
+            print("Found previous link: %s" % previous_link)
+            yield from self._get_previous(previous_link, wait, store_state=True,
+                                          storage_key=storage_key)
+            return
+
         last_url = '%s/streams/%s/0/forward/20' % (self.url, stream)
         d = self._get_feed(last_url)
 
@@ -136,17 +177,49 @@ class EventStoreClient():
         if 'links' in d.feed:
             for link in d.feed.links:
                 if link.rel == 'previous':
-                    yield from self._get_previous(link.href, wait)
+                    self.storage.set(storage_key, link.href)
+                    print("Saved %s: %s" % (storage_key, link.href))
+                    yield from self._get_previous(link.href, wait, storage_key=storage_key)
+    def _check_subscription(self, url):
+        r = requests.get(url + '/info')
+        if r.status_code == 404:
+            self._create_subscription(url)
+        else:
+            r.raise_for_status()
 
-    def _get_previous(self, href, wait=True):
+    def _create_subscription(self, url):
+        headers = self._get_headers()
+        headers['Content-Type'] = 'application/json'
+        data = {
+            'extraStatistics': True,
+            'checkpointAfterMilliseconds': 5000,
+            'maxCheckPointCount': 100,
+            'maxRetryCount': 3,
+            'maxSubscriberCount': 3,
+            'messageTimeoutMilliseconds': 10000,
+            'minCheckPointCount': 5,
+        }
+        r = requests.put(url, data=json.dumps(data, cls=EventStoreClient.EventEncoder), headers=headers)
+        r.raise_for_status()
+
+    def _get_previous(self, href, wait=True, store_state=True, storage_key=''):
         d = self._get_feed(href)
 
+        print("Getting event details")
         for entry in d.entries:
             yield from self._get_entry(entry)
 
-        for link in d.feed.links:
-            if link.rel == 'previous':
-                yield from self._get_previous(link.href)
+        if 'links' in d.feed:
+            for link in d.feed.links:
+                if link.rel == 'previous':
+                    if store_state:
+                        self.storage.set(storage_key, link.href)
+                        print("Saved %s: %s" % (storage_key, link.href))
+                    yield from self._get_previous(link.href, wait, store_state,
+                                                  storage_key=storage_key)
+                    return
+            print("previous link not in links for %s" % href)
+        print("No links for %s" % href)
 
         if wait:
             print("Waiting a second to check again")
@@ -156,42 +229,126 @@ class EventStoreClient():
     def _get_entry(self, entry):
         headers = self._get_headers()
         headers['Accept'] = 'application/vnd.eventstore.event+json'
-        res = self._request(entry.link, headers=headers)
+        res = self._request(entry.id, headers=headers)
         content = json.loads(res.content.decode('UTF-8'))
 
         yield content
 
-    class Exception(Exception):
+    def subscribe_to_stream(self, stream, wait=True):
+        subscription = 'mw-eventhandler'
+        url = '%s/subscriptions/%s/%s' % (self.url, stream, subscription)
+
+        self._check_subscription(url)
+
+        headers = self._get_headers()
+        headers['Accept'] = 'application/vnd.eventstore.competingatom+xml'
+        
+        read_url = url + '/1?embed=body'
+        d = feedparser.parse(read_url, request_headers=headers)
+
+        if 'entries' not in d:
+            raise Excpetion("No entries in subscription")
+
+        for entry in d.entries:
+            yield self._create_job(entry)
+
+    def _create_job(self, entry):
+        event = next(self._get_entry(entry))
+        job = self.Job(entry, event, self)
+
+        return job
+    class Job():
+        def __init__(self, entry, event, eventstore):
+            self.entry = entry
+            self.event = event
+            self.eventstore = eventstore
+        def get_event(self):
+            return self.event
+        def acknowledge(self):
+            ack_url = self._get_url('ack')
+            
+            headers = self.eventstore._get_headers()
+            r = requests.post(ack_url, headers=headers)
+            r.raise_for_status()
+            
+        def not_acknowledge(self, action):
+            nack_url = self._get_url('nack')
+            nack_url += '?action=' + action
+            
+            headers = self.eventstore._get_headers()
+            r = requests.post(nack_url, headers=headers)
+            r.raise_for_status()
+
+        def _get_url(self, rel):
+            for link in self.entry.links:
+                if link.rel == rel:
+                    return link.href
+
+
+    class EventStoreException(Exception):
         pass
 
 
-class EventSourced():
+class PartialEventSourced():
 
     def __init__(self):
         self._uncommitted_events = []
         self._aggregate_version = 0
 
     def _apply(self, event: Event):
-        handler = getattr(self, '_apply_%s' % event.__class__.__name__)
+        handler = getattr(self, '_apply_%s' % event.type)
         handler(event)
         
         self._uncommitted_events.append(event)
+        self._aggregate_version += 1
 
     def get_uncommitted_events(self):
         return self._uncommitted_events
 
+    def clear_uncommitted_events(self):
+        self._uncommitted_events = []
+
     def _inject_events(self, events: List[Event]):
+        if events is None:
+            return
         for event in events:
             self._apply(event)
             self._aggregate_version += 1
         self._uncommitted_events = []
 
 
+class EventSourced(PartialEventSourced):
+
+    def __init__(self, id, events: List[Event], state=None, keep_events=True):
+        super().__init__()
+        self.id = id
+        if state is not None:
+            self._set_state(state)
+
+        for event in events:
+            self._apply(event)
+
+        if not keep_events:
+            self.clear_uncommitted_events()
+
+    def _set_state(self, state):
+        for key, value in state.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+    def _get_state(self):
+        state = vars(self)
+        return state
+
+    def _new(self, events: List[Event]):
+        return self.__class__(self.id, events, self._get_state())
+
+
 def handle_event(eventType: Type[Event], category: str):
     def real_decorator(fn):
         eventbus = EventBus.get_default_instance()
-        eventbus.add_eventhandler(eventType.__name__, category, fn)
-        print("%s registered as eventhandler for %s" % (fn.__name__, eventType.__name__))
+        eventbus.add_eventhandler(eventType, category, fn)
+        logger.info("%s registered as eventhandler for %s" % (fn.__name__, eventType.__name__))
         @wraps(fn)
         def wrapper(*args, **kwargs):
             fn(*args, **kwargs)
@@ -214,26 +371,127 @@ class EventBus():
             EventBus.singleton = EventBus()
         return EventBus.singleton
 
-    def add_eventhandler(self, eventName, category, handler):
+    def add_eventhandler(self, eventType, category, handler):
         key = '%s' % (category,)
         if key not in self.eventhandlers:
             self.eventhandlers[key] = []
-        self.eventhandlers[key].append({'eventName': eventName, 'handler': handler})
+        self.eventhandlers[key].append({
+            'eventName': eventType.__name__,
+            'handler': handler,
+            'class': eventType
+        })
 
     async def run(self, loop):
         while True:
             print("Getting events")
             await self.get_events()
-            await asyncio.sleep(1)
+            await asyncio.sleep(3)
 
     async def get_events(self):
-        print(self.eventhandlers)
         for category, handlers in self.eventhandlers.items():
             print("Getting events for %s" % category)
             stream = '$ce-%s' % category
-            for event in eventstore.get_new_events(stream, wait=False):
+            for job in eventstore.subscribe_to_stream(stream, wait=False):
+                event = job.get_event()
                 print("Handling event %s: %s" % (event['eventType'], event['eventId']))
                 for handler in handlers:
                     if handler['eventName'] == event['eventType']:
-                        handler['handler'](event)
-                        print("Event handled successfully")
+                        event_obj = handler['class'](
+                            event['metadata']['aggregateId'],
+                            event['data'],
+                            event['metadata']
+                        )
+                        print("Running handler %s" % handler['handler'].__name__)
+                        try:
+                            handler['handler'](event_obj)
+                            print("Handler successfully executed")
+                        except Exception as ex:
+                            job.not_acknowledge('park')
+                            logger.error(ex, exc_info=True)
+                            logger.info("Job nacked")
+                        else:
+                            job.acknowledge()
+                            print("Job acknowledged")
+                    else:
+                        print("No matching event handlers")
+                print("Event handlers executed successfully")
+
+
+class EventRepository():
+
+    stream_prefix = None # type: ClassVar[str]
+    ar_class = None # type: ClassVar[Type[EventSourced]]
+    
+    def __init__(self, eventstore):
+        self.eventstore = eventstore
+
+    def get_stream(self, id):
+        return '%s%s' % (self.stream_prefix, id)
+
+    def get_events(self, id):
+        events = self.eventstore.get_all_events(self.get_stream(id))
+
+    def get(self, id):
+        def convert_events(event):
+            return Event.load(event)
+        events = [convert_events(event) for event in self.eventstore.get_all_events(self.get_stream(id))]
+        if len(events) == 0:
+            raise Exception("No events for this ID")
+        ar = self.ar_class(id, events, keep_events=False)
+        return ar
+
+    def save(self, ar: EventSourced):
+        events = ar.get_uncommitted_events()
+        ar_version = ar._aggregate_version - len(events)
+        self.save_events(events, ar.id, ar_version)
+        ar.clear_uncommitted_events()
+
+    def save_events(self, events, id, aggregate_version):
+        self.eventstore.save(events, self.get_stream(id), aggregate_version)
+
+
+class Command():
+
+    def __init__(self, command_name, *args, **kwargs):
+        self.command_name = command_name
+        self.handler = None
+        self.repo = None
+        self.args = args
+        self.kwargs = kwargs
+
+    @staticmethod
+    def create(repo: Type[EventRepository]):
+        def real_decorator(fn):
+            def wrapper(*args, **kwargs):
+                command = Command(fn.__name__, *args, **kwargs)
+                command.handler = fn
+                eventstore = EventStoreClient.get_default_instance()
+                repository = repo(eventstore)
+                command.repo = repository
+                command_bus = CommandBus.get_default_instance()
+                command_bus.run_command(command)
+            return wrapper
+        return real_decorator
+
+    def __call__(self, *args, **kwargs):
+        self.kwargs['repo'] = self.repo
+        ar = self.handler(*self.args, **self.kwargs)
+
+
+class CommandBus():
+
+    instance = None
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def get_default_instance(cls):
+        if CommandBus.instance is None:
+            CommandBus.instance = CommandBus()
+
+        return CommandBus.instance
+
+    def run_command(self, command: Command):
+        command()
+

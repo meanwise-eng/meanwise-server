@@ -23,7 +23,7 @@ from io import BytesIO
 import logging
 import tempfile
 
-from meanwise_backend.eventsourced import EventSourced, Event
+from meanwise_backend.eventsourced import PartialEventSourced, Event
 
 from mwmedia.models import MediaFile
 from userprofile.models import Interest
@@ -77,7 +77,7 @@ class PostLiked(Event):
     pass
 
 
-class Post(models.Model, EventSourced):
+class Post(models.Model, PartialEventSourced):
     TYPE_IMAGE = 'image'
     TYPE_VIDEO = 'video'
     TYPE_PDF = 'pdf'
@@ -177,18 +177,19 @@ class Post(models.Model, EventSourced):
 
     def like(self, user):
         if user in self.liked_by.all():
+            logger.info("Post %s already liked by user %s" % (self.post_uuid, user.id))
             return
 
         self.liked_by.add(user)
 
-        self._apply(PostLiked(self.post_uuid, 'PostLiked', {'liked_by': user.id}))
+        self._apply(PostLiked(self.post_uuid, {'liked_by': user.id}))
 
     def _apply_PostLiked(self, event: PostLiked):
         pass
 
     def save(self, *args, **kwargs):
         if self.id is None:
-            self._apply(PostCreated(self.post_uuid, 'PostCreated', {}))
+            self._apply(PostCreated(self.post_uuid))
 
         inserting = self.post_uuid is None
 

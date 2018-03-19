@@ -160,10 +160,11 @@ class UserPostList(APIView):
                     }
 
                     for device in devices:
-                        try:
-                            send_message_device(device, message_payload)
-                        except Exception as e:
-                            logger.error(e)
+                        pass
+                        #try:
+                        #    send_message_device(device, message_payload)
+                        #except Exception as e:
+                        #    logger.error(e)
 
             if post.parent is not None and post.parent.parent is not None:
                 raise Exception("Parent post should not be a child post.")
@@ -720,21 +721,6 @@ class UserPostLike(APIView):
         if user != request.user:
             raise PermissionDenied("You can only like a post as yourself")
 
-        if user not in post.liked_by.all():
-            skills = list(post.topics.all().values_list('text', flat=True))
-            critic = Critic.objects.create(from_user_id=user.id, to_user_id=post.poster.id,
-                                           post_id=post.id, user_credits=0, rating=3,
-                                           skills=skills, created_on=datetime.datetime.now())
-
-            for skill in (skills + ['overall']):
-                try:
-                    credits = Credits.objects.get(user_id=post.poster.id, skill=skill.upper())
-                except Credits.DoesNotExist:
-                    credits = Credits.objects.create(user_id=post.poster.id, skill=skill.upper(), credits=0)
-
-                credits.credits += 1
-                credits.save()
-
         post.like(user)
         post.save()
 
@@ -764,7 +750,8 @@ class UserPostLike(APIView):
             }
 
             for device in devices:
-                send_message_device(device, message_payload)
+                pass
+                #send_message_device(device, message_payload)
         return Response(
             {
                 "status": "success",
