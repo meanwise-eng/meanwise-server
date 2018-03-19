@@ -17,7 +17,8 @@ def handle_post_liked(event: PostLiked):
 
     skill = post.topic
 
-    create_critic(criticizer=user.id, criticized=post.poster.id, post_id=post.id,
+    create_critic(criticizer=user.userprofile.profile_uuid,
+                  criticized=post.poster.userprofile.profile_uuid, post_id=post.post_uuid,
                   rating=3, skill=skill)
 
 
