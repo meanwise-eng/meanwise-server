@@ -31,8 +31,13 @@ class MediaUploadView(APIView):
         else:
             raise Exception("Haven't implemented binary streaming %s" % request.content_type)
 
+        file_md5sum = request.META.get('HTTP_X_FILE_HASH', None)
+        md5sum = MediaFile._get_hash(the_file)
+        if file_md5sum != md5sum:
+            raise Exception("The uploaded file's hash (%s) doesn't match with hash in X-File-Hash (%s)" % (md5sum, file_md5sum))
+
         try:
-            media = MediaFile.create(the_file.file, filename)
+            media = MediaFile.create(the_file.file, filename, file_md5sum)
         except MediaFile.FileAlreadyExists:
             return Response(
                 {

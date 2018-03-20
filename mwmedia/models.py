@@ -34,21 +34,16 @@ class MediaFile(models.Model):
         return self.filename
 
     @classmethod
-    def create(cls, the_file, filename):
+    def create(cls, the_file, filename, file_md5sum=None):
         s3 = boto3.client('s3')
 
         bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
         try:
             md5sum = s3.head_object(Bucket=bucket_name, Key=filename)['ETag'][1:-1]
-            m = hashlib.md5()
-            while True:
-                chunk = the_file.read(2**20)
-                if chunk == b"":
-                    break
-                m.update(chunk)
-            the_file.seek(0)
-            if md5sum != m.hexdigest():
+            if file_md5sum is None:
+                file_md5sum = self._get_hash(the_file)
+            if md5sum != file_md5sum:
                 raise Exception("The two files are not the same. You cannot replace existing files.")
             else:
                 try:
@@ -75,6 +70,19 @@ class MediaFile(models.Model):
         media.save()
 
         return media
+
+
+    @staticmethod
+    def _get_hash(the_file):
+        m = hashlib.md5()
+        while True:
+            chunk = the_file.read(2**20)
+            if chunk == b"":
+                break
+            m.update(chunk)
+        the_file.seek(0)
+
+        return m.hexdigest()
         
 
     @classmethod
