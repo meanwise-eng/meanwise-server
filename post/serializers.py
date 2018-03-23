@@ -659,6 +659,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
         media_ids = validated_data['media_ids']
         post_type = validated_data['post_type']
 
+        mentioned_users = validated_data.pop('mentioned_users', None)
         post = Post(**validated_data)
 
         allowed_types = ['image', 'video', 'pdf', 'audio']
@@ -668,6 +669,10 @@ class PostCreateSerializer(serializers.ModelSerializer):
             file_field.name = media['media_id']
 
         post.save()
+
+        if mentioned_users is not None:
+            for user in mentioned_users:
+                post.mentioned_users.add(user)
 
         return post
 
