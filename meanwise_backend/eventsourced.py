@@ -20,6 +20,7 @@ class Event():
         self.data = data
         self.metadata = metadata
         self.metadata['timestamp'] = datetime.datetime.now()
+        self.event_number = None
 
     @classmethod
     def load(cls, data):
@@ -383,17 +384,20 @@ class EventBus():
 
     async def run(self, loop):
         while True:
-            print("Getting events")
-            await self.get_events()
-            await asyncio.sleep(3)
+            logger.info("Getting events")
+            events_processed = await self.get_events()
+            if not events_processed:
+                await asyncio.sleep(3)
 
     async def get_events(self):
+        events_processed = False
         for category, handlers in self.eventhandlers.items():
-            print("Getting events for %s" % category)
+            logger.info("Getting events for %s" % category)
             stream = '$ce-%s' % category
             for job in eventstore.subscribe_to_stream(stream, wait=False):
+                events_processed = True
                 event = job.get_event()
-                print("Handling event %s: %s" % (event['eventType'], event['eventId']))
+                logger.info("Handling event %s: %s" % (event['eventType'], event['eventId']))
                 for handler in handlers:
                     if handler['eventName'] == event['eventType']:
                         event_obj = handler['class'](
@@ -401,20 +405,25 @@ class EventBus():
                             event['data'],
                             event['metadata']
                         )
-                        print("Running handler %s" % handler['handler'].__name__)
+                        event_obj.event_number = event['eventNumber']
+                        logger.info("Running handler %s" % handler['handler'].__name__)
                         try:
                             handler['handler'](event_obj)
-                            print("Handler successfully executed")
+                            logger.info("Handler successfully executed")
                         except Exception as ex:
                             job.not_acknowledge('park')
                             logger.error(ex, exc_info=True)
                             logger.info("Job nacked")
                         else:
                             job.acknowledge()
-                            print("Job acknowledged")
+                            logger.info("Job acknowledged")
                     else:
-                        print("No matching event handlers")
-                print("Event handlers executed successfully")
+                        logger.info("No matching event handlers")
+                        job.acknowledged()
+                        logger.info("Job acknowledged")
+                logger.info("Event handlers executed successfully")
+
+        return events_processed
 
 
 class EventRepository():

@@ -167,7 +167,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 
     def get_total_credits(self, obj):
         try:
-            credits = Credits.objects.get(user_id=obj.user.id, skill='overall')
+            credits = Credits.objects.get(user_id=obj.profile_uuid, skill='overall')
         except Credits.DoesNotExist:
             return 0
 

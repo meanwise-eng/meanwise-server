@@ -5,9 +5,9 @@ from django.contrib.postgres.fields import JSONField
 
 class Critic(models.Model):
 
-    from_user_id = models.UUIDField()
-    to_user_id = models.UUIDField()
-    post_id = models.UUIDField()
+    from_user_id = models.IntegerField()
+    to_user_id = models.IntegerField()
+    post_id = models.IntegerField()
     rating = models.IntegerField()
     user_credits = models.IntegerField()
 
@@ -18,6 +18,7 @@ class Critic(models.Model):
 
 class Credits(models.Model):
 
-    user_id = models.UUIDField()
+    user_id = models.IntegerField()
+    profile_id = models.UUIDField(editable=False)
     skill = models.CharField(max_length=256)
     credits = models.IntegerField()

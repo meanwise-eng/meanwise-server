@@ -54,7 +54,7 @@ EMAIL_USE_TLS = bool(os.environ.get('EMAIL_USE_TLS', True))
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 DEFAULT_FROM_EMAIL = 'no-reply@meanwise.com'
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'redis:6379')
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
 
 ELASTICSEARCH_USERNAME = os.environ.get('ELASTICSEARCH_USERNAME', None)
 ELASTICSEARCH_PASSWORD = os.environ.get('ELASTICSEARCH_PASSWORD', None)
@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     'topics.apps.TopicsConfig',
     'influencers.apps.InfluencersConfig',
     'mwmedia.apps.MwmediaConfig',
+    'mwiota.apps.IotaConfig',
     'django_crontab',
     'scarface',
     'analytics',
