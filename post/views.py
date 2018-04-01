@@ -722,9 +722,9 @@ class UserPostLike(APIView):
 
             for skill in (skills + ['overall']):
                 try:
-                    credits = Credits.objects.get(user_id=post.poster.id, skill=skill)
+                    credits = Credits.objects.get(user_id=post.poster.id, skill=skill.upper())
                 except Credits.DoesNotExist:
-                    credits = Credits.objects.create(user_id=post.poster.id, skill=skill, credits=0)
+                    credits = Credits.objects.create(user_id=post.poster.id, skill=skill.upper(), credits=0)
 
                 credits.credits += 1
                 credits.save()
