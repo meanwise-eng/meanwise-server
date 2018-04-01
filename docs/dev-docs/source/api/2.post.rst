@@ -84,6 +84,7 @@ Response Payload (JSON)
         "topics": [
           "legendofzelda"
         ],
+        "topic": "legendofzelda",
         "created_on": "2017-08-02T07:28:33.096Z",
         "is_liked": false,
         "likes_url": "http://localhost:8000/api/v4/posts/94/likes/",
@@ -100,6 +101,12 @@ Response Payload (JSON)
         "audio_url": "",
         "audio_thumb_url": "",
         "post_thumbnail_url": "http://localhost:8001/media/post_images/image.jpg",
+        "media_files": [
+            {
+                "type": "image",
+                "url": "https://mw-media-dev-1.s3.aws.amazonaws.com/post_images/f854530a-159c-11e8-95e1-dbbf80fcfda1.jpg"
+            }
+        ],
       }
     ]
   }
@@ -243,6 +250,15 @@ Response Payload (JSON)
     * - post_thumbnail_url
       - The thumbnail URL based on what type of post it is. i.e. If post is an image post it will
         the image thumbnail.
+      - url
+    * - media_files
+      - An array of media files objects.
+      - array
+    * - media_files.type
+      - The file type.
+      - string
+    * - media_files.url
+      - The URL of the file.
       - url
 
 Pagination
@@ -426,6 +442,206 @@ Response Payload (JSON)
     }
   }
 
+
+Create Post New
+===============
+
+New API for creating posts. The upload of files (image, video) has been separated. Refer to media
+API for details on how to upload files. The UUID for the files have to be added into the media_url
+field. Optionally, a thumbnail image can be generated for the post, and added to the thumbnail
+field. Previously used separate media fields; image, video, pdf, audio, has been removed.
+
+topics and topic_names field has been removed, and replaced with ``topic`` field.
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   PUT api/v2.0/posts/<post_id> HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Content-Type: application/json
+   Authorization: Token {token}
+
+Request Body
+------------
+
+.. code-block:: javascript
+
+  {
+    "post_uuid": "79fd46d6-1562-11e8-95b5-f79db724f160",
+    "text": "Test post @username",
+    "interest": 1,
+    "tags": ["ttag1", "ttag3"],
+    "topic": "testtopic",
+    "mentioned_users": [3],
+    "geo_location_lat": 28.704059,
+    "geo_location_lng": 77.102490
+    "media_ids": [
+        {
+            "media_id": "post_images/89ed1954-1562-11e8-abe3-3b7e2dc10600.jpg",
+            "type": "image"
+        }
+    ],
+    "post_type": "image",
+    "thumbnail": ["post_thumbnails/abe882b4-1562-11e8-8602-b7285e2b2797.jpg"]
+  }
+
+
+..  list-table:: Fields
+    :header-rows: 1
+
+    * - Fieldname
+      - Description
+      - Type
+    * - post_uuid
+      - UUID generated on the front-end to ensure idempotency of the operation.
+      - uuid
+    * - text
+      - Text of the post.
+      - text
+    * - interest
+      - The id of the Interest that the post belongs to.
+      - Integer
+    * - topic
+      - The topic for this post.
+      - array(string)
+    * - resolution
+      - Object representing the resolution of the image or video.
+      - object
+    * - resolution.width
+      - The width of the video/image.
+      - integer
+    * - resolution.height
+      - The height of the video/image.
+      - integer
+    * - tags
+      - An array of tag names.
+      - array(string)
+    * - mentioned_users
+      - An array of `user_id` who are mentioned in the post.
+      - array(values)
+    * - geo_location_lat
+      - Geo location latitude.
+      - Decimal value
+    * - geo_location_lng
+      - Geo location longitude.
+      - Decimal value
+    * - post_type
+      - The type of the post. Allowed types are: image, video, text, audio, pdf, link.
+      - string
+    * - link
+      - The URL that will be linked to.
+      - url
+    * - link_meta_data
+      - Additional data about the link that will be used to display the link in app.
+      - object
+    * - link_meta_data.title
+      - Title of the link shared in a Post.
+      - string
+    * - link_meta_data.description
+      - Description of the link shared in a Post.
+      - string
+    * - link_meta_data.image
+      - URL of image thumbnail of the link shared in a Post.
+      - url
+    * - media_ids
+      - Array of media_id objects.
+      - array
+    * - media_ids.media_id
+      - A :ref:`Media IDs<media-id>`. The media should match the media type (i.e. If media type is video, then the media should be a video file.
+      - media id
+    * - media_ids.type
+      - The type of media: image, video, pdf, audio.
+      - string
+    * - thumbnail
+      - A :ref:`media-id` that contains a thumbnail image that represents the post. Eg: ``/post_thumbnails/60db3238-1596-11e8-89bf-bf1ac5f21e9f.jpg``
+      - media id
+
+Paths for the media
+~~~~~~~~~~~~~~~~~~~
+
+For uploading the post media through the Media API, use the below paths based on the post type.
+
+..  list-table:: paths
+    :header-rows: 1
+
+    * - Type
+      - Path
+    * - image
+      - post_images
+    * - video
+      - post_videos
+    * - pdf
+      - post_pdf
+    * - audio
+      - post_audio
+    * - thumbnail
+      - post_thumbnails
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 201 Created
+  Content-Type: application/json
+  Location: /api/v2.0/posts/<post_id>/status/
+
+
+Check Post status
+=================
+
+Request Payload
+---------------
+
+.. code-block:: http
+
+   POST api/v2.0/posts/<post_id>/status/ HTTP/1.1
+   Host: api.meanwise.com
+   Accept: application/json
+   Authorization: Token {token}
+
+Response Payload (JSON)
+-----------------------
+
+.. code-block:: http
+
+  HTTP/1.1 200 OK
+  Content-Type: application/json
+
+.. code-block:: javascript
+
+  {
+    "status": "success",
+    "error": "",
+    "results": {
+      "status": "pending",
+      "location": "http://localhost:8000/api/v4/posts/<post_id>/status/"
+    }
+  }
+
+..  list-table:: paths
+    :header-rows: 1
+
+    * - Field
+      - Description
+      - Type
+    * - status
+      - Status of the post processing. Either; pending, completed or error.
+      - string
+    * - location
+      - The location of the post, when it is ready.
+      - url
+    * - error_message
+      - Details of the error when something goes wrong while creating the post.
+      - string
+
+If the processing status is 'pending' then try again in a second (or more). If the status is
+completed, then you can consider the post created. The post will appear in other API output (eg.
+explore, portfolio, etc). If the status is 'error' then you will need to fix the issue that's
+mentioned in the error message.
 
 Comment
 =======

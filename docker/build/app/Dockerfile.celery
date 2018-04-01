@@ -1,8 +1,8 @@
 FROM meanwise/api-base:1.0.0
 
-ENV APP_WORKERS=4
-ENV WORKER_TIMEOUT=120
+ENV APP_WORKERS 1
 ENV ENVIRONMENT=production
+ENV C_FORCE_ROOT=1
 
 ADD awscredentials /root/.aws/credentials
 ADD ./code /app
@@ -30,5 +30,5 @@ ENTRYPOINT ["/start.sh"]
 
 VOLUME /usr/share/nginx/html/static
 
-CMD ["/usr/local/bin/gunicorn", "-w", "${APP_WORKERS}", "-b", "0.0.0.0:8000", "-t", "${WORKER_TIMEOUT}", "meanwise_backend.wsgi"]
+CMD ["celery", "-A", "meanwise_backend", "worker", "-l", "info"]
 

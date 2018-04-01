@@ -29,9 +29,10 @@ org.settings(
 @post.doc_type
 class PostDocument(DocType):
 
+    post_uuid = String(index='not_analyzed')
     text = String()
-    image_url = String()
-    video_url = String()
+    image_url = String(index='not_analyzed')
+    video_url = String(index='not_analyzed')
     user_id = Integer()
     tags = String()
     num_likes = Integer()
@@ -41,26 +42,26 @@ class PostDocument(DocType):
     user_firstname = String()
     user_lastname = String()
     user_username = String()
-    user_profile_photo = String()
-    user_cover_photo = String()
+    user_profile_photo = String(index='not_analyzed')
+    user_cover_photo = String(index='not_analyzed')
     user_profession_id = Integer()
     user_profession_text = String()
-    user_profile_photo_small = String()
-    video_thumb_url = String()
+    user_profile_photo_small = String(index='not_analyzed')
+    video_thumb_url = String(index='not_analyzed')
     topics = String(index='not_analyzed')
     topic = String(index='not_analyzed')
     num_seen = Integer()
     num_recent_seen = Integer()
     created_on = Date()
     geo_location = GeoPoint()
-    pdf_url = String()
-    audio_url = String()
-    link = String()
-    pdf_thumb_url = String()
-    audio_thumb_url = String()
-    post_type = String()
-    panaroma_type = String()
-    post_thumbnail_url = String()
+    pdf_url = String(index='not_analyzed')
+    audio_url = String(index='not_analyzed')
+    link = String(index='not_analyzed')
+    pdf_thumb_url = String(index='not_analyzed')
+    audio_thumb_url = String(index='not_analyzed')
+    post_type = String(index='not_analyzed')
+    panaroma_type = String(index='not_analyzed')
+    post_thumbnail_url = String(index='not_analyzed')
     is_work = Boolean()
 
     visible_to = String(index='not_analyzed')
@@ -319,7 +320,7 @@ class PostDocument(DocType):
         return document
 
     def set_from_post(self, post):
-        properties = ('text', 'image_url', 'video_url',
+        properties = ('post_uuid', 'text', 'image_url', 'video_url',
                       'user_id', 'tags', 'num_likes', 'num_recent_likes', 'num_comments',
                       'num_recent_comments', 'user_firstname', 'user_lastname', 'user_username',
                       'user_profile_photo', 'user_cover_photo', 'user_profession_id',

@@ -46,16 +46,18 @@ from post.serializers import *
 from userprofile.models import UserFriend, Interest, UserInterestRelevance
 from mnotifications.models import Notification
 from credits.models import Credits, Critic
+from mwmedia.models import MediaFile
 
 from elasticsearch_dsl import query
 from post.search_indexes import PostIndex
 from common.api_helper import get_objects_paginated, TimeBasedPaginator, NormalPaginator,\
     build_absolute_uri
 from post.documents import PostDocument
+import post.tasks as tasks
 
 from common.push_message import *
 
-post_qs = Post.objects.filter(is_deleted=False).filter(
+post_qs = Post.objects.filter(is_deleted=False, processed=True).filter(
     Q(story__isnull=True) | Q(story_index=1)).order_by('-created_on')
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -185,15 +187,19 @@ class UserPostList(APIView):
             for t in ts:
                 post.tags.add(t)
 
+            location = build_absolute_uri(reverse('post-details', args=[post.post_uuid]))
+
             return Response(
                 {
                     "status": "success",
                     "error": "",
                     "results": {
-                        "message": "Successfully created post"
+                        "message": "Successfully created post",
+                        "location": location,
                     }
                 },
-                status=status.HTTP_201_CREATED
+                status=status.HTTP_201_CREATED,
+                headers={ 'Location': location }
             )
         logger.debug(serializer.errors)
         return Response(
@@ -254,9 +260,20 @@ class PostDetails(APIView):
 
     def get_post(self, pk):
         try:
-            return Post.objects.get(pk=pk, is_deleted=False)
-        except Post.DoesNotExist:
-            raise Http404
+            post_id = int(pk)
+            try:
+                return Post.objects.get(pk=pk, is_deleted=False)
+            except Post.DoesNotExist:
+                raise Http404
+        except ValueError:
+            try:
+                post_uuid = uuid.UUID(pk)
+                try:
+                    return Post.objects.get(post_uuid=post_uuid)
+                except Post.DoesNotExist:
+                    raise Http404
+            except ValueError:
+                raise ValidationError("Invalid post_id")
 
     def get(self, request, post_id):
         post = self.get_post(post_id)
@@ -270,6 +287,82 @@ class PostDetails(APIView):
                 "results": serializer.data
             },
             status=status.HTTP_200_OK
+        )
+
+    @transaction.atomic()
+    def put(self, request, post_id):
+        try:
+            post_uuid = uuid.UUID(post_id)
+        except ValueError:
+            raise Exception("Post ID should be a UUID.")
+
+        try:
+            post = Post.objects.get(post_uuid=post_id)
+            return Response(
+                {
+                    "status": "failed",
+                    "error": { "message": "You cannot PUT the same post twice" },
+                    "results": None
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+        except Post.DoesNotExist:
+            pass
+
+
+        data = request.data.copy()
+        try:
+            thumbnail = data.pop('thumbnail')
+        except KeyError:
+            thumbnail = None
+
+        serializer = PostCreateSerializer(data=data)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "status": "failed",
+                    "error": serializer.errors,
+                    "results": None
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        post = serializer.save(post_uuid=post_id, poster=request.user, processed=False)
+
+        if thumbnail is not None:
+            post.thumbnail.name = thumbnail
+
+        tasks.generate_image_thumbnail.delay(post.id)
+
+        claimed = 0
+        for media_id in post.media_ids:
+            try:
+                MediaFile.claim(media_id['media_id'])
+                claimed += 1
+            except MediaFile.MediaFileDoesNotExist:
+                pass
+
+        if claimed == len(post.media_ids):
+            post.processed = True
+
+        post.save()
+
+        location = build_absolute_uri(reverse('post-status', args=[post.post_uuid]))
+
+        return Response(
+            {
+                "status": "success",
+                "error": None,
+                "results": {
+                    "message": "Post created successfully",
+                    "location": location
+                }
+            },
+            status.HTTP_202_ACCEPTED,
+            headers={
+                'Location': location
+            }
         )
 
     def patch(self, request, post_id):
@@ -299,6 +392,61 @@ class PostDetails(APIView):
             }
         )
 
+
+class PostProcessingView(APIView):
+
+    def get(self, request, post_uuid):
+        try:
+            post = Post.objects.get(post_uuid=post_uuid)
+        except Post.DoesNotExist:
+            raise Http404()
+
+        post_type = post.get_post_type()
+
+        if post.processed:
+            processing_status = 'completed'
+        else:
+            processing_status = 'pending'
+
+            media_ids = list(post.media_ids)
+            if post.thumbnail:
+                media_ids.append({ 'media_id': post.thumbnail.name, 'type': 'image' })
+
+            claimed = 0
+            for media_id in media_ids:
+                try:
+                    media = MediaFile.objects.get(filename=media_id['media_id'])
+                except MediaFile.DoesNotExist:
+                    continue
+                if media.orphan == False:
+                    claimed += 1
+                else:
+                    media.orphan = False
+                    media.save()
+                    claimed += 1
+
+            thumbnail_ready = (not post.thumbnail_required()) or post.thumbnail
+            video_thumb_ready = post_type != Post.TYPE_VIDEO or post.video_thumbnail
+    
+            if claimed == len(media_ids) and thumbnail_ready and video_thumb_ready:
+                post.processed = True
+                post.save()
+                processing_status = 'completed'
+
+        location = build_absolute_uri(reverse('post-details', args=[post.post_uuid]))
+
+        return Response(
+            {
+                "status": "success",
+                "error": None,
+                "results": {
+                    "status": processing_status,
+                    "location": location
+                }
+            },
+            status.HTTP_200_OK,
+            headers={ 'Location': location }
+        )
 
 class UserFriendsPostList(APIView):
     """

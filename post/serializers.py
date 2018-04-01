@@ -13,6 +13,7 @@ from userprofile.models import UserProfile, Profession
 from post.models import Post, Comment, Share, Story, UserTopic
 from post.documents import PostDocument
 from brands.models import Brand
+from mwmedia.models import MediaFile
 
 from drf_haystack.serializers import HaystackSerializerMixin
 from drf_haystack.serializers import HaystackSerializer, HaystackSerializerMixin
@@ -21,6 +22,7 @@ from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 class PostDocumentSerializer(serializers.Serializer):
 
+    post_uuid = serializers.CharField()
     user_id = serializers.IntegerField()
     num_comments = serializers.IntegerField()
     num_likes = serializers.IntegerField()
@@ -63,6 +65,7 @@ class PostDocumentSerializer(serializers.Serializer):
     boost_datetime = serializers.SerializerMethodField()
     link_meta_data = serializers.SerializerMethodField()
     user_profession = serializers.SerializerMethodField()
+    media_files = serializers.SerializerMethodField()
 
     brand_id = serializers.IntegerField()
     college_id = serializers.CharField()
@@ -162,6 +165,23 @@ class PostDocumentSerializer(serializers.Serializer):
 
         return []
 
+    def get_media_files(self, obj):
+        post = self.get_post(obj)
+
+        if post.media_ids is None:
+            return None
+
+        def get_absolute_url(media_id):
+            try:
+                media = MediaFile.objects.get(filename=media_id['media_id'])
+            except MediaFile.DoesNotExist:
+                return media_id
+
+            media_id['media_id'] = media.get_absolute_url()
+            return media_id
+
+        return [get_absolute_url(m) for m in post.media_ids]
+
 
 class MentionedUserSerializer(serializers.ModelSerializer):
 
@@ -200,6 +220,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     brand_logo_url = serializers.SerializerMethodField()
     brand = serializers.SerializerMethodField()
     post_thumbnail_url = serializers.SerializerMethodField()
+    media_files = serializers.SerializerMethodField()
 
     story = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -212,7 +233,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments',
+        fields = ('id', 'post_type', 'post_uuid', 'text', 'user_id', 'num_likes', 'num_comments',
                   'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'created_on',
@@ -220,7 +241,7 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
                   'mentioned_users', 'geo_location_lat', 'geo_location_lng',
                   'brand', 'brand_logo_url', 'pdf_url', 'link', 'audio_url',
                   'pdf_thumb_url', 'audio_thumb_url', 'link_meta_data', 'panaroma_type',
-                  'post_thumbnail_url', 'is_work', 'college',
+                  'post_thumbnail_url', 'is_work', 'college', 'media_files',
                   )
 
     def get_user_id(self, obj):
@@ -406,6 +427,21 @@ class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_post_thumbnail_url(self, obj):
         return obj.post_thumbnail().url if obj.post_thumbnail() else None
 
+    def get_media_files(self, obj):
+        if obj.media_ids is None:
+            return None
+
+        def get_absolute_url(media_id):
+            try:
+                media = MediaFile.objects.get(filename=media_id['media_id'])
+            except MediaFile.DoesNotExist:
+                return media_id
+
+            media_id['media_id'] = media.get_absolute_url()
+            return media_id
+
+        return [get_absolute_url(m) for m in obj.media_ids]
+
 
 class PostSummarySerializer(PostSerializer):
 
@@ -443,7 +479,7 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id','post_type', 'text', 'user_id', 'num_likes', 'num_comments',
+        fields = ('id', 'post_uuid', 'post_type', 'text', 'user_id', 'num_likes', 'num_comments',
                   'user_firstname', 'user_lastname', 'user_username', 'user_profile_photo', 'user_cover_photo',
                   'user_profile_photo_small', 'user_profession', 'user_profession_text',
                   'image_url', 'video_url', 'video_thumb_url', 'resolution', 'liked_by',
@@ -607,6 +643,50 @@ class NotificationPostSerializer(TaggitSerializer, serializers.ModelSerializer):
             return Post.TYPE_TEXT
 
 
+class PostCreateSerializer(serializers.ModelSerializer):
+
+    post_type = serializers.CharField(required=True, allow_null=False)
+
+    class Meta:
+        model = Post
+        fields = ('post_uuid', 'post_type', 'panaroma_type', 'text', 'tags', 'topic',
+                  'geo_location_lat', 'geo_location_lng', 'mentioned_users', 'link',
+                  'link_meta_data', 'parent', 'is_work', 'brand', 'college', 'media_ids',
+                  'thumbnail',
+        )
+
+    def create(self, validated_data):
+        media_ids = validated_data['media_ids']
+        post_type = validated_data['post_type']
+
+        mentioned_users = validated_data.pop('mentioned_users', None)
+        post = Post(**validated_data)
+
+        allowed_types = ['image', 'video', 'pdf', 'audio']
+        if validated_data['post_type'] in allowed_types:
+            media = self._get_media(media_ids, post_type)
+            file_field = getattr(post, post_type)
+            file_field.name = media['media_id']
+
+        post.save()
+
+        if mentioned_users is not None:
+            for user in mentioned_users:
+                post.mentioned_users.add(user)
+
+        return post
+
+    def _get_media(self, media_ids, post_type):
+        if type(media_ids) == list and len(media_ids) > 0:
+            for media in media_ids:
+                if media['type'] == post_type:
+                    return media
+
+    def _set_image(self, validated_data):
+        media = self._get_media(validated_data['media_ids'], validated_data['post_type'])
+        validated_data[validated_data['post_type']] = media['media_id']
+
+
 class PostSaveSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     topics = serializers.SerializerMethodField()
@@ -616,10 +696,11 @@ class PostSaveSerializer(serializers.ModelSerializer):
     geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
+    post_type = serializers.CharField(required=True, allow_null=False)
 
     class Meta:
         model = Post
-        read_only_fields = ('poster', 'brand', 'is_deleted',)
+        read_only_fields = ('poster', 'brand', 'is_deleted', 'media_ids', 'processed', 'post_uuid',)
 
     def get_topics(self, obj):
         return obj.topics.all().values_list('text', flat=True)

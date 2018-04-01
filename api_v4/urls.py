@@ -96,4 +96,5 @@ urlpatterns = [
     url(r'^influencers/$', InfluencersListView.as_view()),
     url(r'^brands/', include('brands.urls')),
     url(r'^college/', include('college.urls')),
+    url(r'^media/', include('mwmedia.urls')),
 ]

@@ -42,6 +42,7 @@ from .documents import Influencer
 from mnotifications.models import Notification
 
 from userprofile.search_indexes import UserProfileIndex
+import userprofile.tasks as tasks
 from common.api_helper import get_objects_paginated
 from common.push_message import *
 
@@ -283,6 +284,13 @@ class UserProfileDetail(APIView):
                     'user_username')
                 up.user.username = user_username
                 up.user.save()
+
+            if serialized_up.validated_data.get('cover_photo', None): 
+                tasks.optimize_cover_photo.delay(up.user.id)
+
+            if serialized_up.validated_data.get('profile_photo', None):
+                tasks.optimize_and_generate_thumbnail_for_profile_photo.delay(up.user.id)
+
             return Response(
                 {
                     "status": "success",

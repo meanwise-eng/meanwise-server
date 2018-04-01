@@ -121,6 +121,7 @@ INSTALLED_APPS = [
     'follow.apps.FollowConfig',
     'topics.apps.TopicsConfig',
     'influencers.apps.InfluencersConfig',
+    'mwmedia.apps.MwmediaConfig',
     'django_crontab',
     'scarface',
     'analytics',
@@ -319,7 +320,7 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
         'sentry': {
@@ -481,19 +482,19 @@ RESET_PASSWORD_URL = SITE_URL + '/reset_password/'
 PASSWORD_RESET_EXPIRY_DAYS = 7
 
 # Cache Settings
-# CACHES = {
-#    'default': {
-#        'BACKEND': 'django_redis.cache.RedisCache',
-#        'LOCATION': 'redis://' + REDIS_HOST,
-#        'OPTIONS': {
-#            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
-#            "SERIALIZER": "django_redis.serializers.json.JSONSerializer"
-#        }
-#    }
-#}
-#CACHE_KEY_PREFIX = 'cc'
-# CACHE_TIMEOUT = 1  # in hours
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://' + REDIS_HOST,
+        'OPTIONS': {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+            "SERIALIZER": "django_redis.serializers.json.JSONSerializer"
+        }
+    }
+}
+CACHE_KEY_PREFIX = 'djcache-%s' % (ENVIRONMENT.lower(),)
+CACHE_TIMEOUT = 1  # in hours
 
 # Google API Key for Places Auto complete
 GOOGLE_LOCATION_API_KEY = 'AIzaSyBPU3h4lDlKHZW17pci_bUZ5LVgimdlTYk'
@@ -507,7 +508,11 @@ COVER_PHOTO_STUB = SITE_URL + '/client/images/coverPictureStub.jpg'
 
 # Celery Settings
 
-CELERY_BROKER_URL = 'redis://%s/0' % REDIS_HOST
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://%s/0' % REDIS_HOST)
+CELERY_BROKER_QUEUE_NAME_PREFIX = os.environ.get('CELERY_BROKER_QUEUE_NAME_PREFIX', 'celery-')
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'queue_name_prefix': CELERY_BROKER_QUEUE_NAME_PREFIX,
+}
 #CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 #CELERYBEAT_SCHEDULE = {
 #    'update-search-index-every-3hours': {

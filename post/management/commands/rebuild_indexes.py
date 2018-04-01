@@ -21,7 +21,7 @@ class Command(BaseCommand):
         PostDocument.init()
         sleep(3)
 
-        posts = Post.objects.filter(is_deleted=False)
+        posts = Post.objects.filter(is_deleted=False, processed=True)
         for post in posts:
             post_doc = PostDocument()
             post_doc.set_from_post(post)

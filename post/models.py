@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import os
 import sys
+import uuid
 
 from django.db import models
 from django.conf import settings
@@ -22,6 +23,7 @@ from io import BytesIO
 import logging
 import tempfile
 
+from mwmedia.models import MediaFile
 from userprofile.models import Interest
 from boost.models import Boost
 from brands.models import Brand
@@ -73,38 +75,32 @@ class Post(models.Model):
     TYPE_TEXT = 'text'
     TYPE_LINK = 'link'
 
+    post_uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     post_type = models.CharField(max_length=5, default=None, choices=POST_TYPES, null=True)
     panaroma_type = models.CharField(max_length=15, default=None, choices=PANAROMA_TYPES, null=True, blank=True)
-    interest = models.ForeignKey(Interest, db_index=True, null=True, blank=True)
-    image = models.ImageField(upload_to='post_images', null=True, blank=True)
-    video = models.FileField(upload_to='post_videos', null=True, blank=True)
     text = models.CharField(max_length=200, null=True, blank=True)
-    poster = models.ForeignKey(User, related_name='poster')
     tags = TaggableManager(blank=True)
-    topics = models.ManyToManyField(Topic, blank=True)
     topic = models.CharField(max_length=100, blank=False, null=False)
-    liked_by = models.ManyToManyField(User, related_name='liked_by', blank=True)
-    is_deleted = models.BooleanField(default=False)
-    video_height = models.IntegerField(null=True, blank=True)
-    video_width = models.IntegerField(null=True, blank=True)
-    video_thumbnail = models.ImageField(upload_to='post_video_thumbnails', null=True, blank=True)
-    resolution = pgJSONField(null=True)
     geo_location_lat = models.DecimalField(null=True, max_digits=9, decimal_places=6)
     geo_location_lng = models.DecimalField(null=True, max_digits=9, decimal_places=6)
     mentioned_users = models.ManyToManyField(User, related_name='mentioned_users', blank=True)
-    pdf = models.FileField(upload_to='post_pdf', null=True, blank=True)
-    pdf_thumbnail = models.ImageField(upload_to='post_pdf_thumbnails', null=True, blank=True)
-    audio = models.FileField(upload_to='post_audio', null=True, blank=True)
-    audio_thumbnail = models.ImageField(upload_to='post_audio_thumbnails', null=True, blank=True)
     link = models.URLField(max_length=1024, null=True, blank=True)
     link_meta_data = pgJSONField(blank=True, null=True)
     parent = models.ForeignKey('self', db_index=True, null=True)
-    story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
-    story_index = models.IntegerField(null=True)
     is_work = models.BooleanField()
-    thumbnail = models.ImageField(upload_to='post_thumbnails', null=True, blank=True)
+    brand = models.ForeignKey(Brand, null=True, related_name='posts')
+    college = models.ForeignKey(College, null=True, related_name='posts')
+    media_ids = pgJSONField(null=True)
 
-    legacy_deleted = models.BooleanField(default=False)
+    interest = models.ForeignKey(Interest, db_index=True, null=True, blank=True)
+    image = models.ImageField(upload_to='post_images', null=True, blank=True)
+    video = models.FileField(upload_to='post_videos', null=True, blank=True)
+    poster = models.ForeignKey(User, related_name='poster')
+    topics = models.ManyToManyField(Topic, blank=True)
+    pdf = models.FileField(upload_to='post_pdf', null=True, blank=True)
+    audio = models.FileField(upload_to='post_audio', null=True, blank=True)
+    boosts = GenericRelation(Boost, related_query_name='post')
+    processed = models.BooleanField(default=True)
 
     # privacy settings
     visible_to = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default='Public')
@@ -112,9 +108,19 @@ class Post(models.Model):
     share_list_user_ids = JSONField(blank=True, default=[])
     allow_sharing = models.BooleanField(default=True)
 
-    boosts = GenericRelation(Boost, related_query_name='post')
-    brand = models.ForeignKey(Brand, null=True, related_name='posts')
-    college = models.ForeignKey(College, null=True, related_name='posts')
+    liked_by = models.ManyToManyField(User, related_name='liked_by', blank=True)
+    is_deleted = models.BooleanField(default=False)
+    video_height = models.IntegerField(null=True, blank=True)
+    video_width = models.IntegerField(null=True, blank=True)
+    video_thumbnail = models.ImageField(upload_to='post_video_thumbnails', null=True, blank=True)
+    resolution = pgJSONField(null=True)
+    pdf_thumbnail = models.ImageField(upload_to='post_pdf_thumbnails', null=True, blank=True)
+    audio_thumbnail = models.ImageField(upload_to='post_audio_thumbnails', null=True, blank=True)
+    story = models.ForeignKey('Story', db_index=True, null=True, related_name='posts')
+    story_index = models.IntegerField(null=True)
+    thumbnail = models.ImageField(upload_to='post_thumbnails', null=True, blank=True)
+
+    legacy_deleted = models.BooleanField(default=False)
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -140,7 +146,7 @@ class Post(models.Model):
             return self.post_type
         if self.image:
             return Post.TYPE_IMAGE
-        if self.video_thumbnail:
+        if self.video:
             return Post.TYPE_VIDEO
         if self.pdf_thumbnail:
             return Post.TYPE_PDF
@@ -150,11 +156,20 @@ class Post(models.Model):
             return Post.TYPE_LINK
         return Post.TYPE_TEXT
 
+    def thumbnail_required(self):
+        if self.get_post_type() == Post.TYPE_TEXT:
+            return False
+
+        return True
+
     def __str__(self):
         return "Post id: " + str(self.id) + " poster: " + str(self.poster)
 
     def save(self, *args, **kwargs):
-        inserting = self.pk is None
+        inserting = self.post_uuid is None
+
+        if self.post_uuid is None:
+            self.post_uuid = uuid.uuid4()
 
         try:
             brand = Brand.objects.get(members__user=self.poster)
@@ -191,7 +206,6 @@ class Post(models.Model):
                 except Exception as e:
                     logger.exception(e)
                     print ("Error generating video thumb", e, str(e))
-                return
 
             if self.video_thumbnail:
                 self.resolution = {
@@ -222,6 +236,24 @@ class Post(models.Model):
                 'image/jpeg', sys.getsizeof(thumb_output), None)
 
         super(Post, self).save(*args, **kwargs)
+
+        if self.media_ids is None:
+            media_id = None
+            if self.get_post_type() == Post.TYPE_VIDEO:
+                media_id = "%s/%s" % (Post.video.field.upload_to, self.video.name)
+            elif self.get_post_type() == Post.TYPE_IMAGE:
+                media_id = "%s/%s" % (Post.image.field.upload_to, self.image.name)
+
+            if media_id:
+                self.media_ids = [{
+                    'media_id': media_id,
+                    'type': self.get_post_type()
+                }]
+
+                media = MediaFile(filename=media_id, storage=MediaFile.STORAGE_S3, orphan=False)
+                media.save()
+
+                super(Post, self).save(*args, **dict(kwargs, update_fields=['media_ids'], force_insert=False))
 
         #if self.video and not self.video_thumbnail:
         #    generate_video_thumbnail.apply_async((self.id,), countdown=1)
