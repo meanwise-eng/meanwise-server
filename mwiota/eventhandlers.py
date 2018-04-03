@@ -61,7 +61,7 @@ def create_wallet_in_read_model(event: WalletCreated):
                 raise Exception("Could not save wallet to read model")
 
 
-@handle_event(eventType=Criticized, category='mw_credits_credits')
+#@handle_event(eventType=Criticized, category='mw_credits_credits')
 def add_critic_to_tangle(event: Criticized):
     criticized = uuid.UUID(event.metadata['aggregateId'])
     criticizer = uuid.UUID(event.data['criticizer'])

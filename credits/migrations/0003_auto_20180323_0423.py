@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('credits', '0002_auto_20171203_2043'),
+        ('userprofile', '0016_userprofile_profile_uuid'), 
     ]
 
     operations = [
