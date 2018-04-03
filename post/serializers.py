@@ -696,7 +696,7 @@ class PostSaveSerializer(serializers.ModelSerializer):
     geo_location_lat = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     geo_location_lng = serializers.DecimalField(required=False, max_digits=9, decimal_places=6)
     share_list_user_ids = serializers.ListField(child=serializers.IntegerField())
-    post_type = serializers.CharField(required=True, allow_null=False)
+    post_type = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
         model = Post
