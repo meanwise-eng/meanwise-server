@@ -44,30 +44,13 @@ def event_converter(events: List[Event], create_event_class):
         events_converted.append(event_from_dict(event, create_event_class))
 
 
-class Storage():
-
-    def __init__(self):
-        self.data = {}
-
-    def get(self, key):
-        if key in self.data:
-           return self.data[key]
-
-    def set(self, key, value):
-        self.data[key] = value
-
-
 class EventStoreClient():
 
     url = 'http://eventstore:2113'
 
-    def __init__(self, storage):
-        self.storage = storage
-
     @classmethod
     def get_default_instance(cls):
-        storage = Storage()
-        return EventStoreClient(storage=storage)
+        return EventStoreClient(cls.url)
 
     class EventEncoder(json.JSONEncoder):
         def default(self, obj):
@@ -77,6 +60,9 @@ class EventStoreClient():
             if isinstance(obj, uuid.UUID):
                 return str(obj)
             return json.JSONEncoder.default(self, obj)
+
+    def __init__(self, url):
+        self.url = url
 
     def _request(self, path, headers):
         if not headers:
@@ -357,20 +343,19 @@ def handle_event(eventType: Type[Event], category: str):
     return real_decorator
         
 
-eventstore = EventStoreClient.get_default_instance()
-
 class EventBus():
 
-    def __init__(self):
+    def __init__(self, eventstore_client):
         self.eventhandlers = {}
+        self.eventstore_client = eventstore_client
 
     singleton = None
 
     @classmethod
     def get_default_instance(cls):
-        if EventBus.singleton is None:
-            EventBus.singleton = EventBus()
-        return EventBus.singleton
+        if cls.singleton is None:
+            cls.singleton = EventBus(EventStoreClient.get_default_instance())
+        return cls.singleton
 
     def add_eventhandler(self, eventType, category, handler):
         key = '%s' % (category,)
@@ -394,7 +379,7 @@ class EventBus():
         for category, handlers in self.eventhandlers.items():
             logger.info("Getting events for %s" % category)
             stream = '$ce-%s' % category
-            for job in eventstore.subscribe_to_stream(stream, wait=False):
+            for job in self.eventstore_client.subscribe_to_stream(stream, wait=False):
                 events_processed = True
                 event = job.get_event()
                 logger.info("Handling event %s: %s" % (event['eventType'], event['eventId']))
@@ -461,6 +446,8 @@ class EventRepository():
 
 class Command():
 
+    eventstore_client = None
+
     def __init__(self, command_name, *args, **kwargs):
         self.command_name = command_name
         self.handler = None
@@ -468,17 +455,27 @@ class Command():
         self.args = args
         self.kwargs = kwargs
 
-    @staticmethod
-    def create(repo: Type[EventRepository]):
+    @classmethod
+    def set_eventstore_client(cls, eventstore_client: EventStoreClient):
+        cls.eventstore_client = eventstore_client
+
+    @classmethod
+    def get_eventstore_client(cls):
+        if cls.eventstore_client is None:
+            cls.eventstore_client = EventStoreClient(settings.EVENTSTORE_HOST)
+        return cls.eventstore_client
+
+    @classmethod
+    def create(cls, repo: Type[EventRepository]):
         def real_decorator(fn):
             def wrapper(*args, **kwargs):
                 command = Command(fn.__name__, *args, **kwargs)
                 command.handler = fn
-                eventstore = EventStoreClient.get_default_instance()
-                repository = repo(eventstore)
+                if cls.eventstore_client is None:
+                    raise Exception("EventStore client not setup")
+                repository = repo(cls.get_eventstore_client())
                 command.repo = repository
-                command_bus = CommandBus.get_default_instance()
-                command_bus.run_command(command)
+                command()
             return wrapper
         return real_decorator
 
