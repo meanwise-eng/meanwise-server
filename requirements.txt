@@ -80,3 +80,9 @@ sendgrid-django==4.0.4
 python-resize-image==1.1.11
 django-easy-select2==1.3.4
 pycurl==7.43.0
+feedparser==5.2.1
+hiredis==0.2.0
+pyota==2.0.5
+pyota-ccurl==1.0.9
+pyopenssl==17.5
+ndg_httpsclient==0.4

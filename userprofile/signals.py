@@ -9,10 +9,13 @@ from django.dispatch import receiver
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 
+from meanwise_backend.eventsourced import EventStoreClient, Event
+
 from .documents import Influencer
 from post.models import Post, Comment
 from userprofile.models import UserFriend, UserProfile
 from boost.models import Boost
+from userprofile.profile import ProfileCreated
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -117,3 +120,15 @@ def send_welcome_email(sender, **kwargs):
             logger.debug("SG Response code: %s" % (response.status_code,))
         except Exception as e:
             logger.error(e)
+
+
+@receiver(post_save, sender=UserProfile, dispatch_uid='userprofile.save_events')
+def save_profile_created_event(sender, **kwargs):
+    if not kwargs['created']:
+        return
+
+    userprofile = kwargs['instance']
+    event = ProfileCreated(userprofile.profile_uuid)
+    eventstore = EventStoreClient.get_default_instance()
+    stream = 'mw_profile_profile-%s' % userprofile.profile_uuid
+    eventstore.save([event], stream, 1)

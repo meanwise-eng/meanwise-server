@@ -55,7 +55,7 @@ urlpatterns = [
         UserInterestsPostList.as_view(), name="interest-post"),
     url(r'^user/(?P<user_id>[0-9]+)/home/feed/$',
         UserHomeFeed.as_view(), name="home-feed"),
-    url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/like/$',
+    url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[a-z0-9-]+)/like/$',
         UserPostLike.as_view(), name="post-like"),
     url(r'^user/(?P<user_id>[0-9]+)/posts/(?P<post_id>[0-9]+)/unlike/$',
         UserPostUnLike.as_view(), name="post-unlike"),

@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import sys
+import uuid
 from PIL import Image
 from io import BytesIO
 
@@ -155,6 +156,7 @@ class UserProfile(models.Model):
     USERTYPE_INVITED = 1
     USERTYPE_GUEST = 0
 
+    profile_uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     user = models.OneToOneField(User, db_index=True)
     facebook_token = models.CharField(max_length=128, null=True, blank=True)
     username = models.CharField(max_length=25, db_index=True)

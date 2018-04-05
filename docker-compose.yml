@@ -14,6 +14,7 @@ services:
       - elasticsearch
       - nginx
       - redis
+      - eventstore
     ports:
       - '8000:8000'
     environment:
@@ -64,6 +65,12 @@ services:
     mem_limit: 1g
     volumes:
       - esdata1:/usr/share/elasticsearch/data
+  eventstore:
+    image: eventstore/eventstore:release-4.1.0
+    ports:
+      - '2113:2113'
+    volumes:
+      - 'eventstore:/var/lib/eventstore'
 
 volumes:
   postgres: ~
@@ -72,3 +79,4 @@ volumes:
   media: ~
   static: ~
   whoosh: ~
+  eventstore: ~

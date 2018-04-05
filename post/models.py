@@ -23,6 +23,8 @@ from io import BytesIO
 import logging
 import tempfile
 
+from meanwise_backend.eventsourced import PartialEventSourced, Event
+
 from mwmedia.models import MediaFile
 from userprofile.models import Interest
 from boost.models import Boost
@@ -67,7 +69,15 @@ class ShareList(models.Model):
     share_with = JSONField()
 
 
-class Post(models.Model):
+class PostCreated(Event):
+    pass
+
+
+class PostLiked(Event):
+    pass
+
+
+class Post(models.Model, PartialEventSourced):
     TYPE_IMAGE = 'image'
     TYPE_VIDEO = 'video'
     TYPE_PDF = 'pdf'
@@ -165,7 +175,22 @@ class Post(models.Model):
     def __str__(self):
         return "Post id: " + str(self.id) + " poster: " + str(self.poster)
 
+    def like(self, user):
+        if user in self.liked_by.all():
+            logger.info("Post %s already liked by user %s" % (self.post_uuid, user.id))
+            return
+
+        self.liked_by.add(user)
+
+        self._apply(PostLiked(self.post_uuid, {'liked_by': user.id}))
+
+    def _apply_PostLiked(self, event: PostLiked):
+        pass
+
     def save(self, *args, **kwargs):
+        if self.id is None:
+            self._apply(PostCreated(self.post_uuid))
+
         inserting = self.post_uuid is None
 
         if self.post_uuid is None:

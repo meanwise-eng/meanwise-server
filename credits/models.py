@@ -19,5 +19,6 @@ class Critic(models.Model):
 class Credits(models.Model):
 
     user_id = models.IntegerField()
+    profile_id = models.UUIDField(editable=False)
     skill = models.CharField(max_length=256)
     credits = models.IntegerField()
