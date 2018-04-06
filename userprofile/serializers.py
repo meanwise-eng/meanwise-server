@@ -214,7 +214,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(UserProfileUpdateSerializer):
 
     class Meta(UserProfileUpdateSerializer.Meta):
-        fields = ['id', 'user_id', 'email', 'username', 'user_username',
+        fields = ['id', 'profile_uuid', 'user_id', 'email', 'username', 'user_username',
                   'profile_photo', 'cover_photo', 'profile_photo_small',
                   'first_name', 'last_name', 'bio', 'user_skills', 'skills',
                   'profession', 'user_profession', 'interests',
@@ -229,7 +229,7 @@ class UserProfileSerializer(UserProfileUpdateSerializer):
 class UserProfileSummarySerializer(UserProfileUpdateSerializer):
 
     class Meta(UserProfileUpdateSerializer.Meta):
-        fields = ['id', 'user_id', 'email', 'username', 'user_username', 'profile_photo',
+        fields = ['id', 'profile_uuid', 'user_id', 'email', 'username', 'user_username', 'profile_photo',
                   'cover_photo', 'profile_photo_small', 'first_name', 'last_name', 'bio',
                   'user_skills', 'skills', 'profession', 'profession_text', 'interests',
                   'user_interests', 'phone', 'dob', 'profile_story_title',
@@ -242,7 +242,7 @@ class UserProfileDetailSerializer(UserProfileUpdateSerializer):
     total_posts = serializers.SerializerMethodField()
 
     class Meta(UserProfileUpdateSerializer.Meta):
-        fields = ['id', 'user_id', 'email', 'username', 'user_username',
+        fields = ['id', 'profile_uuid', 'user_id', 'email', 'username', 'user_username',
                   'profile_photo', 'cover_photo', 'profile_photo_small',
                   'first_name', 'last_name', 'bio', 'user_skills', 'skills',
                   'profession', 'user_profession', 'interests',

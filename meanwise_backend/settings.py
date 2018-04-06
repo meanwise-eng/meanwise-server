@@ -125,6 +125,7 @@ INSTALLED_APPS = [
     'influencers.apps.InfluencersConfig',
     'mwmedia.apps.MwmediaConfig',
     'mwiota.apps.IotaConfig',
+    'user_verification.apps.UserVerificationConfig',
     'django_crontab',
     'scarface',
     'analytics',
@@ -168,7 +169,8 @@ DEVSERVER_AUTO_PROFILE = True
 DEFAULT_FILE_STORAGE = os.environ.get('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
 #THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
 
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-west-2')
+AWS_REGION_NAME = os.environ.get('AWS_REGION_NAME', 'us_west-2')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', AWS_REGION_NAME)
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'AKIAJW5PLC2EZMSQ4ZQQ')
 AWS_ACCESS_KEY = AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY = os.environ.get(
@@ -179,6 +181,11 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'mw-uploads-
 AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH', False)
 AWS_S3_FILE_OVERWRITE = os.environ.get('AWS_S3_FILE_OVERWRITE', False)
 AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
+
+USERVERIFICATION_COLLECTION_ID = os.environ.get('USERVERIFICATION_COLLECTION_ID',
+                                                'mw-userverification-dev-1')
+USERVERIFICATION_BUCKET_NAME = os.environ.get('USERVERIFICATION_COLLECTION_ID',
+                                                'mw-userverification-dev-1')
 
 #AWS_REGION = os.environ.get('AWS_REGION', 'us-west-2')
 #AWS_S3_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME', "mw-uploads")

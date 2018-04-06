@@ -97,4 +97,5 @@ urlpatterns = [
     url(r'^brands/', include('brands.urls')),
     url(r'^college/', include('college.urls')),
     url(r'^media/', include('mwmedia.urls')),
+    url(r'^user-verification/', include('user_verification.urls')),
 ]
