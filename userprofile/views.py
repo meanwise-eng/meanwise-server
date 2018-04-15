@@ -11,7 +11,13 @@ from django.core import exceptions
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.views import View
+from django.views.generic import TemplateView
+from django import forms
+from django.shortcuts import render
+import base64
+from .pacify import pacify
 
 import django.contrib.auth.password_validation as validators
 from django.core.mail import EmailMultiAlternatives
@@ -1316,3 +1322,32 @@ class EarlyAccess(APIView):
             'error': None,
             'results': None
         }, status.HTTP_200_OK)
+
+
+class PacifierForm(forms.Form):
+    face_file = forms.FileField()
+
+class PacifierView(TemplateView):
+
+    template_name = 'pacifier.html'
+
+    def get(self, request):
+        form = PacifierForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = PacifierForm(request.POST, request.FILES)
+        if not form.is_valid():
+            return render(request, self.template_name, {'form': form})
+
+        face_file = request.FILES['face_file']
+        pacified_img = pacify(face_file)
+        bytes_io = BytesIO()
+        pacified_img.save(bytes_io, format='JPEG')
+        face_bytes = bytes_io.getvalue()
+        img_base64 = base64.b64encode(face_bytes)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'pacified_img': img_base64
+        })

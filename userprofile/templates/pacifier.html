@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+  </head>
+  <body>
+    <h1>Pacifier</h1>
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form }}
+        <div><input type="submit" value="Pacify" /></div>
+    </form>
+    <div>
+        <img src="data:image/jpeg;base64,{{ pacified_img }}" alt="Pacified image" />
+    </div>
+  </body>
+</html>

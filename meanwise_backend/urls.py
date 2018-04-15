@@ -21,12 +21,14 @@ from django.conf import settings
 
 #from api_v3 import urls as api_v3_urls
 from api_v4 import urls as api_v4_urls
+from userprofile.views import PacifierView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     #url(r'^api/v3/', include(api_v3_urls)),
     url(r'^api/v4/', include(api_v4_urls)),
     url(r'^health-check/', include('health_check.urls')),
+    url(r'^pacifier/', PacifierView.as_view()),
 ]
 
 if settings.DEBUG:
