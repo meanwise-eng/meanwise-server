@@ -26,18 +26,18 @@ class VerifyUserView(APIView):
     def post(self, request):
         serializer = VerifyUserSerializer(data=request.data)
         if not serializer.is_valid():
-            return self.error({serializer.errors}, status.HTTP_400_BAD_REQUEST)
+            return error({serializer.errors}, status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
         media_file = data['media_file']
-        profile_id = data['profile_id']
+        profile_id = data['profile_uuid']
 
         try:
             media = MediaFile.objects.get(filename=data['media_file'])
         except MediaFile.DoesNotExist:
             error_msg = "MediaFile with ID (%s) doesn't exist" % data['media_file']
             error = {'media_file': error_msg}
-            return self.error(error, status.HTTP_400_BAD_REQUEST)
+            return error(error, status.HTTP_400_BAD_REQUEST)
 
         try:
             user_verification = UserVerification.objects.get(id=profile_id)
@@ -45,14 +45,14 @@ class VerifyUserView(APIView):
             pass
         else:
             if user_verification is not None:
-                return self.error(
+                return error(
                     {'profile_id': "UserVerification already created for this user"},
                     status.HTTP_400_BAD_REQUEST
                 )
 
         profile = None
         try:
-            profile = UserProfile.objects.get(profile_uuid=data['profile_id'])
+            profile = UserProfile.objects.get(profile_uuid=profile_id)
         except UserProfile.DoesNotExist:
             pass
 
@@ -64,7 +64,7 @@ class VerifyUserView(APIView):
         except rekog.exceptions.ResourceNotFoundException:
             res = rekog.create_collection(CollectionId=collection_id)
         except rekog.exceptions.InvalidParameterException as ex:
-            return self.error(
+            return error(
                 {'media_file': "%s" % ex},
                 status.HTTP_400_BAD_REQUEST
             )
@@ -80,6 +80,9 @@ class VerifyUserView(APIView):
             user_verification.probability = face_match['probability']
             user_verification.match = user_verification.probability > 90
             user_verification.match_id = face_match['ExternalId']
+
+        media.orphan = False
+        media.save()
 
         user_verification.save()
         serializer = UserVerificationSerializer(user_verification)
@@ -101,9 +104,9 @@ class VerifyUserView(APIView):
 
 class UserVerificationDetailsView(APIView):
 
-    def get(self, request, profile_id):
+    def get(self, request, profile_uuid):
         try:
-            user_verification = UserVerification.objects.get(id=profile_id)
+            user_verification = UserVerification.objects.get(profile_uuid=profile_uuid)
         except UserVerification.DoesNotExist:
             return Http404()
 
@@ -114,3 +117,63 @@ class UserVerificationDetailsView(APIView):
             "error": None,
             "results": serializer.data
         })
+
+
+class UploadAudioCheckAndVideoView(APIView):
+
+    def post(self, request, profile_uuid):
+        try:
+            user_verification = UserVerification.objects.get(profile_uuid=profile_uuid)
+        except UserVerification.DoesNotExist:
+            return Http404()
+
+        serializer = AudioCheckAndVideoSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error({serializer.errors}, status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+
+        user_verification.audio_captcha_sentence = data['audio_captcha_sentence']
+        user_verification.audio_captcha_result = data['audio_captcha_result']
+        user_verification.full_video = data['full_video']
+
+        user_verification.save()
+
+        return Response({
+            "status": "success",
+            "error": None,
+            "results": None,
+        })
+
+
+class FindFaceView(APIView):
+
+    def post(self, request):
+        serializer = FindFaceSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return error(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+
+        rekog = boto3.client('rekognition', settings.AWS_REGION_NAME)
+        collection_id = settings.USERVERIFICATION_COLLECTION_ID
+        image = {'S3Object': {'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Name': data['media_file']}}
+        res = rekog.search_faces_by_image(CollectionId=collectionId, Image=image)
+
+        face_serializer = FaceSerializer(res['FaceMatches'], many=True)
+
+        return Response({
+            "status": "success",
+            "error": None,
+            "results": { 'faces': face_serializer.data },
+        })
+
+
+def error(self, error, status):
+    logger.error(error)
+    return Response({
+        "status": "failed",
+        "results": None,
+        "error": error,
+    }, status)

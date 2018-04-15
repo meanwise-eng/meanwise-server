@@ -23,6 +23,7 @@ class RegisterUserSerializer(serializers.Serializer):
     Handle user registration.
 
     """
+    profile_uuid = serializers.UUIDField()
     username = serializers.CharField(max_length=200)
     email = serializers.EmailField(required=False)
     password = serializers.CharField(max_length=200, required=False)
@@ -65,6 +66,20 @@ class RegisterUserSerializer(serializers.Serializer):
         except User.DoesNotExist:
             return value
         raise serializers.ValidationError("User with email already exists.")
+
+    def validate_profile_uuid(self, profile_uuid):
+        try:
+            user_verification = UserVerification.objects.get(profile_id=profile_uuid)
+        except UserVerification.DoesNotExist:
+            raise serializers.ValidationError("Do user verification first.")
+
+        if user_verification.probability >= 99:
+            raise serializers.ValidationError("Duplicate detected during user verification")
+
+        if user_verification.audio_captcha_result == False:
+            raise serializers.ValidationError("User verification didn't pass audio captcha.")
+
+        return profile_uuid
 
     def save(self):
         # check
