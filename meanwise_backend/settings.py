@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     # api v4
     'api_v4',
     'custom_auth',
+    'eventsourcing.apps.EventsourcingConfig',
     'userprofile.apps.UserprofileConfig',
     'post.apps.PostConfig',
     'discussions.apps.DiscussionsConfig',
