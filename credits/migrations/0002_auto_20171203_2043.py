@@ -41,6 +41,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('credits', '0001_initial'),
+        ('post', '0028_create_thumbnails'),
     ]
 
     operations = [

@@ -106,7 +106,7 @@ class UserVerificationDetailsView(APIView):
 
     def get(self, request, profile_uuid):
         try:
-            user_verification = UserVerification.objects.get(profile_uuid=profile_uuid)
+            user_verification = UserVerification.objects.get(id=profile_uuid)
         except UserVerification.DoesNotExist:
             return Http404()
 

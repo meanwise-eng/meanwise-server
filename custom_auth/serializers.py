@@ -14,6 +14,7 @@ import django.contrib.auth.password_validation as validators
 from django.contrib.auth.models import User
 from userprofile.models import *
 from userprofile.serializers import UserProfileSerializer
+from user_verification.models import UserVerification
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -69,7 +70,7 @@ class RegisterUserSerializer(serializers.Serializer):
 
     def validate_profile_uuid(self, profile_uuid):
         try:
-            user_verification = UserVerification.objects.get(profile_id=profile_uuid)
+            user_verification = UserVerification.objects.get(id=profile_uuid)
         except UserVerification.DoesNotExist:
             raise serializers.ValidationError("Do user verification first.")
 
@@ -78,6 +79,9 @@ class RegisterUserSerializer(serializers.Serializer):
 
         if user_verification.audio_captcha_result == False:
             raise serializers.ValidationError("User verification didn't pass audio captcha.")
+
+        if user_verification.probability >= 99:
+            raise serializers.ValidationError("User verification found duplicate of the person")
 
         return profile_uuid
 
@@ -104,6 +108,7 @@ class RegisterUserSerializer(serializers.Serializer):
             user.save()
         token = Token.objects.get_or_create(user=user)
         user_profile = UserProfile()
+        user_profile.profile_uuid = self.validated_data['profile_uuid']
         user_profile.user = user
         print ("validated_data", self.validated_data)
         user_profile.first_name = self.validated_data['first_name']

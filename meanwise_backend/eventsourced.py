@@ -9,6 +9,10 @@ from time import sleep
 from typing import List, Type, Dict
 from functools import wraps
 
+from django.db.models import Model
+from django.conf import settings
+from eventsourcing.models import Event as EventModel
+
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
 
@@ -46,7 +50,7 @@ def event_converter(events: List[Event], create_event_class):
 
 class EventStoreClient():
 
-    url = 'http://eventstore:2113'
+    url = settings.EVENTSTORE_HOST
 
     @classmethod
     def get_default_instance(cls):
@@ -133,6 +137,11 @@ class EventStoreClient():
     def _get_feed(self, feed_url):
         headers = self._get_headers()
         return feedparser.parse(feed_url, request_headers=headers)
+
+    def get_version(self, stream):
+        events = list(self.get_all_events(stream))
+
+        return len(events)
 
     def get_all_events(self, stream):
         last_url = '%s/streams/%s/0/forward/20' % (self.url, stream)
@@ -278,7 +287,7 @@ class EventStoreClient():
 
 class PartialEventSourced():
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self._uncommitted_events = []
         self._aggregate_version = 0
 
@@ -302,6 +311,48 @@ class PartialEventSourced():
             self._apply(event)
             self._aggregate_version += 1
         self._uncommitted_events = []
+
+
+class EventSourcedModel(Model, PartialEventSourced):
+
+    stream_prefix = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.save_events(self.id, self._uncommitted_events)
+        self._uncommitted_events = []
+
+    def _apply(self, event: Event):
+        self._uncommitted_events.append(event)
+        self._aggregate_version += 1
+
+    @classmethod
+    def save_events(cls, id, events):
+        if cls.stream_prefix is None:
+            raise Exception("Please set a stream prefix")
+
+        stream = "%s-%s" % (cls.stream_prefix, id)
+        eventstore_client = EventStoreClient.get_default_instance()
+        ar_version = eventstore_client.get_version(stream)
+        try:
+            eventstore_client.save(events, stream, ar_version)
+        except Exception as ex:
+            logger.error(ex)
+            cls.save_events_to_db(id, events, stream, ar_version)
+
+    @classmethod
+    def save_events_to_db(cls, id, events, stream, ar_version):
+        for e in events:
+            event = EventModel(aggregate_id=id, data=e.data, metadata=e.metadata,
+                               stream=stream, event_id=ar_version)
+            event.save()
+            ar_version += 1
+
+    class Meta:
+        abstract = True
 
 
 class EventSourced(PartialEventSourced):

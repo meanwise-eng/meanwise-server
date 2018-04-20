@@ -14,6 +14,8 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 
 from custom_auth.serializers import *
 import userprofile.tasks as tasks
+from user_verification.models import UserVerification
+from user_verification.tasks import add_user_verification_photo_to_face_detection_model
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -33,6 +35,12 @@ class RegisterUserView(APIView):
         reg_user_serializer = RegisterUserSerializer(data=register_data)
         if reg_user_serializer.is_valid():
             user, user_profile, auth_token = reg_user_serializer.save()
+            user_verification = UserVerification.objects.get(id=user_profile.profile_uuid)
+            user_verification.profile_created = True
+            user_verification.save()
+            add_user_verification_photo_to_face_detection_model.delay(user_profile.id)
+            # add the user's user verification photo to rekognition collection but as a background
+            # job
             response_user_data = {}
             response_user_data['auth_token'] = auth_token
             response_user_data['user'] = user.id
