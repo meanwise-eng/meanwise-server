@@ -26,7 +26,7 @@ class VerifyUserView(APIView):
     def post(self, request):
         serializer = VerifyUserSerializer(data=request.data)
         if not serializer.is_valid():
-            return error({serializer.errors}, status.HTTP_400_BAD_REQUEST)
+            return self.error(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
         media_file = data['media_file']
@@ -37,7 +37,7 @@ class VerifyUserView(APIView):
         except MediaFile.DoesNotExist:
             error_msg = "MediaFile with ID (%s) doesn't exist" % data['media_file']
             error = {'media_file': error_msg}
-            return error(error, status.HTTP_400_BAD_REQUEST)
+            return self.error(error, status.HTTP_400_BAD_REQUEST)
 
         try:
             user_verification = UserVerification.objects.get(id=profile_id)
@@ -45,7 +45,7 @@ class VerifyUserView(APIView):
             pass
         else:
             if user_verification is not None:
-                return error(
+                return self.error(
                     {'profile_id': "UserVerification already created for this user"},
                     status.HTTP_400_BAD_REQUEST
                 )
@@ -64,7 +64,7 @@ class VerifyUserView(APIView):
         except rekog.exceptions.ResourceNotFoundException:
             res = rekog.create_collection(CollectionId=collection_id)
         except rekog.exceptions.InvalidParameterException as ex:
-            return error(
+            return self.error(
                 {'media_file': "%s" % ex},
                 status.HTTP_400_BAD_REQUEST
             )
@@ -77,9 +77,9 @@ class VerifyUserView(APIView):
         user_verification.match = False
         if len(res['FaceMatches']) > 0:
             face_match = res['FaceMatches'][0]
-            user_verification.probability = face_match['probability']
+            user_verification.probability = face_match['Face']['Confidence']
             user_verification.match = user_verification.probability > 90
-            user_verification.match_id = face_match['ExternalId']
+            user_verification.match_id = face_match['Face']['ExternalImageId']
 
         media.orphan = False
         media.save()

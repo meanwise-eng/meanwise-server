@@ -38,7 +38,7 @@ class RegisterUserView(APIView):
             user_verification = UserVerification.objects.get(id=user_profile.profile_uuid)
             user_verification.profile_created = True
             user_verification.save()
-            add_user_verification_photo_to_face_detection_model.delay(user_profile.id)
+            add_user_verification_photo_to_face_detection_model.delay(user_profile.profile_uuid)
             # add the user's user verification photo to rekognition collection but as a background
             # job
             response_user_data = {}
@@ -48,8 +48,8 @@ class RegisterUserView(APIView):
             response_data = {'status': 'success', 'error': '', 'results': response_user_data}
             logger.info("RegisterUserView - POST - Finished ")
 
-            tasks.optimize_cover_photo(user.id)
-            tasks.optimize_and_generate_thumbnail_for_profile_photo(user.id)
+            tasks.optimize_cover_photo.delay(user.id)
+            tasks.optimize_and_generate_thumbnail_for_profile_photo.delay(user.id)
 
             return Response(response_data, status=status.HTTP_201_CREATED)
 

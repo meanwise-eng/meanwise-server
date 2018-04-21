@@ -12,7 +12,7 @@ class UserVerificationSerializer(serializers.ModelSerializer):
 
 class VerifyUserSerializer(serializers.Serializer):
     
-    profile_id = serializers.UUIDField()
+    profile_uuid = serializers.UUIDField()
     media_file = serializers.CharField(max_length=255)
 
 

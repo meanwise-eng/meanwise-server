@@ -40,16 +40,18 @@ def generate_video_thumbnail(post_id):
 
     p.save()
 
-@app.task
-def generate_image_thumbnail(post_id):
+@app.task(bind=True)
+def generate_image_thumbnail(self, post_id):
+    def do_retry(ex):
+        logger.error(ex)
+        raise self.retry(ex=ex, countdown=(random.uniform(2, 4) ** self.request.retries))
     logger.info("Generating image thumbnail for %s" % post_id)
     Post = post.models.Post
     try:
         p = Post.objects.get(id=post_id)
-    except Post.DoesNotExist:
+    except Post.DoesNotExist as ex:
         logger.info("Post save not yet complete")
-        generate_image_thumbnail.apply_async((post_id,), countdown=1)
-        return
+        do_retry(ex)
 
     post_type = p.get_post_type()
     if post_type != Post.TYPE_IMAGE and post_type != Post.TYPE_VIDEO:
@@ -59,10 +61,9 @@ def generate_image_thumbnail(post_id):
 
     try:
         media = MediaFile.objects.get(filename=p.media_ids[0]['media_id'])
-    except MediaFile.DoesNotExist:
+    except MediaFile.DoesNotExist as ex:
         logger.info("Media not ready for generating thumbnail for post %s. Delayed for 1 sec" % post_id)
-        generate_image_thumbnail.apply_async((post_id,), countdown=1)
-        return
+        do_retry(ex)
 
     if post_type == Post.TYPE_VIDEO:
         logger.info("Generating video thumbnail")
