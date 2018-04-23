@@ -29,7 +29,4 @@ urlpatterns = [
     url(r'^health-check/', include('health_check.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
-
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -16,7 +16,7 @@ from user_verification.models import UserVerification
 from userprofile.models import UserProfile
 from mwmedia.models import MediaFile
 
-from .serializers import VerifyUserSerializer, UserVerificationSerializer
+from .serializers import *
 
 logger = logging.getLogger('meanwise_backend.%s' % __name__)
 
@@ -159,7 +159,7 @@ class FindFaceView(APIView):
         rekog = boto3.client('rekognition', settings.AWS_REGION_NAME)
         collection_id = settings.USERVERIFICATION_COLLECTION_ID
         image = {'S3Object': {'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Name': data['media_file']}}
-        res = rekog.search_faces_by_image(CollectionId=collectionId, Image=image)
+        res = rekog.search_faces_by_image(CollectionId=collection_id, Image=image)
 
         face_serializer = FaceSerializer(res['FaceMatches'], many=True)
 

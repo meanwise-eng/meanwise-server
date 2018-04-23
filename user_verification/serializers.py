@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import UserVerification
+from userprofile.models import UserProfile
 
 
 class UserVerificationSerializer(serializers.ModelSerializer):
@@ -30,25 +31,37 @@ class FindFaceSerializer(serializers.Serializer):
 
 class FaceSerializer(serializers.Serializer):
 
-    probability = serializers.IntegerField()
-    profile_uuid = serializers.UUIDField()
-    profile_photo_thumbnail_url = serializers.CharField()
+    probability = serializers.SerializerMethodField()
+    profile_uuid = serializers.SerializerMethodField()
+    profile_photo_thumbnail_url = serializers.SerializerMethodField()
+    fullname = serializers.SerializerMethodField()
+    profession = serializers.SerializerMethodField()
 
     def get_probability(self, obj):
-        return obj['probability']
+        return obj['Face']['Confidence']
 
     def get_profile_uuid(self, obj):
-        userprofile = self._get_userprofile(obj['ExternalId'])
+        userprofile = self._get_userprofile(obj)
 
         return userprofile.profile_uuid
 
     def get_profile_photo_thumbnail_url(self, obj):
-        userprofile = self._get_userprofile(obj['ExternalId'])
+        userprofile = self._get_userprofile(obj)
 
         return userprofile.profile_photo_thumbnail.url
 
-    def _get_userprofile(self, profile_uuid):
+    def get_fullname(self, obj):
+        userprofile = self._get_userprofile(obj)
+
+        return userprofile.fullname()
+
+    def get_profession(self, obj):
+        userprofile = self._get_userprofile(obj)
+
+        return userprofile.profession_text
+
+    def _get_userprofile(self, obj):
         try:
-            return UserProfile.objects.get(profile_uuid=profile_uuid)
+            return UserProfile.objects.get(profile_uuid=obj['Face']['ExternalImageId'])
         except UserProfile.DoesNotExist:
             raise Exception("Cannot find userprofile (%s)" % profile_uuid)
