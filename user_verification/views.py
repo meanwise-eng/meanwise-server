@@ -75,7 +75,7 @@ class VerifyUserView(APIView):
 
         user_verification.probability = 0
         user_verification.match = False
-        if len(res['FaceMatches']) > 0:
+        if 'FaceMatches' in res and len(res['FaceMatches']) > 0:
             face_match = res['FaceMatches'][0]
             user_verification.probability = face_match['Face']['Confidence']
             user_verification.match = user_verification.probability > 90
@@ -116,6 +116,39 @@ class UserVerificationDetailsView(APIView):
             "status": "success",
             "error": None,
             "results": serializer.data
+        })
+
+    def delete(self, request, profile_uuid):
+        try:
+            user_verification = UserVerification.objects.get(id=profile_uuid)
+        except UserVerification.DoesNotExist:
+            return Http404()
+
+        face_id = user_verification.face_id
+        if face_id is None:
+            user_verification.delete()
+            return Response({
+                "status": "success",
+                "error": None,
+                "results": {"message": "Face not yet added to collection"}
+            })
+        
+        rekog = boto3.client('rekognition', settings.AWS_REGION_NAME)
+        collection_id = settings.USERVERIFICATION_COLLECTION_ID
+        try:
+            res = rekog.delete_faces(CollectionId=collection_id, FaceIds=[str(face_id)])
+        except (rekog.exceptions.ResourceNotFoundException,
+                rekog.exceptions.InvalidParameterException) as ex:
+            return self.error(
+                {'media_file': "%s" % ex},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        user_verification.delete()
+        return Response({
+            "status": "success",
+            "error": None,
+            "results": {"message": "Face removed from collection"}
         })
 
 
